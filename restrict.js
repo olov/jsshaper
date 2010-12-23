@@ -99,7 +99,7 @@ function assertEquals(l, r) {
         console.log("PASS " + l);
     }
     else {
-        console.log("FAIL " + l + " != " + r);
+        console.log("FAIL " + l + " !== " + r);
         throw new Error("assertion failed");
     }
 }
