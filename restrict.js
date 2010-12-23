@@ -1,7 +1,7 @@
 /*
-To string: ""+ 101 eller String(101)
-To number: +"101" eller Number("101")
-To boolean: !!101
+To string: ""+ 101 or String(101)
+To number: +"101" or Number("101")
+To boolean: !!101 or Boolean(101)
 */
 
 
@@ -193,3 +193,119 @@ assertThrows(function() { __uadd({}); });
 assertEquals(__sub(1,2), -1);
 assertThrows(function() { __sub("1", 0); });
 
+function __toNumber(v) {
+    var vtype = typeof v;
+    if (v === undefined) {
+        return NaN;
+    }
+    if (v === null) {
+        return 0;
+    }
+    if (vtype === "boolean") {
+        return v ? 1 : 0;
+    }
+    if (vtype === "number") {
+        return v;
+    }
+    if (vtype === "string") {
+        // parseFloat can't be used since it's to permissive ("3x" -> 3)
+        return Number(v);
+    }
+    if (vtype === "object") {
+        return __toNumber(__toPrimitive(v, "hint_number"));
+    }
+
+    // can't happen
+    throw new Error("__toNumber unexpected return");
+}
+function __toPrimitive(v, preferredType) {
+    // ecma 9.1
+    var vtype = typeof v;
+    if (v === undefined || v === null || vtype === "boolean" ||
+        vtype === "number" || vtype === "string") {
+        return v;
+    }
+    if (vtype === "object") {
+        return __defaultValue(v, preferredType);
+    }
+
+    // can't happen
+    throw new Error("__toPrimitive unexpected return");
+}
+function __defaultValue(v, preferredType) {
+    // ecma 8.6.2.6
+    if (preferredType === undefined) {
+        var isDate = Object.prototype.toString.call(v) === "[object Date]";
+        preferredType = (isDate ? "hint_string" : "hint_number");
+    }
+
+    if (preferredType === "hint_string") {
+        var val = v.toString();
+        if (val === null || typeof val !== "object") {
+            return val;
+        }
+        val = v.valueOf();
+        if (val === null || typeof val !== "object") {
+            return val;
+        }
+        throw new TypeError("Cannot convert object to primitive value");
+    }
+    else if (preferredType === "hint_number") {
+        // TODO check for valueOf existence?
+        var val = v.valueOf();
+        if (val === null || typeof val !== "object") {
+            return val;
+        }
+        val = v.toString();
+        if (val === null || typeof val !== "object") {
+            return val;
+        }
+        throw new TypeError("Cannot convert object to primitive value");
+    }
+    else {
+        throw new Error("__defaultValue invalid preferredType");
+    }
+}
+function __loose_eq(x, y) {
+    var xtype = typeof x;
+    var ytype = typeof y;
+
+    // ecma 11.9.3 1-13
+    if (x === y) { // ecma 11.9.4
+        return true;
+    }
+
+    // ecma 11.9.3 14-15
+    if (x === null || x === undefined) {
+        return y === null || y === undefined;
+    }
+    // ecma 11.9.3 16
+    if (xtype === "number" && ytype === "string") {
+        return x === __toNumber(y);
+    }
+    // ecma 11.9.3 17
+    if (xtype === "string" && ytype === "number") {
+        return __toNumber(x) === y;
+    }
+    // ecma 11.9.3 18
+    if (xtype === "boolean") {
+        return __toNumber(x) === y;
+    }
+    // ecma 11.9.3 19
+    if (ytype === "boolean") {
+        return x === __toNumber(y);
+    }
+    // ecma 11.9.3 20
+    if ((xtype === "string" || xtype === "number") && ytype === "object") {
+        return x === __toPrimitive(y);
+    }
+    // ecma 11.9.3 21
+    if (xtype === "object" && (ytype === "string" || ytype === "number")) {
+        return __toPrimitive(x) === y;
+    }
+    // ecma 11.9.3 22
+    return false;
+}
+assertEquals(__loose_eq(1, "1"), true);
+assertEquals(__loose_eq(2, {valueOf: function() { return 2; }}), true);
+assertEquals(__loose_eq(2, new Number(2)), true);
