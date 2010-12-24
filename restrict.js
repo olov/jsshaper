@@ -309,27 +309,27 @@ function __loose_eq(x, y) {
     }
     // ecma 11.9.3 16
     if (xtype === "number" && ytype === "string") {
-        return x === __toNumber(y);
+        return __loose_eq(x, __toNumber(y));
     }
     // ecma 11.9.3 17
     if (xtype === "string" && ytype === "number") {
-        return __toNumber(x) === y;
+        return __loose_eq(__toNumber(x), y);
     }
     // ecma 11.9.3 18
     if (xtype === "boolean") {
-        return __toNumber(x) === y;
+        return __loose_eq(__toNumber(x), y);
     }
     // ecma 11.9.3 19
     if (ytype === "boolean") {
-        return x === __toNumber(y);
+        return __loose_eq(x, __toNumber(y));
     }
     // ecma 11.9.3 20
     if ((xtype === "string" || xtype === "number") && ytype === "object") {
-        return x === __toPrimitive(y);
+        return __loose_eq(x, __toPrimitive(y));
     }
     // ecma 11.9.3 21
     if (xtype === "object" && (ytype === "string" || ytype === "number")) {
-        return __toPrimitive(x) === y;
+        return __loose_eq(__toPrimitive(x), y);
     }
     // ecma 11.9.3 22
     return false;
@@ -383,25 +383,25 @@ function __loose_internal_compare(x, y, op) { // ecma 11.8.1
     if (op === 3) return __toNumber(x) >= __toNumber(y);
 }
 function __loose_lt(x, y) { // ecma 11.8.1
-    __loose_internal_compare(x, y, 0);
+    return __loose_internal_compare(x, y, 0);
 }
 function __loose_le(x, y) { // ecma 11.8.3
-    __loose_internal_compare(x, y, 1);
+    return __loose_internal_compare(x, y, 1);
 }
 // __loose_gt can't be !__loose_le because
 // NaN < Nan, NaN <= NaN and NaN > NaN are all false
 function __loose_gt(x, y) { // ecma 11.8.2
-    __loose_internal_compare(x, y, 2);
+    return __loose_internal_compare(x, y, 2);
 }
 function __loose_ge(x, y) { // ecma 11.8.4
-    __loose_internal_compare(x, y, 3);
+    return __loose_internal_compare(x, y, 3);
 }
 
-// <  true: true, false: false, undefined: false
-// >  true: true, false: false, undefined: false
-// <= true: false, false: true, undefined: false
-// >= true: false, false: true, undefined: false
-
 assertEquals(__loose_eq(1, "1"), true);
+assertEquals(__loose_eq(2, new String("2")), true);
 assertEquals(__loose_eq(2, {valueOf: function() { return 2; }}), true);
 assertEquals(__loose_eq(2, new Number(2)), true);
+assertEquals(__loose_lt(2, new Number(3)), true);
+assertEquals(__loose_le(2, new Number(3)), true);
+assertEquals(__loose_gt(2, new Number(3)), false);
+assertEquals(__loose_gt(2, new String("3")), false);
