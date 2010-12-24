@@ -1,3 +1,5 @@
+"use strict";
+
 /*
 To string: ""+ 101 or String(101)
 To number: +"101" or Number("101")
@@ -90,16 +92,14 @@ function __add(l, r) { // binary sub, TODO unary sub
                     ltype +" and "+ rtype);
 }
 
-if (this.console === undefined) {
-    console = {log: print};
-}
+var log = print;
 
 function assertEquals(l, r) {
     if (l === r) {
-        console.log("PASS " + l);
+        log("PASS " + l);
     }
     else {
-        console.log("FAIL " + l + " !== " + r);
+        log("FAIL " + l + " !== " + r);
         throw new Error("assertion failed");
     }
 }
@@ -109,10 +109,10 @@ function assertThrows(fn) {
         fn();
     }
     catch (e) {
-        console.log("PASS " + e);
+        log("PASS " + e);
         return;
     }
-    console.log("FAIL no exception thrown");
+    log("FAIL no exception thrown");
     throw new Error("assertion failed");
 }
 
@@ -209,6 +209,7 @@ function __toNumber(v) {
     }
     if (vtype === "string") {
         // parseFloat can't be used since it's to permissive ("3x" -> 3)
+        // re-use built-in
         return Number(v);
     }
     if (vtype === "object") {
@@ -266,7 +267,34 @@ function __defaultValue(v, preferredType) {
         throw new Error("__defaultValue invalid preferredType");
     }
 }
+function __toString(v) {
+    // ecma 9.8
+    var vtype = typeof v;
+    if (v === undefined) {
+        return "undefined";
+    }
+    if (v === null) {
+        return "null";
+    }
+    if (vtype === "boolean") {
+        return v ? "true" : "false";
+    }
+    if (vtype === "number") {
+        // re-use built-in
+        return String(v);
+    }
+    if (vtype === "string") {
+        return v;
+    }
+    if (vtype === "object") {
+        return __toString(__toPrimitive(v, "hint_string"));
+    }
+
+    // can't happen
+    throw new Error("__toString unexpected return");
+}
 function __loose_eq(x, y) {
+    // ecma 11.9.3
     var xtype = typeof x;
     var ytype = typeof y;
 
@@ -306,6 +334,74 @@ function __loose_eq(x, y) {
     // ecma 11.9.3 22
     return false;
 }
+function __loose_ne(x, y) { // ecma 11.9.2
+    return !__loose_eq(x, y);
+}
+function __loose_add(x, y) { // ecma 11.6.1
+    // ecma 1-6
+    x = __toPrimitive(x); // no type hint
+    y = __toPrimitive(y); // no type hint
+    var xtype = typeof x;
+    var ytype = typeof y;
+
+    // ecma 7, 12-15
+    if (xtype === "string" || ytype === "string") {
+        return String.prototype.concat.call(__toString(x), __toString(y));
+    }
+    // ecma 8-11
+    // re-use built-in + operator for number addition
+    return __toNumber(x) + __toNumber(y);
+}
+function __loose_sub(x, y) { // ecma 11.6.2
+    // re-use built-in - operator for number subtraction
+    return __toNumber(x) - __toNumber(y);
+}
+function __loose_internal_compare(x, y, op) { // ecma 11.8.1
+    if (op < 0 || op > 3) {
+        throw new Error("__loose_internal_compare invalid op");
+    }
+    // ecma 11.8.5
+    // ecma 1-2
+    x = __toPrimitive(x, "hint_number");
+    y = __toPrimitive(y, "hint_number");
+    var xtype = typeof x;
+    var ytype = typeof y;
+
+    // ecma 3, 16-21
+    if (xtype === "string" && ytype === "string") {
+        // re-use built-in operators for lexical string comparision
+        if (op === 0) return x < y;
+        if (op === 1) return x <= y;
+        if (op === 2) return x > y;
+        if (op === 3) return x >= y;
+    }
+    // ecma 4-15
+    // re-use built-in operators for IEEE-754 floating point comparision
+    if (op === 0) return __toNumber(x) < __toNumber(y);
+    if (op === 1) return __toNumber(x) <= __toNumber(y);
+    if (op === 2) return __toNumber(x) > __toNumber(y);
+    if (op === 3) return __toNumber(x) >= __toNumber(y);
+}
+function __loose_lt(x, y) { // ecma 11.8.1
+    __loose_internal_compare(x, y, 0);
+}
+function __loose_le(x, y) { // ecma 11.8.3
+    __loose_internal_compare(x, y, 1);
+}
+// __loose_gt can't be !__loose_le because
+// NaN < Nan, NaN <= NaN and NaN > NaN are all false
+function __loose_gt(x, y) { // ecma 11.8.2
+    __loose_internal_compare(x, y, 2);
+}
+function __loose_ge(x, y) { // ecma 11.8.4
+    __loose_internal_compare(x, y, 3);
+}
+
+// <  true: true, false: false, undefined: false
+// >  true: true, false: false, undefined: false
+// <= true: false, false: true, undefined: false
+// >= true: false, false: true, undefined: false
+
 assertEquals(__loose_eq(1, "1"), true);
 assertEquals(__loose_eq(2, {valueOf: function() { return 2; }}), true);
 assertEquals(__loose_eq(2, new Number(2)), true);
