@@ -396,6 +396,19 @@ function __loose_gt(x, y) { // ecma 11.8.2
 function __loose_ge(x, y) { // ecma 11.8.4
     return __loose_internal_compare(x, y, 3);
 }
+// allow a++ ++a a-- --a as single statements only (like Google Go)?
+function __loose_prefinc(v) { // ecma 11.4.4
+    // special handling for dereferencing via []
+    // to avoid double side-effects, for example a[f()]++
+    // todo what about g()[f()]++ where g returns an array?
+    //   or slightly simpler g().x++ where g returns an object
+    // see ecma 11.2 left-hand-side expressions
+    //   property accessors (., [])
+    //   new operator
+    //   function calls
+    //   argument lists
+    //   function expressions
+}
 
 assertEquals(__loose_eq(1, "1"), true);
 assertEquals(__loose_eq(2, new String("2")), true);
@@ -405,3 +418,36 @@ assertEquals(__loose_lt(2, new Number(3)), true);
 assertEquals(__loose_le(2, new Number(3)), true);
 assertEquals(__loose_gt(2, new Number(3)), false);
 assertEquals(__loose_gt(2, new String("3")), false);
+
+// test postfinc rewrite
+var a = [0,2,4];
+function f() { log("f side-effect"); return 1; }
+assertEquals(a[f()]++, 2);
+assertEquals(a[1], 3);
+a = [0,2,4];
+var tmp1, tmp2;
+assertEquals((tmp2 = a[tmp1=f()], a[tmp1] = __loose_add(a[tmp1], 1), tmp2), 2);
+assertEquals(a[1], 3);
+
+// test += rewrite (prefinc ++a follows since ++a <=> a += 1
+
+// property index expression
+a = [0,2,4];
+assertEquals(a[f()] += 1, 3);
+assertEquals(a[1], 3);
+a = [0,2,4];
+tmp1 = undefined, tmp2 = undefined;
+assertEquals(a[tmp1=f()] = __loose_add(a[tmp1], 1), 3);
+assertEquals(a[1], 3);
+
+// array/object expression
+var o = {x: 1};
+function ofn() { return o; };
+assertEquals(ofn().x++, 1);
+assertEquals(o.x, 2);
+o = {x: 1};
+tmp1 = undefined, tmp2 = undefined;
+assertEquals((tmp2 = (tmp1 = ofn()).x, tmp1.x = __loose_add(tmp1.x, 1), tmp2), 1);
+assertEquals(o.x, 2);
+
+// combination of the two TODO
