@@ -1,21 +1,5 @@
 "use strict";
 
-/*
-To string: ""+ 101 or String(101)
-To number: +"101" or Number("101")
-To boolean: !!101 or Boolean(101)
-*/
-
-
-/*
-WTF
-1 < true
-+[[[7]]] = 7
--[[[7]]] = 7
-new Number(3) != new Number(3)
-workaround n1 <= n2 && n2 >= n1
-new Number(3) == 3
-*/
 function __typeof(v) {
     var t = typeof v;
     return t !== 'object' ? t :
@@ -357,9 +341,6 @@ function __loose_sub(x, y) { // ecma 11.6.2
     return __toNumber(x) - __toNumber(y);
 }
 function __loose_internal_compare(x, y, op) { // ecma 11.8.1
-    if (op < 0 || op > 3) {
-        throw new Error("__loose_internal_compare invalid op");
-    }
     // ecma 11.8.5
     // ecma 1-2
     x = __toPrimitive(x, "hint_number");
@@ -376,11 +357,14 @@ function __loose_internal_compare(x, y, op) { // ecma 11.8.1
         if (op === 3) return x >= y;
     }
     // ecma 4-15
-    // re-use built-in operators for IEEE-754 floating point comparision
-    if (op === 0) return __toNumber(x) < __toNumber(y);
-    if (op === 1) return __toNumber(x) <= __toNumber(y);
-    if (op === 2) return __toNumber(x) > __toNumber(y);
-    if (op === 3) return __toNumber(x) >= __toNumber(y);
+    else {
+        // re-use built-in operators for IEEE-754 floating point comparision
+        if (op === 0) return __toNumber(x) < __toNumber(y);
+        if (op === 1) return __toNumber(x) <= __toNumber(y);
+        if (op === 2) return __toNumber(x) > __toNumber(y);
+        if (op === 3) return __toNumber(x) >= __toNumber(y);
+    }
+    throw new Error("__loose_internal_compare invalid op");
 }
 function __loose_lt(x, y) { // ecma 11.8.1
     return __loose_internal_compare(x, y, 0);
