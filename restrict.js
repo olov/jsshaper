@@ -178,6 +178,7 @@ assertEquals(__sub(1,2), -1);
 assertThrows(function() { __sub("1", 0); });
 
 function __toNumber(v) {
+    // ecma 9.3
     var vtype = typeof v;
     if (v === undefined) {
         return NaN;
@@ -196,60 +197,8 @@ function __toNumber(v) {
         // re-use built-in
         return Number(v);
     }
-    if (vtype === "object") {
-        return __toNumber(__toPrimitive(v, "hint_number"));
-    }
-
-    // can't happen
-    throw new Error("__toNumber unexpected return");
-}
-function __toPrimitive(v, preferredType) {
-    // ecma 9.1
-    var vtype = typeof v;
-    if (v === undefined || v === null || vtype === "boolean" ||
-        vtype === "number" || vtype === "string") {
-        return v;
-    }
-    if (vtype === "object") {
-        return __defaultValue(v, preferredType);
-    }
-
-    // can't happen
-    throw new Error("__toPrimitive unexpected return");
-}
-function __defaultValue(v, preferredType) {
-    // ecma 8.6.2.6
-    if (preferredType === undefined) {
-        var isDate = Object.prototype.toString.call(v) === "[object Date]";
-        preferredType = (isDate ? "hint_string" : "hint_number");
-    }
-
-    if (preferredType === "hint_string") {
-        var val = v.toString();
-        if (val === null || typeof val !== "object") {
-            return val;
-        }
-        val = v.valueOf();
-        if (val === null || typeof val !== "object") {
-            return val;
-        }
-        throw new TypeError("Cannot convert object to primitive value");
-    }
-    else if (preferredType === "hint_number") {
-        // TODO check for valueOf existence?
-        var val = v.valueOf();
-        if (val === null || typeof val !== "object") {
-            return val;
-        }
-        val = v.toString();
-        if (val === null || typeof val !== "object") {
-            return val;
-        }
-        throw new TypeError("Cannot convert object to primitive value");
-    }
-    else {
-        throw new Error("__defaultValue invalid preferredType");
-    }
+    // object, function or host object
+    return __toNumber(__toPrimitive(v, "hint_number"));
 }
 function __toString(v) {
     // ecma 9.8
@@ -270,12 +219,52 @@ function __toString(v) {
     if (vtype === "string") {
         return v;
     }
-    if (vtype === "object") {
-        return __toString(__toPrimitive(v, "hint_string"));
+    // object, function or host object
+    return __toString(__toPrimitive(v, "hint_string"));
+}
+function __isPrimitive(v) {
+    var vtype = typeof v;
+    // false if object, function or host object (with custom typeof)
+    return (v === undefined || v === null || vtype === "boolean" ||
+            vtype === "number" || vtype === "string");
+}
+function __toPrimitive(v, preferredType) {
+    // ecma 9.1
+    return __isPrimitive(v) ? v : __defaultValue(v, preferredType);
+}
+function __defaultValue(v, preferredType) {
+    // ecma 8.6.2.6
+    if (preferredType === undefined) {
+        var isDate = Object.prototype.toString.call(v) === "[object Date]";
+        preferredType = (isDate ? "hint_string" : "hint_number");
     }
-
-    // can't happen
-    throw new Error("__toString unexpected return");
+    var val;
+    if (preferredType === "hint_string") {
+        val = v.toString();
+        if (__isPrimitive(val)) {
+            return val;
+        }
+        val = v.valueOf();
+        if (__isPrimitive(val)) {
+            return val;
+        }
+        throw new TypeError("Cannot convert object to primitive value");
+    }
+    else if (preferredType === "hint_number") {
+        // TODO check for valueOf existence?
+        val = v.valueOf();
+        if (__isPrimitive(val)) {
+            return val;
+        }
+        val = v.toString();
+        if (__isPrimitive(val)) {
+            return val;
+        }
+        throw new TypeError("Cannot convert object to primitive value");
+    }
+    else {
+        throw new Error("__defaultValue invalid preferredType");
+    }
 }
 function __loose_eq(x, y) {
     // ecma 11.9.3
@@ -402,6 +391,11 @@ assertEquals(__loose_lt(2, new Number(3)), true);
 assertEquals(__loose_le(2, new Number(3)), true);
 assertEquals(__loose_gt(2, new Number(3)), false);
 assertEquals(__loose_gt(2, new String("3")), false);
+assertEquals(typeof __toNumber(f), "number"); // NaN
+assertEquals(__toNumber(f).toString(), "NaN"); // NaN
+assertEquals(typeof __toPrimitive(f), "string"); // "function f..."
+assertEquals(typeof __toString(f), "string"); // "function f..."
+assertEquals(typeof __defaultValue(f), "string"); // "function f..."
 
 // test postfinc rewrite
 var a = [0,2,4];

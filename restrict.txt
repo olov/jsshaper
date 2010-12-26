@@ -18,3 +18,11 @@ Converting to primitive types:
 To string: ""+ 101 or String(101)
 To number: +"101" or Number("101")
 To boolean: !!101 or Boolean(101)
+
+String formatting:
+------------------
+Alternatives to string concatenation via + operator
+log("player " + name + " scored " + points " points ");
+
+log(String.fmt("player {0} scored {1} points", name, points));
+log(String.str("player ", name, " scored ", points, " points "));
