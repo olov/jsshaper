@@ -6,12 +6,11 @@ if (a /*loose*/ <= b)
 
 Examples of issues with loose comparisions:
 -------------------------------------------
-[1] < [2] but [10] < [2] (coerced into "10" < "2")
+[1] < [2] and [1,2] < [1,3] but [10] < [2] (coerced into "10" < "2")
 1 + [[[2]]] === "12"
 1 < true
 n1 = new Number(3), n2 = Number(3)
    n1 <= n2, n2 >= n1 but n1 != n2
-
 
 Converting to primitive types:
 ------------------------------
