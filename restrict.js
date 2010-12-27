@@ -23,15 +23,6 @@ function __lt(l, r) {
         if ((ltype === "string" || ltype === "number")) {
             return l < r;
         }
-        if (ltype === "object" && Array.isArray(l) && Array.isArray(r)) {
-            for (var i = 0, len = Math.min(l.length, r.length); i < len; i++) {
-                if (l[i] === r[i]) {
-                    continue;
-                }
-                return __lt(l[i], r[i]);
-            }
-            return l.length < r.length;
-        }
     }
     throw new Error("restrict mode __lt called with "+
                     ltype +" and "+ rtype);
@@ -48,17 +39,6 @@ function __uadd(v) {
 }
 
 function __sub(l, r) { // binary sub, TODO unary sub
-    var ltype = typeof l;
-    var rtype = typeof r;
-    // doesn't support boxed Number or String (yet?)
-    if (ltype === "number" && ltype === rtype) {
-        return l - r;
-    }
-    throw new Error("restrict mode __sub called with "+
-                    ltype +" and "+ rtype);
-}
-
-function __add(l, r) { // binary sub, TODO unary sub
     var ltype = typeof l;
     var rtype = typeof r;
     // doesn't support boxed Number or String (yet?)
@@ -108,10 +88,10 @@ assertEquals(_str("one", 2, "three", 4), "one2three4");
 assertEquals(__lt(1, 2), true);
 assertEquals(__lt("abc", "bac"), true);
 assertEquals(__lt("abc", "abc"), false);
-assertEquals(__lt([1,2,3], [2,3,4]), true);
-assertEquals(__lt([1,2,3], [0,3,4]), false);
+assertThrows(function() { __lt([1,2,3], [2,3,4]); });
+assertThrows(function() { __lt([10], [2]); } );
 assertThrows(function() { __lt([[2]], [["1"]]); } );
-assertThrows(function() { __lt(new Number(1), 2); }, true);
+assertThrows(function() { __lt(new Number(1), 2); });
 assertEquals(__uadd(1), 1);
 assertEquals(__uadd("1"), 1);
 assertEquals(__uadd("1.1"), 1.1);
