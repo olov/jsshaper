@@ -12,6 +12,10 @@ Examples of issues with loose comparisions:
 n1 = new Number(3), n2 = Number(3)
    n1 <= n2, n2 >= n1 but n1 != n2
 
+Falsy and truthy values:
+------------------------
+new Boolean(false) is truthy (object and not null)
+
 Converting to primitive types:
 ------------------------------
 To string: ""+ 101 or String(101)
