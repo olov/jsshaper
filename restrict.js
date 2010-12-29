@@ -12,8 +12,7 @@ if (nodejs) {
         });
     };
 }
-
-function __str_concat(arg0) {
+var __old_str_cat = function(arg0) {
     // TODO check Array.prototype.join("") performance
     if (arguments.length === 0) {
         return "";
@@ -27,39 +26,68 @@ function __str_concat(arg0) {
 
     var args = Array.prototype.slice.call(arguments, 1, arguments.length);
     return String.prototype.concat.apply(String(arg0), args);
+};
+String.concat = function() {
+    return String.prototype.concat.apply(String.prototype, arguments);
+};
+
+function __throw_typeerror(from, x, y) {
+    function detailedtypeof(v) {
+        var t = typeof v;
+        return t !== "object" ? t :
+            v === null ? "null" :
+            Array.isArray(v) ? "object (Array)" :
+            v instanceof Number ? "object (Number)" :
+            v instanceof String ? "object (String)" :
+            v instanceof Boolean ? "object (Boolean)" :
+            v instanceof Date ? "object (Date)" :
+            "object";
+    }
+    throw new Error("restrict mode "+ from +" called with "+
+                    detailedtypeof(x) +" and "+ detailedtypeof(y));
 }
+
 function __lt(l, r) {
     var ltype = typeof l;
     var rtype = typeof r;
 
     if (ltype === rtype) {
         if ((ltype === "string" || ltype === "number")) {
-            return l < r;
+            return l /*loose*/ < r;
         }
     }
-    throw new Error("restrict mode __lt called with "+
-                    ltype +" and "+ rtype);
-    // TODO print array instead of object in error message
+    __throw_typeerror("__lt", l, r);
 }
 function __uadd(v) {
     // TODO remove altogether and require explicit Number("101") str->num?
     var vtype = typeof v;
     // doesn't support boxed Number or String (yet?)
     if (vtype === "number" || vtype === "string") {
-        return +v;
+        return /*loose*/ +v;
     }
     throw new Error("restrict mode __uadd called with "+ vtype);
 }
+function __add(x, y) {
+    var xtype = typeof x;
+    var ytype = typeof y;
+    if (xtype === ytype) {
+        if (xtype === "string") {
+            return String.prototype.concat.call(x, y);
+        }
+        if (xtype === "number") {
+            return x /*loose*/ + y;
+        }
+    }
 
+    __throw_typeerror("__add", x, y);
+}
 function __sub(l, r) { // binary sub, TODO unary sub
     var ltype = typeof l;
     var rtype = typeof r;
-    // doesn't support boxed Number or String (yet?)
     if (ltype === "number" && ltype === rtype) {
-        return l - r;
+        return l /*loose*/ - r;
     }
-    throw new Error("restrict mode __sub called with "+
-                    ltype +" and "+ rtype);
+    __throw_typeerror("__sub", l, r);
 }
 
 function assertEquals(l, r) {
@@ -88,7 +116,7 @@ Array.isArray = Array.isArray || function(o) {
     return Object.prototype.toString.call(o) === '[object Array]';
 };
 
-var _str = __str_concat;
+var _str = String.concat;
 assertEquals(_str(), "");
 assertEquals(_str(""), "");
 assertEquals(_str("one"), "one");
