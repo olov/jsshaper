@@ -12,6 +12,11 @@ Examples of issues with loose comparisions:
 n1 = new Number(3), n2 = Number(3)
    n1 <= n2, n2 >= n1 but n1 != n2
 
+Date is special-case:
+---------------------
+(new Date()) + 1 === "Tue Dec 28 2010 23:59:53 GMT+0100 (CET)1" but
+(new Date()) - 1 === 1293577193075
+
 Falsy and truthy values:
 ------------------------
 new Boolean(false) is truthy (object and not null)

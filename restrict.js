@@ -1,5 +1,18 @@
 "use strict";
 
+var require;
+var nodejs = Boolean(require);
+var log = nodejs ? console.log : print;
+var load;
+if (nodejs) {
+    load = function (filename) {
+        require('fs').readFile('./'+ filename, function(err, content) {
+            if (err) throw err;
+            eval(content.toString());
+        });
+    };
+}
+
 function __str_concat(arg0) {
     // TODO check Array.prototype.join("") performance
     if (arguments.length === 0) {
@@ -48,8 +61,6 @@ function __sub(l, r) { // binary sub, TODO unary sub
     throw new Error("restrict mode __sub called with "+
                     ltype +" and "+ rtype);
 }
-
-var log = print;
 
 function assertEquals(l, r) {
     if (l === r) {
