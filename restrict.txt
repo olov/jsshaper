@@ -1,8 +1,31 @@
-A compiler that automatically converts a < b into __lt(a, b) could use
-comments to force loose (non-strict) version, i.e: 
+Javascript restrict mode design decisions:
+------------------------------------------
+Restrict mode reduces the amount of type coercion by providing strict
+versions of built-in loose operators, similar to how === is already a
+strict version of the loose == operator.
 
-if (a /*loose*/ <= b)
+Restrict mode adds functions but no new syntax. There's a translator
+that automatically converts loose operators into their restrict mode
+equivalent, such as a < b into __lt(a, b).
 
+Restrict mode is enabled similar to ECMAScript 5 strict mode. Include
+the statement "use restrict"; at the top of your script or inside a
+function. It is encouraged to combine the two:
+"use strict"; "use restrict";
+
+Since restrict mode is a subset of Javascript, all valid restrict mode
+programs will produce equivalent results whether compiled or not. The
+opposite is not true, since restrict mode throws errors in cases where
+type coercions would normally occur. One use-case is to use the
+translated version when executing the unit-tests and the original
+version for rapid iterative development and deployment.
+
+It is possible to force the use of a loose operator even in restrict
+mode. Some options for this (TBD):
+      a /*loose*/ < b + 1    annotation left of operator
+      /*loose*/ a < b + 1    annotation prepended to expression
+                             (works on lowest priority operator)
+      /*loose*/ a < (b + 1)  annotation with explicit parens
 
 Examples of issues with loose comparisions:
 -------------------------------------------

@@ -12,26 +12,11 @@ if (nodejs) {
         });
     };
 }
-var __old_str_cat = function(arg0) {
-    // TODO check Array.prototype.join("") performance
-    if (arguments.length === 0) {
-        return "";
-    }
-    if (arguments.length === 1) {
-        if (typeof arg0 === "string") {
-            return arg0;
-        }
-        return String(arg0);
-    }
-
-    var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-    return String.prototype.concat.apply(String(arg0), args);
-};
 String.concat = function() {
     return String.prototype.concat.apply(String.prototype, arguments);
 };
 
-function __throw_typeerror(from, x, y) {
+function __throw_typeerror(from /* ... */) {
     function detailedtypeof(v) {
         var t = typeof v;
         return t !== "object" ? t :
@@ -43,30 +28,46 @@ function __throw_typeerror(from, x, y) {
             v instanceof Date ? "object (Date)" :
             "object";
     }
+    var args = Array.prototype.slice.call(arguments, 1, arguments.length);
     throw new Error("restrict mode "+ from +" called with "+
-                    detailedtypeof(x) +" and "+ detailedtypeof(y));
+                    args.map(detailedtypeof).join(" and "));
 }
 
-function __lt(l, r) {
-    var ltype = typeof l;
-    var rtype = typeof r;
+function __lt(x, y) {
+    var xtype = typeof x;
+    var ytype = typeof y;
 
-    if (ltype === rtype) {
-        if ((ltype === "string" || ltype === "number")) {
-            return l /*loose*/ < r;
+    if (xtype === ytype) {
+        if ((xtype === "string" || xtype === "number")) {
+            return x /*loose*/ < y;
         }
     }
-    __throw_typeerror("__lt", l, r);
+    __throw_typeerror("__lt", x, y);
 }
+function __gt(x, y) { throw new Error("not implemented yet"); } // like __lt
+function __le(x, y) { throw new Error("not implemented yet"); } // like __lt
+function __ge(x, y) { throw new Error("not implemented yet"); } // like __lt
+
+// Unary ops
+// TODO remove __uadd altogether and require explicit Number("101")?
+// +v, __uadd(v) is shorthand for Number(v)
+// !v, __not(v) is shorthand for !Boolean(v) or Boolean(v) ? false : true
+// -v, __usub(v) works on numbers only
 function __uadd(v) {
-    // TODO remove altogether and require explicit Number("101") str->num?
-    var vtype = typeof v;
-    // doesn't support boxed Number or String (yet?)
-    if (vtype === "number" || vtype === "string") {
-        return /*loose*/ +v;
-    }
-    throw new Error("restrict mode __uadd called with "+ vtype);
+    return /*loose*/ +v;
 }
+function __not(v) {
+    return /*loose*/ !v;
+}
+function __usub(v) {
+    var vtype = typeof v;
+    if (vtype === "number") {
+        return /*loose*/ -v;
+    }
+    __throw_typeerror("__usub", v);
+}
+
+
 function __add(x, y) {
     var xtype = typeof x;
     var ytype = typeof y;
@@ -78,16 +79,15 @@ function __add(x, y) {
             return x /*loose*/ + y;
         }
     }
-
     __throw_typeerror("__add", x, y);
 }
-function __sub(l, r) { // binary sub, TODO unary sub
-    var ltype = typeof l;
-    var rtype = typeof r;
-    if (ltype === "number" && ltype === rtype) {
-        return l /*loose*/ - r;
+function __sub(x, y) {
+    var xtype = typeof x;
+    var ytype = typeof y;
+    if (xtype === "number" && xtype === ytype) {
+        return x /*loose*/ - y;
     }
-    __throw_typeerror("__sub", l, r);
+    __throw_typeerror("__sub", x, y);
 }
 
 function assertEquals(l, r) {
@@ -132,17 +132,41 @@ assertThrows(function() { __lt([10], [2]); } );
 assertThrows(function() { __lt([[2]], [["1"]]); } );
 assertThrows(function() { __lt(new Number(1), 2); });
 assertEquals(__uadd(1), 1);
-assertEquals(__uadd("1"), 1);
-assertEquals(__uadd("1.1"), 1.1);
-assertEquals(isNaN(__uadd("asdf")), true);
-assertEquals(__uadd(""), 0);
-assertThrows(function() { __uadd(null); });
-assertThrows(function() { __uadd(undefined); });
-assertThrows(function() { __uadd([]); });
-assertThrows(function() { __uadd({}); });
+//assertEquals(__uadd("1"), 1);
+//assertEquals(__uadd("1.1"), 1.1);
+//assertEquals(isNaN(__uadd("asdf")), true);
+//assertEquals(__uadd(""), 0);
+//assertThrows(function() { __uadd(null); });
+//assertThrows(function() { __uadd(undefined); });
+//assertThrows(function() { __uadd([]); });
+//assertThrows(function() { __uadd({}); });
 assertEquals(__sub(1,2), -1);
 assertThrows(function() { __sub("1", 0); });
 
+function __toBoolean(v) {
+    // short version
+    //return v !== undefined && v !== null && v !== false &&
+    //    v !== 0 && isNaN(v) === false && v !== "";
+
+    // ecma 9.2
+    var vtype = typeof v;
+    if (v === undefined) {
+        return false;
+    }
+    if (v === null) {
+        return false;
+    }
+    if (vtype === "boolean") {
+        return v;
+    }
+    if (vtype === "number") {
+        return v !== 0 && isNaN(v) === false;
+    }
+    if (vtype === "string") {
+        return v === "";
+    }
+    return true;
+}
 function __toNumber(v) {
     // ecma 9.3
     var vtype = typeof v;
