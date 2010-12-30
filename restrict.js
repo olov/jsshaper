@@ -33,6 +33,8 @@ function __throw_typeerror(from /* ... */) {
                     args.map(detailedtypeof).join(" and "));
 }
 
+function __eq(x, y) { throw new Error("use === instead of __eq"); }
+function __ne(x, y) { throw new Error("use !== instead of __ne"); }
 function __lt(x, y) {
     var xtype = typeof x;
     var ytype = typeof y;

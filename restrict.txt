@@ -27,6 +27,10 @@ mode. Some options for this (TBD):
                              (works on lowest priority operator)
       /*loose*/ a < (b + 1)  annotation with explicit parens
 
+In restrict mode, the use of the loose == and != operators is only
+valid when loose-annotated. For strict versions, use the built-in ===
+and !== operators instead.
+
 Examples of issues with loose comparisions:
 -------------------------------------------
 [1] < [2] and [1,2] < [1,3] but [10] < [2] (coerced into "10" < "2")
