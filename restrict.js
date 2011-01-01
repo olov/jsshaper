@@ -50,25 +50,28 @@ function __gt(x, y) { throw new Error("not implemented yet"); } // like __lt
 function __le(x, y) { throw new Error("not implemented yet"); } // like __lt
 function __ge(x, y) { throw new Error("not implemented yet"); } // like __lt
 
-// Unary ops
-// TODO remove __uadd altogether and require explicit Number("101")?
-// +v, __uadd(v) is shorthand for Number(v)
-// !v, __not(v) is shorthand for !Boolean(v) or Boolean(v) ? false : true
-// -v, __usub(v) works on numbers only
-function __uadd(v) {
-    return /*loose*/ +v;
-}
-function __not(v) {
-    return /*loose*/ !v;
-}
-function __usub(v) {
+function __neg(v) {
     var vtype = typeof v;
     if (vtype === "number") {
         return /*loose*/ -v;
     }
-    __throw_typeerror("__usub", v);
+    __throw_typeerror("__neg", v);
 }
 
+function __inc(v) {
+    var vtype = typeof v;
+    if (vtype === "number") {
+        return v /*loose*/ + 1;
+    }
+    __throw_typeerror("__inc", v);
+}
+function __dec(v) {
+    var vtype = typeof v;
+    if (vtype === "number") {
+        return v /*loose*/ - 1;
+    }
+    __throw_typeerror("__dec", v);
+}
 
 function __add(x, y) {
     var xtype = typeof x;
@@ -83,13 +86,88 @@ function __add(x, y) {
     }
     __throw_typeerror("__add", x, y);
 }
-function __sub(x, y) {
+function __assert_numbers(x, y, opname) {
     var xtype = typeof x;
     var ytype = typeof y;
     if (xtype === "number" && xtype === ytype) {
-        return x /*loose*/ - y;
+        return; // ok
     }
-    __throw_typeerror("__sub", x, y);
+    __throw_typeerror(opname, x, y);
+}
+function __sub(x, y) {
+    __assert_numbers(x, y, "__sub");
+    return x /*loose*/ - y;
+}
+function __mul(x, y) {
+    __assert_numbers(x, y, "__mul");
+    return x /*loose*/ * y;
+}
+function __div(x, y) {
+    __assert_numbers(x, y, "__div");
+    return x /*loose*/ / y;
+}
+function __mod(x, y) {
+    __assert_numbers(x, y, "__mod");
+    return x /*loose*/ % y;
+}
+function __bitand(x, y) {
+    __assert_numbers(x, y, "__bitand");
+    return x /*loose*/ & y;
+}
+function __bitor(x, y) {
+    __assert_numbers(x, y, "__bitor");
+    return x /*loose*/ | y;
+}
+function __bitxor(x, y) {
+    __assert_numbers(x, y, "__bitxor");
+    return x /*loose*/ ^ y;
+}
+function __bitasl(x, y) {
+    __assert_numbers(x, y, "__bitasl");
+    return x /*loose*/ << y;
+}
+function __bitasr(x, y) {
+    __assert_numbers(x, y, "__bitasr");
+    return x /*loose*/ >> y;
+}
+function __bitlsr(x, y) {
+    __assert_numbers(x, y, "__bitlsr");
+    return x /*loose*/ >>> y;
+}
+function __bitnot(v) {
+    var vtype = typeof v;
+    if (vtype === "number") {
+        return /*loose*/ ~v;
+    }
+    __throw_typeerror("__bitnot", v);
+}
+
+// += -= *= /= %= &= |= ^= <<= >>= >>>=
+// expr1[expr2] += v is translated into __op_to(__add, expr1, String(expr2), v)
+// expr.id += v is translated into __op_to(__add, expr, "id", v)
+// id += v is translated into id = __add(id, v)
+// ++id is translated into (id = __inc(id))
+// ++expr1[expr2] is translated into __prefinc(expr1, String(expr2))
+// ++expr.id is translated into __prefinc(expr1, "id")
+// id++ is translated into __arg0(id, id = __inc(id))
+//   [other options (id = __inc(id), __dec(id)) or (check(id), id/*loose*/++)]
+// expr1[expr2]++ is translated into __postinc(expr1, String(expr2))
+// expr.id++ is translated into __postinc(expr1, "id")
+// i = f(i, i+=1)
+function __arg0(x) {
+    return x;
+}
+
+function __op_to(fn, base, name, v) {
+    return base[name] = fn(base[name], v);
+}
+function __prefinc(base, name) {
+    return base[name] = __inc(base[name]);
+}
+function __postinc(base, name) {
+    var tmp = base[name];
+    base[name] = __inc(tmp);
+    return tmp;
 }
 
 function assertEquals(l, r) {
@@ -133,15 +211,6 @@ assertThrows(function() { __lt([1,2,3], [2,3,4]); });
 assertThrows(function() { __lt([10], [2]); } );
 assertThrows(function() { __lt([[2]], [["1"]]); } );
 assertThrows(function() { __lt(new Number(1), 2); });
-assertEquals(__uadd(1), 1);
-//assertEquals(__uadd("1"), 1);
-//assertEquals(__uadd("1.1"), 1.1);
-//assertEquals(isNaN(__uadd("asdf")), true);
-//assertEquals(__uadd(""), 0);
-//assertThrows(function() { __uadd(null); });
-//assertThrows(function() { __uadd(undefined); });
-//assertThrows(function() { __uadd([]); });
-//assertThrows(function() { __uadd({}); });
 assertEquals(__sub(1,2), -1);
 assertThrows(function() { __sub("1", 0); });
 
@@ -431,14 +500,10 @@ assertEquals((tmp2=(function(){return a;})())[tmp1=f()] =
 assertEquals(a[1], 3);
 
 // (null || a)[f()] += a[0]
-(function(base, name, v) {
-    return base[name] = __add(base[name], v);
-})(Object(null || a), String(f()), a[0]);
+__op_to(__add, Object(null || a), String(f()), a[0]);
 
 // ofn().x += a[0], ((ofn().x)) += a[0]
-(function(base, name, v) {
-    return base[name] = __add(base[name], v);
-})(Object(ofn()), String("x"), a[0]);
+__op_to(__add, Object(ofn()), String("x"), a[0]);
 
 // x += 1 + 2;
 var x = 0;

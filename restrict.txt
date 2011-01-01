@@ -6,7 +6,14 @@ strict version of the loose == operator.
 
 Restrict mode adds functions but no new syntax. There's a translator
 that automatically converts loose operators into their restrict mode
-equivalent, such as a < b into __lt(a, b).
+equivalent, such as a < b into __lt(a, b). The translator preserves as
+much of the original source and formatting as possible, and tries to
+produce as readable output as possible. Reverse-translation should be
+possible and generate output identical to the original
+file. (devnotes: do this automatically each translation to catch bugs?
+mark the output with a version-number to be backwards-compatible? the
+output should remain the same even if translated twice [i.e. proper
+annotations everywhere])
 
 Restrict mode is enabled similar to ECMAScript 5 strict mode. Include
 the statement "use restrict"; at the top of your script or inside a
@@ -38,6 +45,7 @@ Examples of issues with loose comparisions:
 1 < true
 n1 = new Number(3), n2 = Number(3)
    n1 <= n2, n2 >= n1 but n1 != n2
+null <= [], null >= [] but null != []
 
 Date is special-case:
 ---------------------
@@ -61,3 +69,51 @@ log("player " + name + " scored " + points " points ");
 
 log(String.fmt("player {0} scored {1} points", name, points));
 log(String.str("player ", name, " scored ", points, " points "));
+
+Operators:
+----------
+Operators without restrict equivalents, untranslated
+  (mustn't be /*loose*/ annotated in general]:
+===  strict by default
+!==  strict by default
+==   loose version of ===, must be /*loose*/ annotated
+!=   loose version of !==, must be /*loose*/ annotated
+=    strict by default (doesn't coerce)
+&&   calls toBoolean
+||   calls toBoolean
+!    calls toBoolean
+?:   calls toBoolean
++n   calls toNumber, common shorthand for Number(n). TODO disallow?
+,    doesn't coerce
+o.k  doesn't coerce
+o[k] calls toString
+other operators (for example delete, in, typeof, instanceof)
+
+Comparision (number, string):
+<    __lt
+>    __gt
+<=   __le
+>=   __ge
+
+Arithmetic:
++    __add (number addition, string concatenation)
+-    __sub number
+*    __mul number
+/    __div number
+%    __mod number
+[same for += -= *= /= %=]
+++n  __prefinc number
+--n  __prefdec number
+n++  __postinc number TODO disallow?
+n--  __postdec number TODO disallow?
+-n   __neg number
+
+Bitwise arithmetic (number):
+&    __bitand
+|    __bitor
+^    __bitxor
+<<   __bitasl
+>>   __bitasr
+>>>  __bitlsr
+~n   __bitnot
+[same for &= |= ^= <<= >>= >>>=]
