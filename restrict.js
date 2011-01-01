@@ -420,4 +420,29 @@ tmp1 = undefined, tmp2 = undefined;
 assertEquals((tmp2 = (tmp1 = ofn()).x, tmp1.x = __loose_add(tmp1.x, 1), tmp2), 1);
 assertEquals(o.x, 2);
 
-// combination of the two TODO
+// x[y] += ... where both x and y are expressions
+a = [0,2,4];
+assertEquals((function(){return a;})()[f()] += 1, 3);
+assertEquals(a[1], 3);
+a = [0,2,4];
+tmp1 = undefined, tmp2 = undefined;
+assertEquals((tmp2=(function(){return a;})())[tmp1=f()] =
+             __loose_add(tmp2[tmp1], 1), 3);
+assertEquals(a[1], 3);
+
+// (null || a)[f()] += a[0]
+(function(base, name, v) {
+    return base[name] = __add(base[name], v);
+})(Object(null || a), String(f()), a[0]);
+
+// ofn().x += a[0], ((ofn().x)) += a[0]
+(function(base, name, v) {
+    return base[name] = __add(base[name], v);
+})(Object(ofn()), String("x"), a[0]);
+
+// x += 1 + 2;
+var x = 0;
+(x = __add(x, 1 + 2));
+
+// ofn() += 1 and all other forms should crash with ReferenceError so
+// give translation error
