@@ -336,7 +336,7 @@ function __type(x) {
     return xtype === "function" ? "object" : xtype;
 }
 
-function __loose_eq(x, y) {
+function __loose_eq_ecma(x, y) {
     // ecma 11.9.3
     var xtype = __type(x);
     var ytype = __type(y);
@@ -377,6 +377,51 @@ function __loose_eq(x, y) {
     }
     // ecma 11.9.3 22
     return false;
+}
+function __loose_eq(x, y) {
+    // ecma 11.9.3
+    var xtype = __type(x);
+    var ytype = __type(y);
+
+    // if x and y are of the same type, use strict comparision
+    if (xtype === ytype) {
+        return x === y; // ecma 11.9.4
+    }
+
+    // here, x and y are of different type
+
+    // handle null/undefined
+    if (x === null || x === undefined) {
+        return y === null || y === undefined;
+    }
+    if (y === null || y === undefined) {
+        return false;
+    }
+
+    // here, x and y can be of type object, bool, number, string
+    // here, x and y are of different type
+
+    // if object, convert to primitive
+    if (xtype === "object") {
+        x = __toPrimitive(x), xtype = __type(x);
+    }
+    else if (ytype === "object") {
+        y = __toPrimitive(y), ytype = __type(y);
+    }
+
+    // here, x and y can be of type undefined, null, bool, number, string
+    // here, x and y may be of the same or different type
+
+    // if both x and y are strings, compare lexically
+    if (xtype === "string" && ytype === "string") {
+        return x === y;
+    }
+
+    // here, x and y can be of type undefined, null, bool, number, string
+    // here, x and y may be of the same or different type
+
+    // convert x and y to numbers and compare
+    return __toNumber(x) === __toNumber(y);
 }
 function __loose_ne(x, y) { // ecma 11.9.2
     return !__loose_eq(x, y);
@@ -627,8 +672,8 @@ function test_binary_operator() {
     log(flat.length);
 
     var j;
-    for (i = 0; i < flat.length; i++) {
-        for (j = 0; j < flat.length; j++) {
+    for (i = 2; i < flat.length; i++) {
+        for (j = 1455; j < flat.length; j++) {
 //            log(i, j);
             var exc_a = false, exc_b = false;
             var val_a, val_b;
@@ -643,11 +688,11 @@ function test_binary_operator() {
             }
             else {
                 if (val_a !== val_b) {
-                    log(String.concat("i=", i, " j=", j));
-                    log(String.concat(flat[i], " == ", flat[j], ": ", val_a));
-                    log(String.concat("__loose_eq(", flat[i], ", ",
+                    log(String.concat("  ", "i=", i, " j=", j));
+                    log(String.concat("  ", flat[i], " == ",
+                                      flat[j], ": ", val_a));
+                    log(String.concat("  ", "__loose_eq(", flat[i], ", ",
                                       flat[j], "): ", val_b));
-                    log(i, j);
                     inspect(flat[i]);
                     inspect(flat[j]);
                     assertEquals(true, false);
@@ -658,21 +703,21 @@ function test_binary_operator() {
 }
 
 function inspect(v) {
-    log("inspect("+ String(v) +")");
-    log("typeof: "+ typeof v);
-    log("constructor: "+ v.constructor);
-    log("valueOf: "+ v.valueOf || "undefined");
-    log("toString: "+ v.toString || "undefined");
+    log("inspect "+ String(v) +" {");
+    log("  typeof: "+ typeof v);
+    log("  constructor: "+ v.constructor);
+    log("  valueOf: "+ v.valueOf || "undefined");
+    log("  toString: "+ v.toString || "undefined");
     var val;
     if (v.valueOf) {
         val = v.valueOf();
-        log("valueOf(): "+ val +" ("+ typeof val +")");
+        log("  valueOf(): "+ val +" ("+ typeof val +")");
     }
     if (v.toString) {
         val = v.toString();
-        log("toString(): "+ val +" ("+ typeof val +")");
+        log("  toString(): "+ val +" ("+ typeof val +")");
     }
-    log("inspect end");
+    log("}");
 }
 
 test_binary_operator();
