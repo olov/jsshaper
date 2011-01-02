@@ -172,7 +172,7 @@ function __postinc(base, name) {
 
 function assertEquals(l, r) {
     if (l === r) {
-        log("PASS " + l);
+//        log("PASS " + l);
     }
     else {
         log("FAIL " + l + " !== " + r);
@@ -185,7 +185,7 @@ function assertThrows(fn) {
         fn();
     }
     catch (e) {
-        log("PASS " + e);
+        //log("PASS " + e);
         return;
     }
     log("FAIL no exception thrown");
@@ -327,10 +327,19 @@ function __defaultValue(v, preferredType) {
         throw new Error("__defaultValue invalid preferredType");
     }
 }
+
+function __type(x) {
+    if (x === null) {
+        return "null";
+    }
+    var xtype = typeof x;
+    return xtype === "function" ? "object" : xtype;
+}
+
 function __loose_eq(x, y) {
     // ecma 11.9.3
-    var xtype = typeof x;
-    var ytype = typeof y;
+    var xtype = __type(x);
+    var ytype = __type(y);
 
     // ecma 11.9.3 1-13
     if (x === y) { // ecma 11.9.4
@@ -616,6 +625,33 @@ function test_binary_operator() {
         flat = flat.concat(values[type]);
     }
     log(flat.length);
+
+    var j;
+    for (i = 0; i < flat.length; i++) {
+        for (j = 0; j < flat.length; j++) {
+//            log(i, j);
+            var exc_a = false, exc_b = false;
+            var val_a, val_b;
+            try { val_a = flat[i] == flat[j]; }
+            catch (e) { exc_a = e; }
+
+            try { val_b = __loose_eq(flat[i], flat[j]); }
+            catch (e) { exc_b = e; }
+
+            if (exc_a || exc_b) {
+                assertEquals(!!exc_a, !!exc_b);
+            }
+            else {
+                if (val_a !== val_b) {
+                    log(String.concat(flat[i], " == ", flat[j], ": ", val_a));
+                    log(String.concat("__loose_eq(", flat[i], ", ",
+                                      flat[j], "): ", val_b));
+                    log(i, j);
+                    assertEquals(true, false);
+                }
+            }
+        }
+    }
 }
 
-test_binary_operator();
+//test_binary_operator();
