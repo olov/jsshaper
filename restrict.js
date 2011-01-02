@@ -610,8 +610,8 @@ function test_binary_operator() {
         }
     }
 
-    /*
     create_valueOf_toString("object", Object);
+    /*
     create_valueOf_toString("function", Function);
     create_valueOf_toString("Boolean", Boolean);
     create_valueOf_toString("Number", Number);
@@ -643,10 +643,13 @@ function test_binary_operator() {
             }
             else {
                 if (val_a !== val_b) {
+                    log(String.concat("i=", i, " j=", j));
                     log(String.concat(flat[i], " == ", flat[j], ": ", val_a));
                     log(String.concat("__loose_eq(", flat[i], ", ",
                                       flat[j], "): ", val_b));
                     log(i, j);
+                    inspect(flat[i]);
+                    inspect(flat[j]);
                     assertEquals(true, false);
                 }
             }
@@ -654,4 +657,22 @@ function test_binary_operator() {
     }
 }
 
-//test_binary_operator();
+function inspect(v) {
+    log("inspect("+ String(v) +")");
+    log("typeof: "+ typeof v);
+    log("constructor: "+ v.constructor);
+    log("valueOf: "+ v.valueOf || "undefined");
+    log("toString: "+ v.toString || "undefined");
+    var val;
+    if (v.valueOf) {
+        val = v.valueOf();
+        log("valueOf(): "+ val +" ("+ typeof val +")");
+    }
+    if (v.toString) {
+        val = v.toString();
+        log("toString(): "+ val +" ("+ typeof val +")");
+    }
+    log("inspect end");
+}
+
+test_binary_operator();
