@@ -358,6 +358,7 @@ function __loose_eq(x, y) {
         return __loose_eq(x, __toNumber(y));
     }
     // ecma 11.9.3 20
+    // TODO fix bug handle "function" like "object"
     if ((xtype === "string" || xtype === "number") && ytype === "object") {
         return __loose_eq(x, __toPrimitive(y));
     }
@@ -511,3 +512,110 @@ var x = 0;
 
 // ofn() += 1 and all other forms should crash with ReferenceError so
 // give translation error
+
+function test_binary_operator() {
+    function create_getter(o, key, val) { // why can't it be in the loop?
+        o[key] = function() { return val; };
+        return o;
+    }
+    var values = {
+        "undefined": [undefined],
+        "boolean": [true, false],
+        "Boolean": [new Boolean(true), new Boolean(false)],
+        "number": [0, 0.1, 0.5, 1, 1.1, 1.5, 2, 3, 8, 10, 11, 20, 100,
+                   0, 319676400000, 1285279200000, // Dates
+                   Number.MAX_VALUE, Number.MIN_VALUE,
+                   Infinity, NaN],
+        "Number": [],
+        "string": ["", " ", "  ",
+                   "undefined", "true", "false",
+                   "a", "b", "xy", "zw", "qwerty"],
+        "String": [],
+        "Date": [new Date(0), new Date(1980, 1, 18), new Date(2010, 8, 24)],
+        "object": [null, {}, {key: "value"}],
+        "array": [[], [1], [2], [10], [1, 2], [1, 3], [[]], [[1]], [[1], 2]],
+        "function": [function() {}, function() { return 1; },
+                     new Function(), new Function("return 1;")]
+    };
+
+    var i, len;
+    // populate string with string representation of
+    // Date, object, array, function values
+    for (i = 0, len = values["Date"].length; i < len; ++i) {
+        values["string"].push(String(values["Date"][i]));
+    }
+    for (i = 0, len = values["object"].length; i < len; ++i) {
+        values["string"].push(String(values["object"][i]));
+    }
+    for (i = 0, len = values["array"].length; i < len; ++i) {
+        values["string"].push(String(values["array"][i]));
+    }
+    for (i = 0, len = values["function"].length; i < len; ++i) {
+        values["string"].push(String(values["function"][i]));
+    }
+    // populate string with string representation of numbers
+    for (i = 0, len = values["number"].length; i < len; ++i) {
+        var str = String(values["number"][i]);
+        values["string"].push(str, "-"+ str, // positive, negative
+                              " "+ str, str +",", // prep space, app comma
+                              "0"+ str); // prep "0" (octalness)
+    }
+
+    // populate number with dates
+    for (i = 0, len = values["Date"].length; i < len; ++i) {
+        values["number"].push(Number(values["Date"][i]));
+    }
+    // populate number with negative values
+    for (i = 0, len = values["number"].length; i < len; ++i) {
+        values["number"].push(-values["number"][i]);
+    }
+
+    // populate Number with boxed numbers
+    for (i = 0, len = values["number"].length; i < len; ++i) {
+        values["Number"].push(new Number(values["number"][i]));
+    }
+
+    // populate String with boxed strings
+    for (i = 0, len = values["string"].length; i < len; ++i) {
+        values["String"].push(new String(values["string"][i]));
+    }
+
+    //flatten
+    var flat = [];
+    flat = flat.concat(values["undefined"],
+                       values["boolean"],// values["Boolean"],
+                       values["number"],// values["Number"],
+                       values["string"],// values["String"],
+                       values["Date"], values["object"],
+                       values["array"], values["function"]);
+
+    function create_valueOf_toString(type, ctor) {
+        for (i = 0, len = flat.length; i < len; ++i) {
+            values[type].push(
+                create_getter(new ctor, "valueOf", flat[i]));
+            values[type].push(
+                create_getter(new ctor, "toString", flat[i]));
+            values[type].push(
+                create_getter(create_getter(new ctor, "valueOf", flat[i])),
+                "toString", flat[i], flat[len-i-1]);
+        }
+    }
+
+    /*
+    create_valueOf_toString("object", Object);
+    create_valueOf_toString("function", Function);
+    create_valueOf_toString("Boolean", Boolean);
+    create_valueOf_toString("Number", Number);
+    create_valueOf_toString("String", String);
+    create_valueOf_toString("Date", Date);
+    create_valueOf_toString("array", Array);
+*/
+    flat = [];
+    for (var type in values) {
+        log(type +": "+ String(values[type].length));
+        flat = flat.concat(values[type]);
+    }
+    log(flat.length);
+}
+
+test_binary_operator();
