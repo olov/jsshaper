@@ -143,22 +143,27 @@ function __bitnot(v) {
 }
 
 // += -= *= /= %= &= |= ^= <<= >>= >>>=
-// expr1[expr2] += v is translated into __op_to(__add, expr1, String(expr2), v)
-// expr.id += v is translated into __op_to(__add, expr, "id", v)
+//
 // id += v is translated into id = __add(id, v)
+// expr.id += v is translated into __op_set(__add, expr, "id", v)
+// expr1[expr2] += v is translated into __op_set(__add, expr1, String(expr2), v)
+//
 // ++id is translated into (id = __inc(id))
+// ++expr.id is translated into __prefinc(expr, "id")
 // ++expr1[expr2] is translated into __prefinc(expr1, String(expr2))
-// ++expr.id is translated into __prefinc(expr1, "id")
+//
 // id++ is translated into __arg0(id, id = __inc(id))
 //   [other options (id = __inc(id), __dec(id)) or (check(id), id/*loose*/++)]
+// expr.id++ is translated into __postinc(expr, "id")
 // expr1[expr2]++ is translated into __postinc(expr1, String(expr2))
-// expr.id++ is translated into __postinc(expr1, "id")
-// i = f(i, i+=1)
+//
+// all other forms, for example ofn() += 1, throws ReferenceError so
+// give translation error
+//
 function __arg0(x) {
     return x;
 }
-
-function __op_to(fn, base, name, v) {
+function __op_set(fn, base, name, v) {
     return base[name] = fn(base[name], v);
 }
 function __prefinc(base, name) {
@@ -170,6 +175,24 @@ function __postinc(base, name) {
     return tmp;
 }
 
+
+function inspect(v) {
+    log("inspect "+ String(v) +" {");
+    log("  typeof: "+ typeof v);
+    log("  constructor: "+ v.constructor);
+    log("  valueOf: "+ v.valueOf || "undefined");
+    log("  toString: "+ v.toString || "undefined");
+    var val;
+    if (v.valueOf) {
+        val = v.valueOf();
+        log("  valueOf(): "+ val +" ("+ typeof val +")");
+    }
+    if (v.toString) {
+        val = v.toString();
+        log("  toString(): "+ val +" ("+ typeof val +")");
+    }
+    log("}");
+}
 function assertEquals(l, r) {
     if (l === r) {
 //        log("PASS " + l);
@@ -179,7 +202,6 @@ function assertEquals(l, r) {
         throw new Error("assertion failed");
     }
 }
-
 function assertThrows(fn) {
     try {
         fn();
@@ -214,8 +236,9 @@ assertThrows(function() { __lt(new Number(1), 2); });
 assertEquals(__sub(1,2), -1);
 assertThrows(function() { __sub("1", 0); });
 
+
 function __toBoolean(v) {
-    // short version
+    //short version:
     //return v !== undefined && v !== null && v !== false &&
     //    v !== 0 && isNaN(v) === false && v !== "";
 
@@ -300,26 +323,35 @@ function __defaultValue(v, preferredType) {
         preferredType = (isDate ? "hint_string" : "hint_number");
     }
     var val;
+    // checks for toString and valueOf function existence before calling
+    // for ecma compliance (host objects?)
     if (preferredType === "hint_string") {
-        val = v.toString();
-        if (__isPrimitive(val)) {
-            return val;
+        if (typeof v.toString === "function") {
+            val = v.toString();
+            if (__isPrimitive(val)) {
+                return val;
+            }
         }
-        val = v.valueOf();
-        if (__isPrimitive(val)) {
-            return val;
+        if (typeof v.valueOf === "function") {
+            val = v.valueOf();
+            if (__isPrimitive(val)) {
+                return val;
+            }
         }
         throw new TypeError("Cannot convert object to primitive value");
     }
     else if (preferredType === "hint_number") {
-        // TODO check for valueOf existence?
-        val = v.valueOf();
-        if (__isPrimitive(val)) {
-            return val;
+        if (typeof v.valueOf === "function") {
+            val = v.valueOf();
+            if (__isPrimitive(val)) {
+                return val;
+            }
         }
-        val = v.toString();
-        if (__isPrimitive(val)) {
-            return val;
+        if (typeof v.toString === "function") {
+            val = v.toString();
+            if (__isPrimitive(val)) {
+                return val;
+            }
         }
         throw new TypeError("Cannot convert object to primitive value");
     }
@@ -485,87 +517,25 @@ function __loose_gt(x, y) { // ecma 11.8.2
 function __loose_ge(x, y) { // ecma 11.8.4
     return __loose_internal_compare(x, y, 3);
 }
-// allow a++ ++a a-- --a as single statements only (like Google Go)?
-function __loose_prefinc(v) { // ecma 11.4.4
-    // special handling for dereferencing via []
-    // to avoid double side-effects, for example a[f()]++
-    // todo what about g()[f()]++ where g returns an array?
-    //   or slightly simpler g().x++ where g returns an object
-    // see ecma 11.2 left-hand-side expressions
-    //   property accessors (., [])
-    //   new operator
-    //   function calls
-    //   argument lists
-    //   function expressions
+
+
+function test_loose() {
+    function f() {}
+    assertEquals(__loose_eq(1, "1"), true);
+    assertEquals(__loose_eq(2, new String("2")), true);
+    assertEquals(__loose_eq(2, {valueOf: function() { return 2; }}), true);
+    assertEquals(__loose_eq(2, new Number(2)), true);
+    assertEquals(__loose_lt(2, new Number(3)), true);
+    assertEquals(__loose_le(2, new Number(3)), true);
+    assertEquals(__loose_gt(2, new Number(3)), false);
+    assertEquals(__loose_gt(2, new String("3")), false);
+    assertEquals(typeof __toNumber(f), "number"); // NaN
+    assertEquals(__toNumber(f).toString(), "NaN"); // NaN
+    assertEquals(typeof __toPrimitive(f), "string"); // "function f..."
+    assertEquals(typeof __toString(f), "string"); // "function f..."
+    assertEquals(typeof __defaultValue(f), "string"); // "function f..."
 }
-
-assertEquals(__loose_eq(1, "1"), true);
-assertEquals(__loose_eq(2, new String("2")), true);
-assertEquals(__loose_eq(2, {valueOf: function() { return 2; }}), true);
-assertEquals(__loose_eq(2, new Number(2)), true);
-assertEquals(__loose_lt(2, new Number(3)), true);
-assertEquals(__loose_le(2, new Number(3)), true);
-assertEquals(__loose_gt(2, new Number(3)), false);
-assertEquals(__loose_gt(2, new String("3")), false);
-assertEquals(typeof __toNumber(f), "number"); // NaN
-assertEquals(__toNumber(f).toString(), "NaN"); // NaN
-assertEquals(typeof __toPrimitive(f), "string"); // "function f..."
-assertEquals(typeof __toString(f), "string"); // "function f..."
-assertEquals(typeof __defaultValue(f), "string"); // "function f..."
-
-// test postfinc rewrite
-var a = [0,2,4];
-function f() { log("f side-effect"); return 1; }
-assertEquals(a[f()]++, 2);
-assertEquals(a[1], 3);
-a = [0,2,4];
-var tmp1, tmp2;
-assertEquals((tmp2 = a[tmp1=f()], a[tmp1] = __loose_add(a[tmp1], 1), tmp2), 2);
-assertEquals(a[1], 3);
-
-// test += rewrite (prefinc ++a follows since ++a <=> a += 1
-
-// property index expression
-a = [0,2,4];
-assertEquals(a[f()] += 1, 3);
-assertEquals(a[1], 3);
-a = [0,2,4];
-tmp1 = undefined, tmp2 = undefined;
-assertEquals(a[tmp1=f()] = __loose_add(a[tmp1], 1), 3);
-assertEquals(a[1], 3);
-
-// array/object expression
-var o = {x: 1};
-function ofn() { return o; };
-assertEquals(ofn().x++, 1);
-assertEquals(o.x, 2);
-o = {x: 1};
-tmp1 = undefined, tmp2 = undefined;
-assertEquals((tmp2 = (tmp1 = ofn()).x, tmp1.x = __loose_add(tmp1.x, 1), tmp2), 1);
-assertEquals(o.x, 2);
-
-// x[y] += ... where both x and y are expressions
-a = [0,2,4];
-assertEquals((function(){return a;})()[f()] += 1, 3);
-assertEquals(a[1], 3);
-a = [0,2,4];
-tmp1 = undefined, tmp2 = undefined;
-assertEquals((tmp2=(function(){return a;})())[tmp1=f()] =
-             __loose_add(tmp2[tmp1], 1), 3);
-assertEquals(a[1], 3);
-
-// (null || a)[f()] += a[0]
-__op_to(__add, Object(null || a), String(f()), a[0]);
-
-// ofn().x += a[0], ((ofn().x)) += a[0]
-__op_to(__add, Object(ofn()), String("x"), a[0]);
-
-// x += 1 + 2;
-var x = 0;
-(x = __add(x, 1 + 2));
-
-// ofn() += 1 and all other forms should crash with ReferenceError so
-// give translation error
+//test_loose();
 
 function test_binary_operator() {
     function create_getter(o, key, val) { // why can't it be in the loop?
@@ -698,28 +668,9 @@ function test_binary_operator() {
         }
     }
 }
-
-function inspect(v) {
-    log("inspect "+ String(v) +" {");
-    log("  typeof: "+ typeof v);
-    log("  constructor: "+ v.constructor);
-    log("  valueOf: "+ v.valueOf || "undefined");
-    log("  toString: "+ v.toString || "undefined");
-    var val;
-    if (v.valueOf) {
-        val = v.valueOf();
-        log("  valueOf(): "+ val +" ("+ typeof val +")");
-    }
-    if (v.toString) {
-        val = v.toString();
-        log("  toString(): "+ val +" ("+ typeof val +")");
-    }
-    log("}");
-}
-
 //test_binary_operator();
 
-function jsvm_differences(vmstr) {
+function test_jsvm_differences(vmstr) {
     var vm = {js: vmstr === "js", v8: vmstr === "v8",
               jsc: vmstr === "jsc", ecma: vmstr == "ecma"};
 
@@ -733,4 +684,6 @@ function jsvm_differences(vmstr) {
     assertEquals(316998000000 == new Date(1980, 1-1, 18), !vm.js);
     assertEquals(1282600800000 == new Date(2010, 8-1, 24), !vm.js);
 }
-jsvm_differences("v8");
+//test_jsvm_differences("v8");
+
+log("restrict.js done");
