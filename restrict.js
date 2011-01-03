@@ -672,9 +672,8 @@ function test_binary_operator() {
     log(flat.length);
 
     var j;
-    for (i = 2; i < flat.length; i++) {
-        for (j = 1455; j < flat.length; j++) {
-//            log(i, j);
+    for (i = 0; i < flat.length; i++) {
+        for (j = 0; j < flat.length; j++) {
             var exc_a = false, exc_b = false;
             var val_a, val_b;
             try { val_a = flat[i] == flat[j]; }
@@ -687,7 +686,7 @@ function test_binary_operator() {
                 assertEquals(!!exc_a, !!exc_b);
             }
             else {
-                if (val_a !== val_b) {
+                if (val_a !== val_b && !(isNaN(val_a) && isNaN(val_b))) {
                     log(String.concat("  ", "i=", i, " j=", j));
                     log(String.concat("  ", flat[i], " == ",
                                       flat[j], ": ", val_a));
@@ -720,4 +719,19 @@ function inspect(v) {
     log("}");
 }
 
-test_binary_operator();
+//test_binary_operator();
+
+function jsvm_differences(vmstr) {
+    var vm = {sm: vmstr === "sm", v8: vmstr === "v8",
+              jsc: vmstr === "jsc", ecma: vmstr == "ecma"};
+
+    // sm, v8, jsc yield true, ecma (my interpretation) yields false
+    assertEquals(false == {valueOf: function() { return null; }}, !vm.ecma);
+
+    assertEquals("" == {valueOf: function() { return null; }}, vm.sm);
+
+    assertEquals(false == new Date(0), !vm.sm);
+
+    // lots of other Date differences
+}
+//jsvm_differences("sm");
