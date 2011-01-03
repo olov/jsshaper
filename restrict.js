@@ -16,18 +16,18 @@ String.concat = function() {
     return String.prototype.concat.apply(String.prototype, arguments);
 };
 
+function detailedtypeof(v) {
+    var t = typeof v;
+    return t !== "object" ? t :
+        v === null ? "null" :
+        Array.isArray(v) ? "object (Array)" :
+        v instanceof Number ? "object (Number)" :
+        v instanceof String ? "object (String)" :
+        v instanceof Boolean ? "object (Boolean)" :
+        v instanceof Date ? "object (Date)" :
+        "object";
+}
 function __throw_typeerror(from /* ... */) {
-    function detailedtypeof(v) {
-        var t = typeof v;
-        return t !== "object" ? t :
-            v === null ? "null" :
-            Array.isArray(v) ? "object (Array)" :
-            v instanceof Number ? "object (Number)" :
-            v instanceof String ? "object (String)" :
-            v instanceof Boolean ? "object (Boolean)" :
-            v instanceof Date ? "object (Date)" :
-            "object";
-    }
     var args = Array.prototype.slice.call(arguments, 1, arguments.length);
     throw new Error("restrict mode "+ from +" called with "+
                     args.map(detailedtypeof).join(" and "));
@@ -177,21 +177,17 @@ function __postinc(base, name) {
 
 
 function inspect(v) {
-    log("inspect "+ String(v) +" {");
-    log("  typeof: "+ typeof v);
-    log("  constructor: "+ v.constructor);
-    log("  valueOf: "+ v.valueOf || "undefined");
-    log("  toString: "+ v.toString || "undefined");
+    var str = "inspect("+ detailedtypeof(v) +")";
     var val;
     if (v.valueOf) {
         val = v.valueOf();
-        log("  valueOf(): "+ val +" ("+ typeof val +")");
+        str += " valueOf: "+ String(val) +" ("+ detailedtypeof(val) +")";
     }
     if (v.toString) {
         val = v.toString();
-        log("  toString(): "+ val +" ("+ typeof val +")");
+        str += " toString: "+ String(val) +" ("+ detailedtypeof(val) +")";
     }
-    log("}");
+    log(str);
 }
 function assertEquals(l, r) {
     if (l === r) {
@@ -655,20 +651,20 @@ function test_binary_operator() {
                 if (val_a !== val_b && !(isNaN(val_a) && isNaN(val_b))) {
 //                    log(i,j); continue;
 
-                    log(String.concat("  ", "i=", i, " j=", j));
-                    log(String.concat("  ", flat[i], " == ",
-                                      flat[j], ": ", val_a));
-                    log(String.concat("  ", "__loose_eq(", flat[i], ", ",
-                                      flat[j], "): ", val_b));
+                    log(String.concat(
+                        "flat[", i, "] == flat[", j, "] yields ", val_a,
+                        " but ",
+                        "__loose_eq(flat[", i, "], flat[", j,"]) yields ", val_b));
                     inspect(flat[i]);
                     inspect(flat[j]);
+                    log();
 //                    assertEquals(true, false);
                 }
             }
         }
     }
 }
-//test_binary_operator();
+test_binary_operator();
 
 function test_jsvm_differences(vmstr) {
     var vm = {js: vmstr === "js", v8: vmstr === "v8",
