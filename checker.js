@@ -27,6 +27,8 @@ function createTraverseData() {
     o[tkn.SEMICOLON] = ["expression"];
     o[tkn.LABEL] = ["statement"];
     o[tkn.IDENTIFIER] = ["initializer"];
+    o[tkn.GETTER] = ["body"];
+    o[tkn.SETTER] = ["body"];
 
     var c = [tkn.SCRIPT,
              tkn.BLOCK, tkn.VAR, tkn.CONST, tkn.COMMA, tkn.ASSIGN,
@@ -108,6 +110,7 @@ var src = "x = 1+\n2;\nprint(y);for (s.x in o) {}";
 src = "switch(a+b) { case c+d: e+f; case g+h: i+j; default: k+l; }";
 src = "try { a+b; } catch (x if c+d) { e+f; } catch (y) { g+h; } finally { i+j; }";
 src = "var x = a+b, y = c+d; const z = e+f, w = g+h";
+src = "var o = {get prop() { a+b; }, set prop(val) { c+d; }}";
 var root = Narcissus.parser.parse(src, "test.js", 0);
 
 function abbrev(str, max) {
