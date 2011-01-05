@@ -68,7 +68,12 @@ function traverseAstDFS(node, visitfns, level, parent, parentprop) {
         return;
     }
     level = level || 0;
-    visitfns.pre && visitfns.pre(node, level, parent, parentprop);
+    var n;
+    visitfns.pre && (n = visitfns.pre(node, level, parent, parentprop));
+    if (n !== undefined) {
+        node = n;
+        print("new node!");
+    }
 
     var subprops = traverseData[node.type];
     // temporary sanity-check
@@ -123,6 +128,7 @@ function nodeString(node) {
     function strPos(pos) {
         return pos === undefined ? "?" : String(pos);
     }
+    var src = node.tokenizer.source;
     return tokenString(node.type) +
         ("start" in node && "end" in node ?
          " `"+ abbrev(src.slice(node.start, node.end), 30) +"´" : "") +
@@ -131,7 +137,6 @@ function nodeString(node) {
 
 function printTree(root) {
     traverseAstDFS(root, {pre: function(node, level, parent, parentprop) {
-        var src = node.tokenizer.source;
         print(spaces(level * 2) + (parentprop ? parentprop + ": " : "") +
               nodeString(node));
     }});
@@ -147,4 +152,5 @@ src = "a, b, c";
 src = "\"no restrict\", function add(a, b) { return a+b; }";
 var root = Narcissus.parser.parse(src, "test.js", 0);
 printTree(root);
+
 print("done");
