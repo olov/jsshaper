@@ -32,6 +32,14 @@ function __throw_typeerror(from /* ... */) {
     throw new Error("restrict mode "+ from +" called with "+
                     args.map(detailedtypeof).join(" and "));
 }
+function __assert_numbers(x, y, opname) {
+    var xtype = typeof x;
+    var ytype = typeof y;
+    if (xtype === "number" && xtype === ytype) {
+        return; // ok
+    }
+    __throw_typeerror(opname, x, y);
+}
 
 function __eq(x, y) { throw new Error("use === instead of __eq"); }
 function __ne(x, y) { throw new Error("use !== instead of __ne"); }
@@ -58,21 +66,6 @@ function __neg(v) {
     __throw_typeerror("__neg", v);
 }
 
-function __inc(v) {
-    var vtype = typeof v;
-    if (vtype === "number") {
-        return v /*loose*/ + 1;
-    }
-    __throw_typeerror("__inc", v);
-}
-function __dec(v) {
-    var vtype = typeof v;
-    if (vtype === "number") {
-        return v /*loose*/ - 1;
-    }
-    __throw_typeerror("__dec", v);
-}
-
 function __add(x, y) {
     var xtype = typeof x;
     var ytype = typeof y;
@@ -85,14 +78,6 @@ function __add(x, y) {
         }
     }
     __throw_typeerror("__add", x, y);
-}
-function __assert_numbers(x, y, opname) {
-    var xtype = typeof x;
-    var ytype = typeof y;
-    if (xtype === "number" && xtype === ytype) {
-        return; // ok
-    }
-    __throw_typeerror(opname, x, y);
 }
 function __sub(x, y) {
     __assert_numbers(x, y, "__sub");
@@ -160,6 +145,20 @@ function __bitnot(v) {
 // all other forms, for example ofn() += 1, throws ReferenceError so
 // give translation error
 //
+function __inc(v) {
+    var vtype = typeof v;
+    if (vtype === "number") {
+        return v /*loose*/ + 1;
+    }
+    __throw_typeerror("__inc", v);
+}
+function __dec(v) {
+    var vtype = typeof v;
+    if (vtype === "number") {
+        return v /*loose*/ - 1;
+    }
+    __throw_typeerror("__dec", v);
+}
 function __arg0(x) {
     return x;
 }
