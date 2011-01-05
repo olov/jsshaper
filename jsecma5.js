@@ -22,11 +22,11 @@ if (Object.create === undefined) {
     Object.create = function(obj, props) {
         function ctor() {}
         ctor.prototype = obj;
-        var clone = new ctor();
+        var o = new ctor();
         if (props !== undefined) {
-            Object.defineProperties(clone, props);
+            Object.defineProperties(o, props);
         }
-        return clone;
+        return o;
     };
 }
 
