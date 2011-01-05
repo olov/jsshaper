@@ -111,6 +111,9 @@ src = "switch(a+b) { case c+d: e+f; case g+h: i+j; default: k+l; }";
 src = "try { a+b; } catch (x if c+d) { e+f; } catch (y) { g+h; } finally { i+j; }";
 src = "var x = a+b, y = c+d; const z = e+f, w = g+h";
 src = "var o = {get prop() { a+b; }, set prop(val) { c+d; }}";
+src = "var x = 1, y = 2; f(1, 2); a, function f(a, b) {}; x = a, b;";
+src = "a, b, c";
+src = "\"no restrict\", function add(a, b) { return a+b; }";
 var root = Narcissus.parser.parse(src, "test.js", 0);
 
 function abbrev(str, max) {
@@ -131,7 +134,7 @@ traverseAstDFS(root, {pre: function(node, level, parent, parentprop) {
           (parentprop ? parentprop + ": " : "") +
           tokenString(node.type) +
           ("start" in node && "end" in node ?
-           " \""+ abbrev(src.slice(node.start, node.end), 20) +"\"" : "") +
+           " `"+ abbrev(src.slice(node.start, node.end), 30) +"´" : "") +
           " ("+ strPos(node.start) +".."+ strPos(node.end) +")"
            );
 }});
