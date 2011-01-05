@@ -7,6 +7,10 @@ load('narcissus/lib/jsparse.js');
 
 var tkn = Narcissus.definitions.tokenIds;
 
+Array.isArray = Array.isArray || function(o) {
+    return Object.prototype.toString.call(o) === '[object Array]';
+};
+
 function createTraverseData() {
     var o = [];
 
@@ -70,9 +74,8 @@ function traverseAstDFS(node, visitfns, level, parent, parentprop) {
     // temporary sanity-check
     if (Array.isArray(node.children) && node.children.length > 0 &&
         (!Array.isArray(subprops) || subprops[subprops.length - 1] !== "children")) {
-        throw new Error("traverse error "+ tokenString(node.type) +" "+
-                        JSON.stringify(subprops) +" "+
-                        JSON.stringify(node.children));
+        throw new Error("traverse error "+ tokenString(node.type) +
+                        " has children property but not in subprops");
     }
 
     if (subprops) {
@@ -106,16 +109,6 @@ function tokenString(tt) {
     return /^\W/.test(t) ? defs.opTypeNames[t] : t.toUpperCase();
 }
 
-var src = "x = 1+\n2;\nprint(y);for (s.x in o) {}";
-src = "switch(a+b) { case c+d: e+f; case g+h: i+j; default: k+l; }";
-src = "try { a+b; } catch (x if c+d) { e+f; } catch (y) { g+h; } finally { i+j; }";
-src = "var x = a+b, y = c+d; const z = e+f, w = g+h";
-src = "var o = {get prop() { a+b; }, set prop(val) { c+d; }}";
-src = "var x = 1, y = 2; f(1, 2); a, function f(a, b) {}; x = a, b;";
-src = "a, b, c";
-src = "\"no restrict\", function add(a, b) { return a+b; }";
-var root = Narcissus.parser.parse(src, "test.js", 0);
-
 function abbrev(str, max) {
     max = Math.max(Number(max) || 3, 3);
     if (str.length <= max) {
@@ -125,17 +118,33 @@ function abbrev(str, max) {
     var r = Math.floor((max - 3) / 2);
     return str.slice(0, l) +"..."+ str.slice(str.length - r, str.length);
 }
-traverseAstDFS(root, {pre: function(node, level, parent, parentprop) {
+
+function nodeString(node) {
     function strPos(pos) {
         return pos === undefined ? "?" : String(pos);
     }
-    var src = node.tokenizer.source;
-    print(spaces(level, "  ") +
-          (parentprop ? parentprop + ": " : "") +
-          tokenString(node.type) +
-          ("start" in node && "end" in node ?
-           " `"+ abbrev(src.slice(node.start, node.end), 30) +"´" : "") +
-          " ("+ strPos(node.start) +".."+ strPos(node.end) +")"
-           );
-}});
+    return tokenString(node.type) +
+        ("start" in node && "end" in node ?
+         " `"+ abbrev(src.slice(node.start, node.end), 30) +"´" : "") +
+        " ("+ strPos(node.start) +".."+ strPos(node.end) +")";
+}
+
+function printTree(root) {
+    traverseAstDFS(root, {pre: function(node, level, parent, parentprop) {
+        var src = node.tokenizer.source;
+        print(spaces(level * 2) + (parentprop ? parentprop + ": " : "") +
+              nodeString(node));
+    }});
+}
+
+var src = "x = 1+\n2;\nprint(y);for (s.x in o) {}";
+src = "switch(a+b) { case c+d: e+f; case g+h: i+j; default: k+l; }";
+src = "try { a+b; } catch (x if c+d) { e+f; } catch (y) { g+h; } finally { i+j; }";
+src = "var x = a+b, y = c+d; const z = e+f, w = g+h";
+src = "var o = {get prop() { a+b; }, set prop(val) { c+d; }}";
+src = "var x = 1, y = 2; f(1, 2); a, function f(a, b) {}; x = a, b;";
+src = "a, b, c";
+src = "\"no restrict\", function add(a, b) { return a+b; }";
+var root = Narcissus.parser.parse(src, "test.js", 0);
+printTree(root);
 print("done");
