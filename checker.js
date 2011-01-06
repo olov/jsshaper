@@ -62,17 +62,16 @@ function createTraverseData() {
 var traverseData = createTraverseData();
 
 // visitfns: {pre: function, post: function}
-// visit function signature: function(node, level, parent, parentprop)
-function traverseAstDFS(node, visitfns, level, parent, parentprop) {
+// visit function signature: function(node, level, parent, parentProp)
+function traverseAstDFS(node, visitfns, level, parent, parentProp) {
     if (!node) {
         return;
     }
     level = level || 0;
     var n;
-    visitfns.pre && (n = visitfns.pre(node, level, parent, parentprop));
+    visitfns.pre && (n = visitfns.pre(node, level, parent, parentProp));
     if (n !== undefined) {
         node = n;
-        print("new node!");
     }
 
     var subprops = traverseData[node.type];
@@ -97,7 +96,7 @@ function traverseAstDFS(node, visitfns, level, parent, parentprop) {
         }
     }
 
-    visitfns.post && visitfns.post(node, level, parent, parentprop);
+    visitfns.post && visitfns.post(node, level, parent, parentProp);
 }
 
 function spaces(n, s) {
@@ -131,26 +130,90 @@ function nodeString(node) {
     var src = node.tokenizer.source;
     return tokenString(node.type) +
         ("start" in node && "end" in node ?
-         " `"+ abbrev(src.slice(node.start, node.end), 30) +"´" : "") +
-        " ("+ strPos(node.start) +".."+ strPos(node.end) +")";
+         " '"+ abbrev(src.slice(node.start, node.end), 30) +"'" :
+         (node.value !== undefined ? " ("+ node.value +")" : "")) +
+        ("start" in node || "end" in node ?
+         " ("+ strPos(node.start) +".."+ strPos(node.end) +")" : "");
 }
 
 function printTree(root) {
-    traverseAstDFS(root, {pre: function(node, level, parent, parentprop) {
-        print(spaces(level * 2) + (parentprop ? parentprop + ": " : "") +
+    traverseAstDFS(root, {pre: function(node, level, parent, parentProp) {
+        print(spaces(level * 2) + (parentProp ? parentProp + ": " : "") +
               nodeString(node));
     }});
 }
 
-var src = "x = 1+\n2;\nprint(y);for (s.x in o) {}";
-src = "switch(a+b) { case c+d: e+f; case g+h: i+j; default: k+l; }";
-src = "try { a+b; } catch (x if c+d) { e+f; } catch (y) { g+h; } finally { i+j; }";
-src = "var x = a+b, y = c+d; const z = e+f, w = g+h";
-src = "var o = {get prop() { a+b; }, set prop(val) { c+d; }}";
-src = "var x = 1, y = 2; f(1, 2); a, function f(a, b) {}; x = a, b;";
-src = "a, b, c";
-src = "\"no restrict\", function add(a, b) { return a+b; }";
-var root = Narcissus.parser.parse(src, "test.js", 0);
-printTree(root);
+function setParent(parent, parentProp, node) {
+    if (parentProp[parentProp.length - 1] === "]") {
+        var leftBracket = parentProp.indexOf("[");
+        var index = parentProp.slice(leftBracket + 1,
+                                     parentProp.length - 1);
+        var base = parentProp.slice(0, leftBracket);
+        parent[base][index] = node;
+    }
+    else {
+        parent[parentProp] = node;
+    }
+}
 
+function newNode(type, tokenizer, props) {
+    var node = Object.create(Narcissus.parser.Node);
+    node.tokenizer = tokenizer;
+    node.type = type;
+    node.children = [];
+
+    if (props !== undefined) {
+        for (var prop in props) {
+            node[prop] = props[prop];
+        }
+    }
+    //value, lineno, start, end
+    return node;
+}
+
+function alterTree(root) {
+    var tokenizer = root.tokenizer;
+    function IDENTIFIER(name) {
+        return newNode(tkn.IDENTIFIER, tokenizer, {value: name});
+    }
+    function LIST(children) {
+        return newNode(tkn.LIST, tokenizer, {children: children});
+    }
+    function CALL(f, args) {
+        return newNode(tkn.CALL, tokenizer, {
+            children: [IDENTIFIER(f), LIST(args)]
+        });
+    }
+    traverseAstDFS(root, {pre: function(node, level, parent, parentProp) {
+        if (node.type === tkn.PLUS) {
+            var call = CALL("__add", node.children);
+            setParent(parent, parentProp, call);
+            return call;
+        }
+    }});
+}
+var src;
+//src = "x = 1+\n2;\nprint(y);for (s.x in o) {}";
+//src = "switch(a+b) { case c+d: e+f; case g+h: i+j; default: k+l; }";
+//src = "try { a+b; } catch (x if c+d) { e+f; } catch (y) { g+h; } finally { i+j; }";
+//src = "var x = a+b, y = c+d; const z = e+f, w = g+h";
+//src = "var o = {get prop() { a+b; }, set prop(val) { c+d; }}";
+//src = "var x = 1, y = 2; f(1, 2); a, function f(a, b) {}; x = a, b;";
+//src = "a, b, c";
+//src = "\"no restrict\", function add(a, b) { return a+b; }";
+src = "var x = f(!y + 3)";
+var root = Narcissus.parser.parse(src, "test.js", 1);
+
+function parseExpression(expr) {
+    // SCRIPT -> [SEMICOLON ->] expr
+    var stmnt = Narcissus.parser.parse(expr).children[0];
+    return stmnt.type === tkn.SEMICOLON ? stmnt.expression : stmnt;
+}
+
+//var callNode = parseExpression("f(1)");
+//alterTree(root);
+//printTree(callNode);
+printTree(root);
+alterTree(root);
+printTree(root);
 print("done");
