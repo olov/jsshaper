@@ -133,7 +133,8 @@ function nodeString(node) {
          " '"+ abbrev(src.slice(node.start, node.end), 30) +"'" :
          (node.value !== undefined ? " ("+ node.value +")" : "")) +
         ("start" in node || "end" in node ?
-         " ("+ strPos(node.start) +".."+ strPos(node.end) +")" : "");
+         " ("+ strPos(node.start) +".."+ strPos(node.end) +")" : "") +
+        ("parenthesized" in node ? " parenthesized": "");
 }
 
 function printTree(root) {
