@@ -201,8 +201,8 @@ var src;
 //src = "var x = 1, y = 2; f(1, 2); a, function f(a, b) {}; x = a, b;";
 //src = "a, b, c";
 //src = "\"no restrict\", function add(a, b) { return a+b; }";
-src = "var x = f(!y + 3)";
-var root = Narcissus.parser.parse(src, "test.js", 1);
+//src = "; var x   = f  (! y   + 3)";
+//var root = Narcissus.parser.parse(src, "test.js", 1);
 
 function parseExpression(expr) {
     // SCRIPT -> [SEMICOLON ->] expr
@@ -213,7 +213,12 @@ function parseExpression(expr) {
 //var callNode = parseExpression("f(1)");
 //alterTree(root);
 //printTree(callNode);
-printTree(root);
-alterTree(root);
-printTree(root);
+// printTree(root);
+// alterTree(root);
+// printTree(root);
+// print();
+// print(src);
+// load('narcissus/lib/jsdecomp.js');
+// print(Narcissus.decompiler.pp(root));
+
 print("done");
