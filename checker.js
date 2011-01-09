@@ -67,6 +67,43 @@ function traverseAstDFS(node, visitfns, level, parent, parentProp) {
     if (!node) {
         return;
     }
+    if (node instanceof Narcissus.parser.Node !== true) {
+        throw new Error("traverseAstDFS expected Node, got "+ typeof node +
+                       ". parentProp: "+ parentProp);
+    }
+
+    level = level || 0;
+    var n;
+    visitfns.pre && (n = visitfns.pre(node, level, parent, parentProp));
+    if (n !== undefined) {
+        node = n;
+    }
+
+    for (var prop in node) {
+        if (!node.hasOwnProperty(prop)) {
+            continue;
+        }
+        if (prop === "funDecls" || prop === "params" || prop === "varDecls" ||
+            prop === "target") {
+            continue;
+        }
+        if (node[prop] instanceof Narcissus.parser.Node) {
+            traverseAstDFS(node[prop], visitfns, level + 1, node, prop);
+        }
+        else if (Array.isArray(node[prop])) {
+            for (var j = 0, k = node[prop].length; j < k; j++) {
+                traverseAstDFS(node[prop][j], visitfns, level + 1, node, prop + "[" + String(j) + "]");
+            }
+        }
+    }
+
+    visitfns.post && visitfns.post(node, level, parent, parentProp);
+}
+
+function traverseAstDFS_traverseData(node, visitfns, level, parent, parentProp) {
+    if (!node) {
+        return;
+    }
     level = level || 0;
     var n;
     visitfns.pre && (n = visitfns.pre(node, level, parent, parentProp));
@@ -139,7 +176,7 @@ function nodeString(node) {
 
 function printTree(root) {
     traverseAstDFS(root, {pre: function(node, level, parent, parentProp) {
-        print(spaces(level * 2) + (parentProp ? parentProp + ": " : "") +
+        print(spaces(level * 2) + (parentProp || "root") +": "+
               nodeString(node));
     }});
 }
@@ -193,6 +230,15 @@ function alterTree(root) {
         }
     }});
 }
+function adjustStartEnd(root) {
+    traverseAstDFS(root, {post: function(node, level, parent, parentProp) {
+        if (parent) {
+            parent.start = Math.min(parent.start, node.start);
+            parent.end = Math.max(parent.end, node.end);
+        }
+    }});
+    return root;
+}
 var src;
 //src = "x = 1+\n2;\nprint(y);for (s.x in o) {}";
 //src = "switch(a+b) { case c+d: e+f; case g+h: i+j; default: k+l; }";
@@ -222,4 +268,4 @@ function parseExpression(expr) {
 // load('narcissus/lib/jsdecomp.js');
 // print(Narcissus.decompiler.pp(root));
 
-print("done");
+print("checker.js done");
