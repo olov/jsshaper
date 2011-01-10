@@ -239,33 +239,5 @@ function adjustStartEnd(root) {
     }});
     return root;
 }
-var src;
-//src = "x = 1+\n2;\nprint(y);for (s.x in o) {}";
-//src = "switch(a+b) { case c+d: e+f; case g+h: i+j; default: k+l; }";
-//src = "try { a+b; } catch (x if c+d) { e+f; } catch (y) { g+h; } finally { i+j; }";
-//src = "var x = a+b, y = c+d; const z = e+f, w = g+h";
-//src = "var o = {get prop() { a+b; }, set prop(val) { c+d; }}";
-//src = "var x = 1, y = 2; f(1, 2); a, function f(a, b) {}; x = a, b;";
-//src = "a, b, c";
-//src = "\"no restrict\", function add(a, b) { return a+b; }";
-//src = "; var x   = f  (! y   + 3)";
-//var root = Narcissus.parser.parse(src, "test.js", 1);
-
-function parseExpression(expr) {
-    // SCRIPT -> [SEMICOLON ->] expr
-    var stmnt = Narcissus.parser.parse(expr).children[0];
-    return stmnt.type === tkn.SEMICOLON ? stmnt.expression : stmnt;
-}
-
-//var callNode = parseExpression("f(1)");
-//alterTree(root);
-//printTree(callNode);
-// printTree(root);
-// alterTree(root);
-// printTree(root);
-// print();
-// print(src);
-// load('narcissus/lib/jsdecomp.js');
-// print(Narcissus.decompiler.pp(root));
 
 print("checker.js done");
