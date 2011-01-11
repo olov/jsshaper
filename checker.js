@@ -195,7 +195,7 @@ function setParent(parent, parentProp, node) {
 }
 
 function newNode(type, tokenizer, props) {
-    var node = Object.create(Narcissus.parser.Node);
+    var node = Object.create(Narcissus.parser.Node.prototype);
     node.tokenizer = tokenizer;
     node.type = type;
     node.children = [];
@@ -233,6 +233,10 @@ function alterTree(root) {
 function adjustStartEnd(root) {
     traverseAstDFS(root, {post: function(node, level, parent, parentProp) {
         if (parent) {
+            if (parent.start === undefined || parent.end === undefined ||
+                node.start === undefined || node.end === undefined) {
+                throw new Error("adjustStartEnd: undefined start/end");
+            }
             parent.start = Math.min(parent.start, node.start);
             parent.end = Math.max(parent.end, node.end);
         }
