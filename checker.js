@@ -62,7 +62,7 @@ var traverseData = createTraverseData();
 
 // visitfns: {pre: function, post: function}
 // visit function signature: function(node, level, parent, parentProp)
-function traverseAstDFS(node, visitfns, level, parent, parentProp) {
+function traverseAstDFS_dynamic(node, visitfns, level, parent, parentProp) {
     if (!node) {
         return;
     }
@@ -98,11 +98,15 @@ function traverseAstDFS(node, visitfns, level, parent, parentProp) {
 
     visitfns.post && visitfns.post(node, level, parent, parentProp);
 }
-
-function traverseAstDFS_traverseData(node, visitfns, level, parent, parentProp) {
+function traverseAstDFS(node, visitfns, level, parent, parentProp) {
     if (!node) {
         return;
     }
+    if (node instanceof Narcissus.parser.Node !== true) {
+        throw new Error("traverseAstDFS expected Node, got "+ typeof node +
+                       ". parentProp: "+ parentProp);
+    }
+
     level = level || 0;
     var n;
     visitfns.pre && (n = visitfns.pre(node, level, parent, parentProp));
@@ -110,25 +114,16 @@ function traverseAstDFS_traverseData(node, visitfns, level, parent, parentProp) 
         node = n;
     }
 
-    var subprops = traverseData[node.type];
-    // temporary sanity-check
-    if (Array.isArray(node.children) && node.children.length > 0 &&
-        (!Array.isArray(subprops) || subprops[subprops.length - 1] !== "children")) {
-        throw new Error("traverse error "+ tokenString(node.type) +
-                        " has children property but not in subprops");
-    }
-
-    if (subprops) {
-        for (var i = 0; i < subprops.length; i++) {
-            var prop = subprops[i];
-            if (Array.isArray(node[prop])) {
-                for (var j = 0, k = node[prop].length; j < k; j++) {
-                    traverseAstDFS(node[prop][j], visitfns, level + 1, node, prop + "[" + String(j) + "]");
-                }
+    var subprops = traverseData[node.type] || [];
+    for (var i = 0; i < subprops.length; i++) {
+        var prop = subprops[i];
+        if (Array.isArray(node[prop])) {
+            for (var j = 0, k = node[prop].length; j < k; j++) {
+                traverseAstDFS(node[prop][j], visitfns, level + 1, node, prop + "[" + String(j) + "]");
             }
-            else {
-                traverseAstDFS(node[prop], visitfns, level + 1, node, prop);
-            }
+        }
+        else {
+            traverseAstDFS(node[prop], visitfns, level + 1, node, prop);
         }
     }
 
