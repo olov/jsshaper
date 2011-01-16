@@ -222,10 +222,90 @@ function alterTree(root) {
             children: [IDENTIFIER(f), LIST(args)]
         });
     }
+    function replace(node, var_args) {
+        var placeholders = [];
+        //collect all # nodes into placeholders array
+        traverseAstDFS(node, {pre: function(node, level, parent, parentProp) {
+            if (node.type === tkn.PLACEHOLDER) {
+                placeholders.push({node: node, parent: parent, parentProp: parentProp});
+            }
+        }});
+        if (arguments.length - 1 !== placeholders.length) {
+            throw new Error("replace: placeholders.length mismatch");
+        }
+        //sort placeholders on textual position
+        placeholders.sort(function(a, b) {
+            return a.node.start - b.node.start;
+        });
+
+        // offsets is an array of pairs (pos, offs)
+        // where offs is the offset to be added to characters on
+        // position pos upto the offs in next pair
+        //
+        // perform textual replacement of node.tokenizer.source
+        var offsets = [[0, 0]]; // include [0, 0] for easier iteration
+        var fragments = [];
+        var origSource = node.tokenizer.source;
+        for (var i = 0, offs = 0, pos = 0; i < placeholders.length; i++) {
+            var orig = placeholders[i].node;
+            var repl = arguments[i + 1];
+            offs += (repl.end - repl.start) - (orig.end - orig.start);
+            offsets.push([orig.end, offs]);
+
+            fragments.push(origSource.slice(pos, orig.start));
+            fragments.push(repl.getSource());
+            pos = orig.end;
+        }
+        fragments.push(origSource.slice(pos, node.end));
+        node.tokenizer.source = fragments.join(''); // this won't work (destroys parent)
+
+        // add offsets to node-tree based on offsets
+        traverseAstDFS(node, {pre: function(node, level, parent, parentProp) {
+            // TODO replace linear with binary search
+            var i;
+            for (i = 0; i < offsets.length && offsets[i][0] <= node.start; i++) {
+            }
+            node.start += offsets[i - 1][1];
+
+            for (i = 0; i < offsets.length && offsets[i][0] < node.end; i++) {
+            }
+            node.end += offsets[i - 1][1];
+        }});
+
+        // add offsets to new nodes and change their tokenizer
+        for (i = 0; i < placeholders.length; i++) {
+            var orig = placeholders[i].node;
+            var repl = arguments[i + 1];
+            //TODO
+        }
+
+        // replace placeholders with new nodes
+        for (i = 0; i < placeholders.length; i++) {
+            var o = placeholders[i];
+            setParent(o.parent, o.parentProp, arguments[i + 1]);
+        }
+    }
     traverseAstDFS(root, {pre: function(node, level, parent, parentProp) {
         if (node.type === tkn.PLUS) {
+            // prs("__add(@)", node.children);
+            // n: new node (CALL, IDENTIFIER, LIST, node.children)
+            // s: nodestring
+            // setParent(parent, parentProp, n);
+            // replace text
+            //var replaceNode = parseExpression("__add(#, #)");
+            var replaceNode = parseExpression(" # + !#");
+            print(":");
+            printTree(replaceNode);
+            replace(replaceNode, node.children[0], node.children[1]);
+            printTree(replaceNode);
+
             var call = CALL("__add", node.children);
             setParent(parent, parentProp, call);
+            print(nodeString(node));
+            print(nodeString(node.children[0]));
+            print(nodeString(node.children[1]));
+            var src = "__add("+ node.children[0].getSource() +", "+ node.children[1].getSource() +")";
+            print(src);
             return call;
         }
     }});
