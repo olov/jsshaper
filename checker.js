@@ -19,7 +19,7 @@ function createTraverseData() {
     o[tkn.SWITCH] = ["discriminant", "cases"];
     o[tkn.CASE] = ["caseLabel", "statements"];
     o[tkn.DEFAULT] = ["statements"];
-    o[tkn.FOR] = ["setup", "condition", "body", "update"];
+    o[tkn.FOR] = ["setup", "condition", "update", "body"];
     o[tkn.WHILE] = ["condition", "body"];
     o[tkn.FOR_IN] = ["varDecl", "iterator", "object", "body"];
     o[tkn.DO] = ["body", "condition"];
@@ -49,11 +49,10 @@ function createTraverseData() {
     // add "children" to all tokens enumerated in c
     for (var i = 0; i < c.length; i++) {
         if (o[c[i]]) {
-            o[c[i]].push("children");
+            throw new Error("createTraverseData: don't know ordering so "+
+                            "can't add 'children' to existing traverseData");
         }
-        else {
-            o[c[i]] = ["children"];
-        }
+        o[c[i]] = ["children"];
     }
 
     return o;
