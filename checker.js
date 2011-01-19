@@ -27,15 +27,20 @@ function createTraverseData() {
     o[tkn.CATCH] = ["guard", "block"];
     o[tkn.THROW] = ["exception"];
     o[tkn.RETURN] = ["value"];
+    o[tkn.YIELD] = ["value"];
+    o[tkn.GENERATOR] = ["expression", "tail"];
     o[tkn.WITH] = ["object", "body"];
     o[tkn.SEMICOLON] = ["expression"];
     o[tkn.LABEL] = ["statement"];
     o[tkn.IDENTIFIER] = ["initializer"];
     o[tkn.GETTER] = ["body"];
     o[tkn.SETTER] = ["body"];
+    o[tkn.LET_BLOCK] = ["variables", "expression", "block"];
+    o[tkn.ARRAY_COMP] = ["expression", "tail"];
+    o[tkn.COMP_TAIL] = ["children", "guard"]; // children and custom
 
     var c = [tkn.SCRIPT,
-             tkn.BLOCK, tkn.VAR, tkn.CONST, tkn.COMMA, tkn.ASSIGN,
+             tkn.BLOCK, tkn.LET, tkn.VAR, tkn.CONST, tkn.COMMA, tkn.ASSIGN,
              tkn.HOOK, tkn.OR, tkn.AND, tkn.BITWISE_OR, tkn.BITWISE_XOR,
              tkn.BITWISE_AND, tkn.EQ, tkn.NE, tkn.STRICT_EQ, tkn.STRICT_NE,
              tkn.LT, tkn.LE, tkn.GE, tkn.GT, tkn.IN, tkn.INSTANCEOF,
