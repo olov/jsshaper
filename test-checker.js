@@ -36,10 +36,11 @@ var src;
 src = "x &&a*3 +b || y";
 var root = parse(src);
 
-print(src);
+print(root.getSrc());
 printTree(root);
-//alterTree(root);
-//printTree(root);
+alterTree(root);
+print(root.getSrc());
+printTree(root);
 // print();
 // print(src);
 //load('narcissus/lib/jsdecomp.js');
