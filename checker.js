@@ -135,12 +135,7 @@ function traverseAstDFS(node, visitfns, level, parent, parentProp) {
 }
 
 function spaces(n, s) {
-    var str = "";
-    s = s || " ";
-    for (var i = 0; i < n; i++) {
-        str += s;
-    }
-    return str;
+    return (new Array(n + 1)).join(s || " ");
 }
 function tokenString(tt) {
     var defs = Narcissus.definitions;
