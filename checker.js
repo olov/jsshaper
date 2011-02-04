@@ -1,6 +1,7 @@
 "use strict";
 
 load('jsecma5.js');
+var Narcissus;
 load('narcissus/lib/jsdefs.js');
 load('narcissus/lib/jslex.js');
 load('narcissus/lib/jsparse.js');
@@ -105,7 +106,7 @@ function traverseAstDFS_dynamic(node, visitfns, level, parent, parentProp) {
 }
 function traverseAstDFS(node, visitfns, level, parent, parentProp) {
     if (!node) {
-        return;
+        return node;
     }
     if (node instanceof Narcissus.parser.Node !== true) {
         throw new Error("traverseAstDFS expected Node, got "+ typeof node +
@@ -113,11 +114,7 @@ function traverseAstDFS(node, visitfns, level, parent, parentProp) {
     }
 
     level = level || 0;
-    var n;
-    visitfns.pre && (n = visitfns.pre(node, level, parent, parentProp));
-    if (n !== undefined) {
-        node = n;
-    }
+    visitfns.pre && (node = visitfns.pre(node, level, parent, parentProp) || node);
 
     var subprops = traverseData[node.type] || [];
     for (var i = 0; i < subprops.length; i++) {
@@ -132,7 +129,9 @@ function traverseAstDFS(node, visitfns, level, parent, parentProp) {
         }
     }
 
-    visitfns.post && visitfns.post(node, level, parent, parentProp);
+    visitfns.post && (node = visitfns.post(node, level, parent, parentProp) || node);
+
+    return node;
 }
 
 function spaces(n, s) {
@@ -165,7 +164,8 @@ function nodeString(node) {
     }
     var src = node.tokenizer.source;
     return tokenString(node.type) +
-        ("start" in node && "end" in node ?
+        ("srcs" in node ? " ["+ String(node.srcs) +"]" :
+         "start" in node && "end" in node ?
          " '"+ abbrev(src.slice(node.start, node.end), 30) +"'" :
          (node.value !== undefined ? " ("+ node.value +")" : "")) +
         ("start" in node || "end" in node ?
@@ -310,7 +310,7 @@ function alterTree(root) {
     }});
 }
 function adjustStartEnd(root) {
-    traverseAstDFS(root, {post: function(node, level, parent, parentProp) {
+    return traverseAstDFS(root, {post: function(node, level, parent, parentProp) {
         if (parent) {
             if (parent.start === undefined || parent.end === undefined ||
                 node.start === undefined || node.end === undefined) {
@@ -320,7 +320,55 @@ function adjustStartEnd(root) {
             parent.end = Math.max(parent.end, node.end);
         }
     }});
-    return root;
+}
+function srcsify(root) {
+    return traverseAstDFS(root, {
+        pre: function(node, level, parent, parentProp) {
+            node.pos = node.start;
+            node.srcs = [];
+
+            if (parent) {
+                var src = parent.tokenizer.source;
+                parent.srcs.push(src.slice(parent.pos, node.start));
+                parent.pos = node.end;
+            }
+        },
+        post: function(node, level, parent, parentProp) {
+            var src = node.tokenizer.source;
+            node.srcs.push(src.slice(node.pos, node.end));
+            delete node.pos;
+            delete node.start;
+            delete node.end;
+            node.tokenizer = {source: ""};
+//            delete node.tokenizer;
+        }
+    });
+}
+
+Narcissus.parser.Node.prototype.getSrc = function() {
+    var srcs = [];
+    traverseAstDFS(this, {
+        pre: function(node, level, parent, parentProp) {
+            if (parent) {
+                srcs.push(parent.srcs[parent.nPushed++]);
+            }
+            node.nPushed = 0;
+        },
+        post: function(node, level, parent, parentProp) {
+            srcs.push(node.srcs[node.nPushed++]);
+            delete node.nPushed;
+        }
+    });
+    return srcs.join("");
+};
+
+function parse(str) {
+    return srcsify(adjustStartEnd(Narcissus.parser.parse(str, "test.js", 1)));
+}
+function parseExpression(expr) {
+    // SCRIPT -> [SEMICOLON ->] expr
+    var stmnt = parse(expr).children[0];
+    return stmnt.type === tkn.SEMICOLON ? stmnt.expression : stmnt;
 }
 
 print("checker.js done");

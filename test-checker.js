@@ -3,14 +3,6 @@
 load('checker.js');
 load('assert.js');
 
-function parse(str) {
-    return adjustStartEnd(Narcissus.parser.parse(str, "test.js", 1));
-}
-function parseExpression(expr) {
-    // SCRIPT -> [SEMICOLON ->] expr
-    var stmnt = parse(expr).children[0];
-    return stmnt.type === tkn.SEMICOLON ? stmnt.expression : stmnt;
-}
 function testParser() {
 //    assertEquals(parse("1").start, 0);
 //    printTree(parse("var x = 1"));
@@ -41,15 +33,17 @@ var src;
 //src = "a, b, c";
 //src = "\"no restrict\", function add(a, b) { return a+b; }";
 //src = "; var x   = f  (! y   + 3)";
-src = "x &&a +b || y";
+src = "x &&a*3 +b || y";
 var root = parse(src);
 
+print(src);
 printTree(root);
-alterTree(root);
-printTree(root);
+//alterTree(root);
+//printTree(root);
 // print();
 // print(src);
-load('narcissus/lib/jsdecomp.js');
-print(Narcissus.decompiler.pp(root));
+//load('narcissus/lib/jsdecomp.js');
+//print(Narcissus.decompiler.pp(root));
+//printTree(parseExpression("if (1+2) 3;"));
 
 print("test-checker.js done");
