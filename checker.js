@@ -115,6 +115,7 @@ function traverseAstDFS(node, visitfns, level, parent, parentProp) {
 
     level = level || 0;
     visitfns.pre && (node = visitfns.pre(node, level, parent, parentProp) || node);
+    // todo add setParent here?
 
     var subprops = traverseData[node.type] || [];
     for (var i = 0; i < subprops.length; i++) {
@@ -130,6 +131,7 @@ function traverseAstDFS(node, visitfns, level, parent, parentProp) {
     }
 
     visitfns.post && (node = visitfns.post(node, level, parent, parentProp) || node);
+    // todo add setParent here?
 
     return node;
 }
@@ -206,9 +208,9 @@ function newNode(type, tokenizer, props) {
 function alterTree(root) {
     function replace(node, var_args) {
         var placeholders = [];
-        //collect all # nodes into placeholders array
+        //collect all $ nodes into placeholders array
         traverseAstDFS(node, {pre: function(node, level, parent, parentProp) {
-            if (node.type === tkn.PLACEHOLDER) {
+            if (node.type === tkn.IDENTIFIER && node.value === "$") {
                 placeholders.push({node: node, parent: parent, parentProp: parentProp});
             }
         }});
@@ -222,12 +224,85 @@ function alterTree(root) {
             setParent(o.parent, o.parentProp, arguments[i + 1]);
         }
     }
+    var restrictfns = [];
+    restrictfns[tkn.LT] = "__lt($, $)";
+    restrictfns[tkn.GT] = "__gt($, $)";
+    restrictfns[tkn.LE] = "__le($, $)";
+    restrictfns[tkn.GE] = "__ge($, $)";
+
+    restrictfns[tkn.PLUS] = "__add($, $)";
+    restrictfns[tkn.MINUS] = "__sub($, $)";
+    restrictfns[tkn.MUL] = "__mul($, $)";
+    restrictfns[tkn.DIV] = "__div($, $)";
+    restrictfns[tkn.MOD] = "__mod($, $)";
+
+    // INCREMENT, DECREMENT prefix, postfix
+
+    restrictfns[tkn.UNARY_MINUS] = "__neg($)";
+    restrictfns[tkn.BITWISE_AND] = "__bitand($, $)";
+    restrictfns[tkn.BITWISE_OR] = "__bitor($, $)";
+    restrictfns[tkn.BITWISE_XOR] = "__bitxor($, $)";
+    restrictfns[tkn.LSH] = "__bitasl($, $)";
+    restrictfns[tkn.RSH] = "__bitasr($, $)";
+    restrictfns[tkn.URSH] = "__bitlsr($, $)";
+    restrictfns[tkn.BITWISE_NOT] = "__bitnot($)";
+
+    // ASSIGN with .assignOp
+
     traverseAstDFS(root, {pre: function(node, level, parent, parentProp) {
-        if (node.type === tkn.PLUS) {
-            var replaceNode = parseExpression("__add(#, #)");
-            replace(replaceNode, node.children[0], node.children[1]);
-            setParent(parent, parentProp, replaceNode);
+        var replaceNode;
+        if (restrictfns[node.type] !== undefined) {
+            replaceNode = parseExpression(restrictfns[node.type]);
+            if (node.children.length === 1) {
+                replace(replaceNode, node.children[0]);
+            }
+            else {
+                replace(replaceNode, node.children[0], node.children[1]);
+            }
         }
+        else if (node.type === tkn.INCREMENT || node.type === tkn.DECREMENT) {
+            var c = node.children[0];
+            var __op = node.type === tkn.INCREMENT ? "__inc" : "__dec";
+            var __postprefop = (node.postfix ? "__post" : "__pref") + (node.type === tkn.INCREMENT ? "inc" : "dec");
+
+            if (c.type === tkn.IDENTIFIER) { // id++
+                if (node.postfix) {
+                    replaceNode = parseExpression("__arg0($, $ = "+ __op +"($))");
+                    replace(replaceNode, c, c, c);
+                }
+                else {
+                    replaceNode = parseExpression("($ = "+ __op +"($))");
+                    replace(replaceNode, c, c);
+                }
+            }
+            else if (c.type === tkn.DOT) { // expr.id++
+                var expr = c.children[0];
+                var id = c.children[1];
+                replaceNode = parseExpression(__postprefop +'($, "'+ id.value +'")');
+                replace(replaceNode, expr);
+            }
+            else if (c.type === tkn.INDEX) { // expr1[expr2]++
+                var expr1 = c.children[0];
+                var expr2 = c.children[1];
+                if (expr2.type === tkn.STRING) {
+                    replaceNode = parseExpression(__postprefop +"($, $)");
+                }
+                else {
+                    replaceNode = parseExpression(__postprefop +"($, String($))");
+                }
+                replace(replaceNode, expr1, expr2);
+            }
+            else {
+                throw new Error("replace: invalid INCREMENT/DECREMENT forms");
+            }
+        }
+        else {
+            // no-op
+            return undefined;
+        }
+        // TODO ASSIGN with .assignOp
+        setParent(parent, parentProp, replaceNode);
+        return replaceNode;
     }});
 }
 function adjustStartEnd(root) {

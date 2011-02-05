@@ -33,14 +33,15 @@ var src;
 //src = "a, b, c";
 //src = "\"no restrict\", function add(a, b) { return a+b; }";
 //src = "; var x   = f  (! y   + 3)";
-src = "x &&a*3 +b || y";
+//src = "x &&a*3 +b || y";
+src = "++id; ++expr.id; ++expr1[expr2]; --id; --expr.id; --expr1[expr2]; id++; expr.id++; expr1[expr2]++; id--; expr.id--; expr1[expr2]--;";
 var root = parse(src);
 
 print(root.getSrc());
-printTree(root);
+//printTree(root);
 alterTree(root);
 print(root.getSrc());
-printTree(root);
+//printTree(root);
 // print();
 // print(src);
 //load('narcissus/lib/jsdecomp.js');
