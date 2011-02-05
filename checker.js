@@ -293,14 +293,44 @@ function alterTree(root) {
                 replace(replaceNode, expr1, expr2);
             }
             else {
-                throw new Error("replace: invalid INCREMENT/DECREMENT forms");
+                throw new Error("replace: invalid INCREMENT/DECREMENT form");
+            }
+        }
+        else if (node.type === tkn.ASSIGN && node.assignOp) {
+            var lvalue = node.children[0];
+            var v = node.children[1];
+            var __opcall = restrictfns[node.assignOp];
+            var __op = __opcall.slice(0, __opcall.indexOf("("));
+
+            if (lvalue.type === tkn.IDENTIFIER) { // id += v
+                replaceNode = parseExpression(__op +"($, $)");
+                replace(replaceNode, lvalue, v);
+            }
+            else if (lvalue.type === tkn.DOT) { // expr.id += v
+                var expr = lvalue.children[0];
+                var id = lvalue.children[1];
+                replaceNode = parseExpression('__op_set('+ __op +', $, "'+ id.value +'", $)');
+                replace(replaceNode, expr, v);
+            }
+            else if (lvalue.type === tkn.INDEX) { // expr1[expr2] += v
+                var expr1 = lvalue.children[0];
+                var expr2 = lvalue.children[1];
+                if (expr2.type === tkn.STRING) {
+                    replaceNode = parseExpression('__op_set('+ __op +', $, $, $)');
+                }
+                else {
+                    replaceNode = parseExpression('__op_set('+ __op +', $, String($), $)');
+                }
+                replace(replaceNode, expr1, expr2, v);
+            }
+            else {
+                throw new Error("replace: invalid ASSIGN form");
             }
         }
         else {
             // no-op
             return undefined;
         }
-        // TODO ASSIGN with .assignOp
         setParent(parent, parentProp, replaceNode);
         return replaceNode;
     }});

@@ -34,7 +34,8 @@ var src;
 //src = "\"no restrict\", function add(a, b) { return a+b; }";
 //src = "; var x   = f  (! y   + 3)";
 //src = "x &&a*3 +b || y";
-src = "++id; ++expr.id; ++expr1[expr2]; --id; --expr.id; --expr1[expr2]; id++; expr.id++; expr1[expr2]++; id--; expr.id--; expr1[expr2]--;";
+//src = "++id; ++expr.id; ++expr1[expr2]; --id; --expr.id; --expr1[expr2]; id++; expr.id++; expr1[expr2]++; id--; expr.id--; expr1[expr2]--;";
+src = "id += v; expr.id += v; expr1[expr2] += v";
 var root = parse(src);
 
 print(root.getSrc());
