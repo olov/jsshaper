@@ -11,8 +11,8 @@ function detailedtypeof(v) {
 }
 function __throw_typeerror(from, var_args) {
     var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-    throw new Error("restrict mode "+ from +" called with "+
-                    args.map(detailedtypeof).join(" and "));
+    var typeofs = args.map(detailedtypeof).join(" and ");
+    throw new Error("restrict mode ".concat(from, " called with ", typeofs));
 }
 function __assert_numbers(x, y, opname) {
     var xtype = typeof x;
