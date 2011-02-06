@@ -479,7 +479,7 @@ function test_binary_operator() {
         for (j = 0; j < flat.length; j++) {
             var exc_a = false, exc_b = false;
             var val_a, val_b;
-            try { val_a = flat[i] == flat[j]; }
+            try { val_a = flat[i] /*loose*/ == flat[j]; }
             catch (e) { exc_a = e; }
 
             try { val_b = __loose_eq(flat[i], flat[j]); }
@@ -509,17 +509,17 @@ test_binary_operator();
 
 function test_jsvm_differences(vmstr) {
     var vm = {js: vmstr === "js", v8: vmstr === "v8",
-              jsc: vmstr === "jsc", ecma: vmstr == "ecma"};
+              jsc: vmstr === "jsc", ecma: vmstr === "ecma"};
 
     // js, v8, jsc yield true, ecma (my interpretation) yields false
-    assertEquals(false == {valueOf: function() { return null; }}, !vm.ecma);
+    assertEquals(false /*loose*/ == {valueOf: function() { return null; }}, !vm.ecma);
 
-    assertEquals("" == {valueOf: function() { return null; }}, vm.js);
+    assertEquals("" /*loose*/ == {valueOf: function() { return null; }}, vm.js);
 
-    assertEquals(false == new Date(0), !vm.js);
-    assertEquals(0 == new Date(0), !(vm.js || vm.v8));
-    assertEquals(316998000000 == new Date(1980, 1-1, 18), !vm.js);
-    assertEquals(1282600800000 == new Date(2010, 8-1, 24), !vm.js);
+    assertEquals(false /*loose*/ == new Date(0), !vm.js);
+    assertEquals(0 /*loose*/ == new Date(0), !(vm.js || vm.v8));
+    assertEquals(316998000000 /*loose*/ == new Date(1980, 1-1, 18), !vm.js);
+    assertEquals(1282600800000 /*loose*/ == new Date(2010, 8-1, 24), !vm.js);
 }
 //test_jsvm_differences("v8");
 
