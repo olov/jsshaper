@@ -22,7 +22,7 @@ function createTraverseData() {
     o[tkn.DEFAULT] = ["statements"];
     o[tkn.FOR] = ["setup", "condition", "update", "body"];
     o[tkn.WHILE] = ["condition", "body"];
-    o[tkn.FOR_IN] = ["varDecl", "iterator", "object", "body"];
+    o[tkn.FOR_IN] = [/*"varDecl",*/ "iterator", "object", "body"];
     o[tkn.DO] = ["body", "condition"];
     o[tkn.TRY] = ["tryBlock", "catchClauses", "finallyBlock"];
     o[tkn.CATCH] = ["guard", "block"];
@@ -303,8 +303,8 @@ function alterTree(root) {
             var __op = __opcall.slice(0, __opcall.indexOf("("));
 
             if (lvalue.type === tkn.IDENTIFIER) { // id += v
-                replaceNode = parseExpression(__op +"($, $)");
-                replace(replaceNode, lvalue, v);
+                replaceNode = parseExpression("$ = "+ __op +"($, $)");
+                replace(replaceNode, lvalue, lvalue, v);
             }
             else if (lvalue.type === tkn.DOT) { // expr.id += v
                 var expr = lvalue.children[0];
@@ -354,6 +354,12 @@ function srcsify(root) {
             node.srcs = [];
 
             if (parent) {
+                if(parent.pos > node.start ||
+                   node.start === undefined || node.end === undefined) {
+                    throw new Error("srcsify: src already covered."+
+                                    " parent: "+ nodeString(parent) +
+                                    " parent."+ parentProp +": "+ nodeString(node));
+                }
                 var src = parent.tokenizer.source;
                 parent.srcs.push(src.slice(parent.pos, node.start));
                 parent.pos = node.end;
@@ -397,4 +403,4 @@ function parseExpression(expr) {
     return stmnt.type === tkn.SEMICOLON ? stmnt.expression : stmnt;
 }
 
-print("checker.js done");
+//print("checker.js done");
