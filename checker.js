@@ -260,6 +260,22 @@ function alterTree(root) {
                 replace(replaceNode, node.children[0], node.children[1]);
             }
         }
+        // ++ -- += -= *= /= %= &= |= ^= <<= >>= >>>=
+        //
+        // id += v is translated into id = __add(id, v)
+        // expr.id += v is translated into __op_set(__add, expr, "id", v)
+        // expr1[expr2] += v is translated into __op_set(__add, expr1, String(expr2), v)
+        //
+        // ++id is translated into (id = __inc(id))
+        // ++expr.id is translated into __prefinc(expr, "id")
+        // ++expr1[expr2] is translated into __prefinc(expr1, String(expr2))
+        //
+        // id++ is translated into __arg0(id, id = __inc(id))
+        // expr.id++ is translated into __postinc(expr, "id")
+        // expr1[expr2]++ is translated into __postinc(expr1, String(expr2))
+        //
+        // all other forms, for example ofn() += 1, throws ReferenceError so
+        // give translation error
         else if (node.type === tkn.INCREMENT || node.type === tkn.DECREMENT) {
             var c = node.children[0];
             var __op = node.type === tkn.INCREMENT ? "__inc" : "__dec";
