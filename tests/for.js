@@ -1,12 +1,14 @@
-for (var prop in node) {
+var obj = {a: 1, b: 2};
+
+for (var prop in obj) {
 }
-for (prop in node) {
+for (prop in obj) {
 }
-for each (var prop2 in node) {
+for each (var prop2 in obj) {
 }
-for each (prop2 in node) {
+for each (prop2 in obj) {
 }
 for (var x = 0; x < 10; x++) {
 }
-for (x = 0; x < 10; x++) {
+for (x = 0; !(x > 10); ++x) {
 }
