@@ -27,7 +27,7 @@ function detailedtypeof(v) {
         v instanceof Date ? "object (Date)" :
         "object";
 }
-function __throw_typeerror(from /* ... */) {
+function __throw_typeerror(from, var_args) {
     var args = Array.prototype.slice.call(arguments, 1, arguments.length);
     throw new Error("restrict mode "+ from +" called with "+
                     args.map(detailedtypeof).join(" and "));
