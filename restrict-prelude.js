@@ -36,9 +36,39 @@ function __lt(x, y) {
     }
     __throw_typeerror("__lt", x, y);
 }
-function __gt(x, y) { throw new Error("not implemented yet"); } // like __lt
-function __le(x, y) { throw new Error("not implemented yet"); } // like __lt
-function __ge(x, y) { throw new Error("not implemented yet"); } // like __lt
+function __gt(x, y) {
+    var xtype = typeof x;
+    var ytype = typeof y;
+
+    if (xtype === ytype) {
+        if ((xtype === "string" || xtype === "number")) {
+            return x /*loose*/ > y;
+        }
+    }
+    __throw_typeerror("__gt", x, y);
+}
+function __le(x, y) {
+    var xtype = typeof x;
+    var ytype = typeof y;
+
+    if (xtype === ytype) {
+        if ((xtype === "string" || xtype === "number")) {
+            return x /*loose*/ <= y;
+        }
+    }
+    __throw_typeerror("__le", x, y);
+}
+function __ge(x, y) {
+    var xtype = typeof x;
+    var ytype = typeof y;
+
+    if (xtype === ytype) {
+        if ((xtype === "string" || xtype === "number")) {
+            return x /*loose*/ >= y;
+        }
+    }
+    __throw_typeerror("__ge", x, y);
+}
 
 function __neg(v) {
     var vtype = typeof v;
