@@ -250,6 +250,11 @@ function alterTree(root) {
     // ASSIGN with .assignOp
 
     traverseAstDFS(root, {pre: function(node, level, parent, parentProp) {
+        // don't /*loose*/ annotated nodes
+        // todo children?
+        if (node.loose) {
+            return undefined;
+        }
         var replaceNode;
         if (restrictfns[node.type] !== undefined) {
             replaceNode = parseExpression(restrictfns[node.type]);
@@ -377,8 +382,29 @@ function srcsify(root) {
                                     " parent."+ parentProp +": "+ nodeString(node));
                 }
                 var src = parent.tokenizer.source;
-                parent.srcs.push(src.slice(parent.pos, node.start));
+                var frag = src.slice(parent.pos, node.start);
+                parent.srcs.push(frag);
                 parent.pos = node.end;
+
+                // fragment includes /*loose*/? (optional extra ' ' and '*')
+                var match = frag.match(/\/\*+\s*loose\s*\*+\//);
+                if (match) {
+                    var matchLen = match[0].length;
+                    var tail = frag.slice(match.index + matchLen);
+                    // strip all comments [http://ostermiller.org/findcomment.html]
+                    tail = tail.replace(/(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)|(\/\/.*)/g, "");
+                    // tail should only contain whitespace
+                    if (tail.search(/\S/) !== -1) {
+                        throw new Error(node.tokenizer.filename +":"+ String(node.lineno) +" error: invalid annotation: "+ frag.slice(match.index));
+                    }
+                    if (!(node.parenthesized || node.type === tkn.GROUP)) {
+                        throw new Error(node.tokenizer.filename +":"+ String(node.lineno) +" error: missing ( after annotation: "+ frag);
+                    }
+                    traverseAstDFS(node, {pre: function(node) {
+                        node.loose = true;
+                    }});
+//                    print("loose: " + nodeString(node));
+                }
             }
         },
         post: function(node, level, parent, parentProp) {
