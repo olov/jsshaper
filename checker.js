@@ -385,26 +385,6 @@ function srcsify(root) {
                 var frag = src.slice(parent.pos, node.start);
                 parent.srcs.push(frag);
                 parent.pos = node.end;
-
-                // fragment includes /*loose*/? (optional extra ' ' and '*')
-                var match = frag.match(/\/\*+\s*loose\s*\*+\//);
-                if (match) {
-                    var matchLen = match[0].length;
-                    var tail = frag.slice(match.index + matchLen);
-                    // strip all comments [http://ostermiller.org/findcomment.html]
-                    tail = tail.replace(/(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)|(\/\/.*)/g, "");
-                    // tail should only contain whitespace
-                    if (tail.search(/\S/) !== -1) {
-                        throw new Error(node.tokenizer.filename +":"+ String(node.lineno) +" error: invalid annotation: "+ frag.slice(match.index));
-                    }
-                    if (!(node.parenthesized || node.type === tkn.GROUP)) {
-                        throw new Error(node.tokenizer.filename +":"+ String(node.lineno) +" error: missing ( after annotation: "+ frag);
-                    }
-                    traverseAstDFS(node, {pre: function(node) {
-                        node.loose = true;
-                    }});
-//                    print("loose: " + nodeString(node));
-                }
             }
         },
         post: function(node, level, parent, parentProp) {
@@ -417,6 +397,103 @@ function srcsify(root) {
             //delete node.tokenizer;
         }
     });
+}
+function annotate(root) {
+    function pushNodeFragment(node, frag) {
+        // skip if frag doesn't contain anything but whitespace
+        if (frag.search(/\S/) === -1) {
+            return;
+        }
+        // apply annotations captured on previous node fragment to this node
+        if (annotations) {
+            applyAnnotations(node);
+            return;
+        }
+
+        var isTerminalNode = (node.srcs.length === 1);
+        captureAnnotation(node, frag, isTerminalNode);
+
+        // special-case for terminal node, for example where fragment is
+        // (/*loose*/ x), (/*loose*/ (x)) or {/*loose*/}
+        // in this case the annotations should be applied to the same node
+        // for which it was captured, not next node
+        if (annotations && isTerminalNode) { // terminal node
+            applyAnnotations(node);
+        }
+    }
+    function captureAnnotation(node, frag, allowTrailing) {
+        // hard-coded to /*loose*/ annotation for now, could be extended
+        // to capture any registered annotation fragment
+
+        // fragment includes /*loose*/? (optional extra '*' and ' ')
+        var match = frag.match(/\/\*+\s*loose\s*\*+\//);
+        if (match === null) {
+            return;
+        }
+        if (!allowTrailing) {
+            var tail = frag.slice(match.index + match[0].length);
+            // strip all comments [http://ostermiller.org/findcomment.html]
+            tail = tail.replace(/(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)|(\/\/.*)/g, "");
+
+            // tail should only contain whitespace
+            if (tail.search(/\S/) !== -1) {
+                throw new Error(node.tokenizer.filename +":"+ String(node.lineno) +" error: invalid annotation: "+ frag.slice(match.index));
+            }
+        }
+        annotations = {loose: true};
+    }
+    function applyAnnotations(node) {
+        // todo annotations could be per-node, per-subtree or have a
+        // custom, possibly tree-modifying, apply function
+        // for now only per-subtree is implemented
+        print("applyAnnotations: "+ nodeString(node));
+        traverseAstDFS(node, {pre: function(node) {
+            for (var annotation in annotations) {
+                node[annotation] = annotations[annotation];
+            }
+        }});
+        annotations = null;
+    }
+    var prevFrag = "";
+    var annotations = null;
+
+    return traverseAstDFS(root, {
+        pre: function(node, level, parent, parentProp) {
+            if (parent) {
+                pushNodeFragment(parent, parent.srcs[parent.nPushed++]);
+            }
+            node.nPushed = 0;
+        },
+        post: function(node, level, parent, parentProp) {
+            pushNodeFragment(node, node.srcs[node.nPushed++]);
+            delete node.nPushed;
+        }
+    });
+    /*
+   return traverseAstDFS(root, {pre: function(node, level, parent, parentProp) {
+        for (var i = 0; i < node.srcs.length; i++) {
+            var frag = node.srcs[i];
+        }
+
+            if (false && match) {
+                var matchLen = match[0].length;
+                var tail = frag.slice(match.index + matchLen);
+                // strip all comments [http://ostermiller.org/findcomment.html]
+                tail = tail.replace(/(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)|(\/\/.*)/g, "");
+                // tail should only contain whitespace
+                if (tail.search(/\S/) !== -1) {
+                    throw new Error(node.tokenizer.filename +":"+ String(node.lineno) +" error: invalid annotation: "+ frag.slice(match.index));
+                }
+                if (!(node.parenthesized || node.type === tkn.GROUP)) {
+                    throw new Error(node.tokenizer.filename +":"+ String(node.lineno) +" error: missing ( after annotation: "+ frag);
+                }
+                traverseAstDFS(node, {pre: function(node) {
+                    node.loose = true;
+                }});
+                //print("loose: " + nodeString(node));
+            }
+        }});
+*/
 }
 
 Narcissus.parser.Node.prototype.getSrc = function() {
@@ -437,7 +514,7 @@ Narcissus.parser.Node.prototype.getSrc = function() {
 };
 
 function parse(str) {
-    return srcsify(adjustStartEnd(Narcissus.parser.parse(str, "test.js", 1)));
+    return annotate(srcsify(adjustStartEnd(Narcissus.parser.parse(str, "test.js", 1))));
 }
 function parseExpression(expr) {
     // SCRIPT -> [SEMICOLON ->] expr
