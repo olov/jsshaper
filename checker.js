@@ -11,6 +11,10 @@ var tkn = Narcissus.definitions.tokenIds;
 Array.isArray = Array.isArray || function(o) {
     return Object.prototype.toString.call(o) === '[object Array]';
 };
+function error(node, msg) {
+    print(node.tokenizer.filename +":"+ String(node.lineno) +" error: "+ msg);
+    quit(-1);
+}
 
 function createTraverseData() {
     var o = [];
@@ -442,7 +446,7 @@ function annotate(root) {
 
             // tail should only contain whitespace
             if (tail.search(/\S/) !== -1) {
-                throw new Error(node.tokenizer.filename +":"+ String(node.lineno) +" error: invalid annotation: "+ frag.slice(match.index));
+                error(node, "invalid annotation: "+ frag.slice(match.index));
             }
         }
         annotations = {loose: true};
