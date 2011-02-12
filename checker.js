@@ -426,7 +426,7 @@ function annotate(root) {
         // (/*loose*/ x), (/*loose*/ (x)) or {/*loose*/}
         // in this case the annotations should be applied to the same node
         // for which it was captured, not next node
-        if (annotations && isTerminalNode) { // terminal node
+        if (annotations && isTerminalNode) {
             applyAnnotations(node);
         }
     }
@@ -441,8 +441,8 @@ function annotate(root) {
         }
         if (!allowTrailing) {
             var tail = frag.slice(match.index + match[0].length);
-            // strip all comments [http://ostermiller.org/findcomment.html]
-            tail = tail.replace(/(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)|(\/\/.*)/g, "");
+            // strip all /* inline */ comments [http://ostermiller.org/findcomment.html]
+            tail = tail.replace(/\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\//g, "");
 
             // tail should only contain whitespace
             if (tail.search(/\S/) !== -1) {
@@ -464,7 +464,6 @@ function annotate(root) {
         }});
         annotations = null;
     }
-    var prevFrag = "";
     var annotations = null;
 
     return traverseAstDFS(root, {
@@ -479,31 +478,6 @@ function annotate(root) {
             delete node.nPushed;
         }
     });
-    /*
-   return traverseAstDFS(root, {pre: function(node, level, parent, parentProp) {
-        for (var i = 0; i < node.srcs.length; i++) {
-            var frag = node.srcs[i];
-        }
-
-            if (false && match) {
-                var matchLen = match[0].length;
-                var tail = frag.slice(match.index + matchLen);
-                // strip all comments [http://ostermiller.org/findcomment.html]
-                tail = tail.replace(/(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)|(\/\/.*)/g, "");
-                // tail should only contain whitespace
-                if (tail.search(/\S/) !== -1) {
-                    throw new Error(node.tokenizer.filename +":"+ String(node.lineno) +" error: invalid annotation: "+ frag.slice(match.index));
-                }
-                if (!(node.parenthesized || node.type === tkn.GROUP)) {
-                    throw new Error(node.tokenizer.filename +":"+ String(node.lineno) +" error: missing ( after annotation: "+ frag);
-                }
-                traverseAstDFS(node, {pre: function(node) {
-                    node.loose = true;
-                }});
-                //print("loose: " + nodeString(node));
-            }
-        }});
-*/
 }
 
 Narcissus.parser.Node.prototype.getSrc = function() {
