@@ -396,9 +396,9 @@ function srcsify(root) {
         post: function(node, level, parent, parentProp) {
             var src = node.tokenizer.source;
             node.srcs.push(src.slice(node.pos, node.end));
+            delete node.pos;
             delete node.start;
             delete node.end;
-            delete node.pos; // weird bug if other deletion order
             node.tokenizer = tokenizer;
             //delete node.tokenizer;
         }

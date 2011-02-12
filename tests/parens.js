@@ -1,4 +1,3 @@
-// todo annotations that are included in // comments should be ignored
 1;
 
 // valid annotations
