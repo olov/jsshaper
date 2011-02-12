@@ -369,6 +369,8 @@ function adjustStartEnd(root) {
     }});
 }
 function srcsify(root) {
+    var tokenizer = {source: "", filename: root.tokenizer.filename};
+
     return traverseAstDFS(root, {
         pre: function(node, level, parent, parentProp) {
             node.pos = node.start;
@@ -393,13 +395,16 @@ function srcsify(root) {
             delete node.start;
             delete node.end;
             delete node.pos; // weird bug if other deletion order
-            node.tokenizer = {source: ""};
+            node.tokenizer = tokenizer;
             //delete node.tokenizer;
         }
     });
 }
 function annotate(root) {
     function pushNodeFragment(node, frag) {
+        // remove to-end-of-line comments (// comment)
+        frag = frag.replace(/\/\/.*/g, "");
+
         // skip if frag doesn't contain anything but whitespace
         if (frag.search(/\S/) === -1) {
             return;
@@ -446,7 +451,8 @@ function annotate(root) {
         // todo annotations could be per-node, per-subtree or have a
         // custom, possibly tree-modifying, apply function
         // for now only per-subtree is implemented
-        print("applyAnnotations: "+ nodeString(node));
+
+        //print("applyAnnotations: "+ nodeString(node));
         traverseAstDFS(node, {pre: function(node) {
             for (var annotation in annotations) {
                 node[annotation] = annotations[annotation];

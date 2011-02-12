@@ -14,8 +14,8 @@ function f(x) {/*loose*/}
 1 ? /*loose*/ null : 2;
 
 // annotation errors
-if /*loose*/ (1) {2;}
-function /*loose*/g(x) {}
-function h/*loose*/(x) {}
-function i(/*loose*/x) {}
-
+//if /*loose*/ (1) {2;}
+//function /*loose*/g(x) {}
+//function h/*loose*/(x) {}
+//function i(/*loose*/x) {}
+2;
