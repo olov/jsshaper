@@ -254,7 +254,7 @@ function alterTree(root) {
     // ASSIGN with .assignOp
 
     traverseAstDFS(root, {pre: function(node, level, parent, parentProp) {
-        // don't /*loose*/ annotated nodes
+        // don't alter /*loose*/ annotated nodes
         // todo children?
         if (node.loose) {
             return undefined;
@@ -405,6 +405,7 @@ function srcsify(root) {
     });
 }
 function annotate(root) {
+    var annotations = null;
     function pushNodeFragment(node, frag) {
         // remove to-end-of-line comments (// comment)
         frag = frag.replace(/\/\/.*/g, "");
@@ -464,7 +465,6 @@ function annotate(root) {
         }});
         annotations = null;
     }
-    var annotations = null;
 
     return traverseAstDFS(root, {
         pre: function(node, level, parent, parentProp) {
