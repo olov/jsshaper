@@ -164,21 +164,6 @@ function setParent(parent, parentProp, node) {
     }
 }
 
-function newNode(type, tokenizer, props) {
-    var node = Object.create(Narcissus.parser.Node.prototype);
-    node.tokenizer = tokenizer;
-    node.type = type;
-    node.children = [];
-
-    if (props !== undefined) {
-        for (var prop in props) {
-            node[prop] = props[prop];
-        }
-    }
-    //value, lineno, start, end
-    return node;
-}
-
 function alterTree(root) {
     function replace(node, var_args) {
         var placeholders = [];
