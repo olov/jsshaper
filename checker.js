@@ -71,54 +71,17 @@ function createTraverseData() {
 var traverseData = createTraverseData();
 
 // visitfns: {pre: function, post: function}
-// visit function signature: function(node, level, parent, parentProp)
-function traverseAstDFS_dynamic(node, visitfns, level, parent, parentProp) {
-    if (!node) {
-        return;
-    }
-    if (node instanceof Narcissus.parser.Node !== true) {
-        throw new Error("traverseAstDFS expected Node, got "+ typeof node +
-                       ". parentProp: "+ parentProp);
-    }
-
-    level = level || 0;
-    var n;
-    visitfns.pre && (n = visitfns.pre(node, level, parent, parentProp));
-    if (n !== undefined) {
-        node = n;
-    }
-
-    for (var prop in node) {
-        if (!node.hasOwnProperty(prop)) {
-            continue;
-        }
-        if (prop === "funDecls" || prop === "params" || prop === "varDecls" ||
-            prop === "target") {
-            continue;
-        }
-        if (node[prop] instanceof Narcissus.parser.Node) {
-            traverseAstDFS(node[prop], visitfns, level + 1, node, prop);
-        }
-        else if (Array.isArray(node[prop])) {
-            for (var j = 0, k = node[prop].length; j < k; j++) {
-                traverseAstDFS(node[prop][j], visitfns, level + 1, node, prop + "[" + String(j) + "]");
-            }
-        }
-    }
-
-    visitfns.post && visitfns.post(node, level, parent, parentProp);
-}
-function traverseAstDFS(node, visitfns, level, parent, parentProp) {
+// visit function signature: function(node, parent, parentProp)
+function traverseTree(node, visitfns, parent, parentProp) {
     if (!node) {
         return node;
     }
     if (node instanceof Narcissus.parser.Node !== true) {
-        throw new Error("traverseAstDFS expected Node, got "+ typeof node +
+        throw new Error("traverseTree expected Node, got "+ typeof node +
                        ". parentProp: "+ parentProp);
     }
 
-    level = level || 0;
-    visitfns.pre && (node = visitfns.pre(node, level, parent, parentProp) || node);
+    visitfns.pre && (node = visitfns.pre(node, parent, parentProp) || node);
     // todo add setParent here?
 
     var subprops = traverseData[node.type] || [];
@@ -126,15 +89,15 @@ function traverseAstDFS(node, visitfns, level, parent, parentProp) {
         var prop = subprops[i];
         if (Array.isArray(node[prop])) {
             for (var j = 0, k = node[prop].length; j < k; j++) {
-                traverseAstDFS(node[prop][j], visitfns, level + 1, node, prop + "[" + String(j) + "]");
+                traverseTree(node[prop][j], visitfns, node, prop + "[" + String(j) + "]");
             }
         }
         else {
-            traverseAstDFS(node[prop], visitfns, level + 1, node, prop);
+            traverseTree(node[prop], visitfns, node, prop);
         }
     }
 
-    visitfns.post && (node = visitfns.post(node, level, parent, parentProp) || node);
+    visitfns.post && (node = visitfns.post(node, parent, parentProp) || node);
     // todo add setParent here?
 
     return node;
@@ -175,10 +138,17 @@ function nodeString(node) {
 }
 
 function printTree(root) {
-    traverseAstDFS(root, {pre: function(node, level, parent, parentProp) {
-        print(spaces(level * 2) + (parentProp || "root") +": "+
-              nodeString(node));
-    }});
+    var level = 0;
+    traverseTree(root, {
+        pre: function(node, parent, parentProp) {
+            print(spaces(level * 2) + (parentProp || "root") +": "+
+                  nodeString(node));
+            ++level;
+        },
+        post: function(node, parent, parentProp) {
+            --level;
+        }
+    });
 }
 
 function setParent(parent, parentProp, node) {
@@ -213,7 +183,7 @@ function alterTree(root) {
     function replace(node, var_args) {
         var placeholders = [];
         //collect all $ nodes into placeholders array
-        traverseAstDFS(node, {pre: function(node, level, parent, parentProp) {
+        traverseTree(node, {pre: function(node, parent, parentProp) {
             if (node.type === tkn.IDENTIFIER && node.value === "$") {
                 placeholders.push({node: node, parent: parent, parentProp: parentProp});
             }
@@ -253,7 +223,7 @@ function alterTree(root) {
 
     // ASSIGN with .assignOp
 
-    traverseAstDFS(root, {pre: function(node, level, parent, parentProp) {
+    traverseTree(root, {pre: function(node, parent, parentProp) {
         // don't alter /*loose*/ annotated nodes
         // todo children?
         if (node.loose) {
@@ -361,7 +331,7 @@ function alterTree(root) {
     }});
 }
 function adjustStartEnd(root) {
-    return traverseAstDFS(root, {post: function(node, level, parent, parentProp) {
+    return traverseTree(root, {post: function(node, parent, parentProp) {
         if (parent) {
             if (parent.start === undefined || parent.end === undefined ||
                 node.start === undefined || node.end === undefined) {
@@ -375,8 +345,8 @@ function adjustStartEnd(root) {
 function srcsify(root) {
     var tokenizer = {source: "", filename: root.tokenizer.filename};
 
-    return traverseAstDFS(root, {
-        pre: function(node, level, parent, parentProp) {
+    return traverseTree(root, {
+        pre: function(node, parent, parentProp) {
             node.pos = node.start;
             node.srcs = [];
 
@@ -393,7 +363,7 @@ function srcsify(root) {
                 parent.pos = node.end;
             }
         },
-        post: function(node, level, parent, parentProp) {
+        post: function(node, parent, parentProp) {
             var src = node.tokenizer.source;
             node.srcs.push(src.slice(node.pos, node.end));
             delete node.pos;
@@ -458,7 +428,7 @@ function annotate(root) {
         // for now only per-subtree is implemented
 
         //print("applyAnnotations: "+ nodeString(node));
-        traverseAstDFS(node, {pre: function(node) {
+        traverseTree(node, {pre: function(node) {
             for (var annotation in annotations) {
                 node[annotation] = annotations[annotation];
             }
@@ -466,14 +436,14 @@ function annotate(root) {
         annotations = null;
     }
 
-    return traverseAstDFS(root, {
-        pre: function(node, level, parent, parentProp) {
+    return traverseTree(root, {
+        pre: function(node, parent, parentProp) {
             if (parent) {
                 pushNodeFragment(parent, parent.srcs[parent.nPushed++]);
             }
             node.nPushed = 0;
         },
-        post: function(node, level, parent, parentProp) {
+        post: function(node, parent, parentProp) {
             pushNodeFragment(node, node.srcs[node.nPushed++]);
             delete node.nPushed;
         }
@@ -482,14 +452,14 @@ function annotate(root) {
 
 Narcissus.parser.Node.prototype.getSrc = function() {
     var srcs = [];
-    traverseAstDFS(this, {
-        pre: function(node, level, parent, parentProp) {
+    traverseTree(this, {
+        pre: function(node, parent, parentProp) {
             if (parent) {
                 srcs.push(parent.srcs[parent.nPushed++]);
             }
             node.nPushed = 0;
         },
-        post: function(node, level, parent, parentProp) {
+        post: function(node, parent, parentProp) {
             srcs.push(node.srcs[node.nPushed++]);
             delete node.nPushed;
         }
