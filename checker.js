@@ -307,6 +307,14 @@ function alterTree(root) {
                 throw new Error("replace: invalid ASSIGN form");
             }
         }
+        else if (node.type === tkn.EQ) {
+            error(node, "== used without /**loose*/ annotation, did you mean === ?\n  Replace with === for strict equal or add annotation\n  if loose equal with type-coercion was intended.");
+            return undefined;
+        }
+        else if (node.type === tkn.NE) {
+            error(node, "!= used without /**loose*/ annotation, did you mean !== ?\n  Replace with !== for strict not-equal or add annotation\n  if loose not-equal with type-coercion was intended.");
+            return undefined;
+        }
         else {
             // no-op
             return undefined;
