@@ -76,13 +76,19 @@ function traverseTree(node, visitfns, parent, parentProp) {
     if (!node) {
         return node;
     }
-    if (node instanceof Narcissus.parser.Node !== true) {
-        throw new Error("traverseTree expected Node, got "+ typeof node +
+    if (!(node instanceof Narcissus.parser.Node)) {
+        throw new Error("traverseTree: expected Node, got "+ typeof node +
                        ". parentProp: "+ parentProp);
     }
 
+    var old = node;
     visitfns.pre && (node = visitfns.pre(node, parent, parentProp) || node);
-    // todo add setParent here?
+    if (node === "stop") {
+        return old;
+    }
+    else if (!(node instanceof Narcissus.parser.Node)) {
+        throw new Error("traverseTree: visitfns.post invalid return type");
+    }
 
     var subprops = traverseData[node.type] || [];
     for (var i = 0; i < subprops.length; i++) {
@@ -98,7 +104,9 @@ function traverseTree(node, visitfns, parent, parentProp) {
     }
 
     visitfns.post && (node = visitfns.post(node, parent, parentProp) || node);
-    // todo add setParent here?
+    if (!(node instanceof Narcissus.parser.Node)) {
+        throw new Error("traverseTree: visitfns.post invalid return type");
+    }
 
     return node;
 }
@@ -184,6 +192,8 @@ function alterTree(root) {
         }
     }
     var restrictfns = [];
+    restrictfns[tkn.EQ] = "__eq($, $)";
+    restrictfns[tkn.NE] = "__ne($, $)";
     restrictfns[tkn.LT] = "__lt($, $)";
     restrictfns[tkn.GT] = "__gt($, $)";
     restrictfns[tkn.LE] = "__le($, $)";
@@ -209,10 +219,9 @@ function alterTree(root) {
     // ASSIGN with .assignOp
 
     traverseTree(root, {pre: function(node, parent, parentProp) {
-        // don't alter /*loose*/ annotated nodes
-        // todo children?
+        // don't alter /*loose*/ annotated nodes or children
         if (node.loose) {
-            return undefined;
+            return "stop";
         }
         var replaceNode;
         if (restrictfns[node.type] !== undefined) {
@@ -307,14 +316,14 @@ function alterTree(root) {
                 throw new Error("replace: invalid ASSIGN form");
             }
         }
-        else if (node.type === tkn.EQ) {
-            error(node, "== used without /**loose*/ annotation, did you mean === ?\n  Replace with === for strict equal or add annotation\n  if loose equal with type-coercion was intended.");
-            return undefined;
-        }
-        else if (node.type === tkn.NE) {
-            error(node, "!= used without /**loose*/ annotation, did you mean !== ?\n  Replace with !== for strict not-equal or add annotation\n  if loose not-equal with type-coercion was intended.");
-            return undefined;
-        }
+//         else if (node.type === tkn.EQ) {
+//             error(node, "== used without /**loose*/ annotation, did you mean === ?\n  Replace with === for strict equal or add annotation if loose equal with type-coercion was intended.");
+//             return undefined;
+//         }
+//         else if (node.type === tkn.NE) {
+//             error(node, "!= used without /**loose*/ annotation, did you mean !== ?\n  Replace with !== for strict not-equal or add annotation if loose not-equal with type-coercion was intended.");
+//             return undefined;
+//         }
         else {
             // no-op
             return undefined;
@@ -418,14 +427,12 @@ function annotate(root) {
     function applyAnnotations(node) {
         // todo annotations could be per-node, per-subtree or have a
         // custom, possibly tree-modifying, apply function
-        // for now only per-subtree is implemented
+        // for now only per-node is implemented
 
         //print("applyAnnotations: "+ nodeString(node));
-        traverseTree(node, {pre: function(node) {
-            for (var annotation in annotations) {
-                node[annotation] = annotations[annotation];
-            }
-        }});
+        for (var annotation in annotations) {
+            node[annotation] = annotations[annotation];
+        }
         annotations = null;
     }
 

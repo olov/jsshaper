@@ -12,7 +12,9 @@ function detailedtypeof(v) {
 function __throw_typeerror(from, var_args) {
     var args = Array.prototype.slice.call(arguments, 1, arguments.length);
     var typeofs = args.map(detailedtypeof).join(" and ");
-    throw new Error("restrict mode ".concat(from, " called with ", typeofs));
+    var e = new Error("restrict mode ".concat(from, " called with ", typeofs));
+    print(e.stack);
+    throw e;
 }
 function __assert_numbers(x, y, opname) {
     var xtype = typeof x;
@@ -23,8 +25,22 @@ function __assert_numbers(x, y, opname) {
     __throw_typeerror(opname, x, y);
 }
 
-function __eq(x, y) { throw new Error("use === instead of __eq"); }
-function __ne(x, y) { throw new Error("use !== instead of __ne"); }
+function __eq(x, y) {
+    var eq_strict = (x === y);
+    var eq_loose = /*loose*/(x == y);
+    if (eq_strict === eq_loose) {
+        return eq_strict;
+    }
+    __throw_typeerror("__eq", x, y);
+}
+function __ne(x, y) {
+    var ne_strict = (x !== y);
+    var ne_loose = /*loose*/(x != y);
+    if (ne_strict === ne_loose) {
+        return ne_strict;
+    }
+    __throw_typeerror("__ne", x, y);
+}
 function __lt(x, y) {
     var xtype = typeof x;
     var ytype = typeof y;

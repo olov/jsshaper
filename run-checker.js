@@ -1,6 +1,5 @@
 "use strict";
 
-//var arguments = this.arguments || ["tests/loop-continue.js"];
 if (arguments.length > 0 && arguments[0] === '--') {
     arguments.shift();
 }
@@ -16,7 +15,7 @@ var src = readfile(filename);
 var root = parse(src);
 alterTree(root);
 var header = 'load("restrict-prelude.js");\n';
-//print(header);
+print(header);
 print(root.getSrc());
 //printTree(root);
 //print("run-checker.js done");
