@@ -54,17 +54,11 @@ String annotation alternative:
           "no restrict", function min(a, b) { return a < b ? a : b }
           since they become expressions (min is not bound afterwards)
 
-
 Function annotation alternative:
       __loose(a < b + 1)
       disables restrict mode for the entire function argument
       expression
       requires function __loose(e) { return e; } definition in source file
-
-
-In restrict mode, the use of the loose == and != operators is only
-valid when loose-annotated. For strict versions, use the built-in ===
-and !== operators instead.
 
 
 Restrict mode...
@@ -128,11 +122,9 @@ log(String.str("player ", name, " scored ", points, " points "));
 Operators:
 ----------
 Operators without restrict equivalents, untranslated
-  (mustn't be /*loose*/ annotated in general]:
+  (mustn't be /*loose*/ annotated in general):
 ===  strict by default
 !==  strict by default
-==   loose version of ===, must be /*loose*/ annotated
-!=   loose version of !==, must be /*loose*/ annotated
 =    strict by default (doesn't coerce)
 &&   calls toBoolean
 ||   calls toBoolean
@@ -143,6 +135,10 @@ Operators without restrict equivalents, untranslated
 o.k  doesn't coerce
 o[k] calls toString
 other operators (for example delete, in, typeof, instanceof)
+
+Equality (null/undefined, boolean, number, string, object, function):
+==   __eq
+!=   __ne
 
 Comparision (number, string):
 <    __lt
@@ -159,8 +155,8 @@ Arithmetic:
 [same for += -= *= /= %=]
 ++n  __prefinc number
 --n  __prefdec number
-n++  __postinc number TODO disallow?
-n--  __postdec number TODO disallow?
+n++  __postinc number
+n--  __postdec number
 -n   __neg number
 
 Bitwise arithmetic (number):
@@ -172,3 +168,10 @@ Bitwise arithmetic (number):
 >>>  __bitlsr
 ~n   __bitnot
 [same for &= |= ^= <<= >>= >>>=]
+
+
+Restrict pedantic mode:
+In restrict pedantic mode, the use of the loose == and != operators is
+only valid when loose-annotated. For strict versions, use the built-in
+=== and !== operators instead. + < > <= and >= are only valid with
+numbers.

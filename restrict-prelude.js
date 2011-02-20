@@ -9,14 +9,14 @@ function detailedtypeof(v) {
         v instanceof Date ? "object (Date)" :
         "object";
 }
-function __throw_typeerror(from, var_args) {
+function __throw_typeerror(opname, var_args) {
     var args = Array.prototype.slice.call(arguments, 1, arguments.length);
     var typeofs = args.map(detailedtypeof).join(" and ");
-    var e = new Error("restrict mode ".concat(from, " called with ", typeofs));
-    print(e.stack);
+    var e = new Error("restrict mode ".concat(opname, " called with ", typeofs));
+//    print(e.stack);
     throw e;
 }
-function __assert_numbers(x, y, opname) {
+function __assert_numbers(opname, x, y) {
     var xtype = typeof x;
     var ytype = typeof y;
     if (xtype === "number" && xtype === ytype) {
@@ -28,18 +28,20 @@ function __assert_numbers(x, y, opname) {
 function __eq(x, y) {
     var eq_strict = (x === y);
     var eq_loose = /*loose*/(x == y);
-    if (eq_strict === eq_loose) {
-        return eq_strict;
+    if (eq_strict === eq_loose ||
+        (x === undefined && y === null || x === null && y === undefined)) {
+        return eq_loose;
     }
-    __throw_typeerror("__eq", x, y);
+    __throw_typeerror("==", x, y);
 }
 function __ne(x, y) {
     var ne_strict = (x !== y);
     var ne_loose = /*loose*/(x != y);
-    if (ne_strict === ne_loose) {
-        return ne_strict;
+    if (ne_strict === ne_loose ||
+        (x === undefined && y === null || x === null && y === undefined)) {
+        return ne_loose;
     }
-    __throw_typeerror("__ne", x, y);
+    __throw_typeerror("!=", x, y);
 }
 function __lt(x, y) {
     var xtype = typeof x;
@@ -50,7 +52,7 @@ function __lt(x, y) {
             return /*loose*/(x < y);
         }
     }
-    __throw_typeerror("__lt", x, y);
+    __throw_typeerror("<", x, y);
 }
 function __gt(x, y) {
     var xtype = typeof x;
@@ -61,7 +63,7 @@ function __gt(x, y) {
             return /*loose*/(x > y);
         }
     }
-    __throw_typeerror("__gt", x, y);
+    __throw_typeerror(">", x, y);
 }
 function __le(x, y) {
     var xtype = typeof x;
@@ -72,7 +74,7 @@ function __le(x, y) {
             return /*loose*/(x <= y);
         }
     }
-    __throw_typeerror("__le", x, y);
+    __throw_typeerror("<=", x, y);
 }
 function __ge(x, y) {
     var xtype = typeof x;
@@ -83,7 +85,7 @@ function __ge(x, y) {
             return /*loose*/(x >= y);
         }
     }
-    __throw_typeerror("__ge", x, y);
+    __throw_typeerror(">=", x, y);
 }
 
 function __neg(v) {
@@ -91,7 +93,7 @@ function __neg(v) {
     if (vtype === "number") {
         return /*loose*/(-v);
     }
-    __throw_typeerror("__neg", v);
+    __throw_typeerror("unary -", v);
 }
 
 function __add(x, y) {
@@ -105,46 +107,46 @@ function __add(x, y) {
             return /*loose*/(x + y);
         }
     }
-    __throw_typeerror("__add", x, y);
+    __throw_typeerror("+", x, y);
 }
 function __sub(x, y) {
-    __assert_numbers(x, y, "__sub");
+    __assert_numbers("-", x, y);
     return /*loose*/(x - y);
 }
 function __mul(x, y) {
-    __assert_numbers(x, y, "__mul");
+    __assert_numbers("*", x, y);
     return /*loose*/(x * y);
 }
 function __div(x, y) {
-    __assert_numbers(x, y, "__div");
+    __assert_numbers("/", x, y);
     return /*loose*/(x / y);
 }
 function __mod(x, y) {
-    __assert_numbers(x, y, "__mod");
+    __assert_numbers("%", x, y);
     return /*loose*/(x % y);
 }
 function __bitand(x, y) {
-    __assert_numbers(x, y, "__bitand");
+    __assert_numbers("&", x, y);
     return /*loose*/(x & y);
 }
 function __bitor(x, y) {
-    __assert_numbers(x, y, "__bitor");
+    __assert_numbers("|", x, y);
     return /*loose*/(x | y);
 }
 function __bitxor(x, y) {
-    __assert_numbers(x, y, "__bitxor");
+    __assert_numbers("^", x, y);
     return /*loose*/(x ^ y);
 }
 function __bitasl(x, y) {
-    __assert_numbers(x, y, "__bitasl");
+    __assert_numbers("<<", x, y);
     return /*loose*/(x << y);
 }
 function __bitasr(x, y) {
-    __assert_numbers(x, y, "__bitasr");
+    __assert_numbers(">>", x, y);
     return /*loose*/(x >> y);
 }
 function __bitlsr(x, y) {
-    __assert_numbers(x, y, "__bitlsr");
+    __assert_numbers(">>>", x, y);
     return /*loose*/(x >>> y);
 }
 function __bitnot(v) {
@@ -152,21 +154,21 @@ function __bitnot(v) {
     if (vtype === "number") {
         return /*loose*/(~v);
     }
-    __throw_typeerror("__bitnot", v);
+    __throw_typeerror("~", v);
 }
 function __inc(v) {
     var vtype = typeof v;
     if (vtype === "number") {
         return /*loose*/(v + 1);
     }
-    __throw_typeerror("__inc", v);
+    __throw_typeerror("++", v);
 }
 function __dec(v) {
     var vtype = typeof v;
     if (vtype === "number") {
         return /*loose*/(v - 1);
     }
-    __throw_typeerror("__dec", v);
+    __throw_typeerror("--", v);
 }
 function __arg0(x) {
     return x;
