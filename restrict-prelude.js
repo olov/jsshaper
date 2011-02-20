@@ -16,6 +16,13 @@ function __throw_typeerror(opname, var_args) {
 //    print(e.stack);
     throw e;
 }
+function __assert_number(opname, v) {
+    var vtype = typeof v;
+    if (vtype === "number") {
+        return; // ok
+    }
+    __throw_typeerror(opname, v);
+}
 function __assert_numbers(opname, x, y) {
     var xtype = typeof x;
     var ytype = typeof y;
@@ -89,11 +96,8 @@ function __ge(x, y) {
 }
 
 function __neg(v) {
-    var vtype = typeof v;
-    if (vtype === "number") {
-        return /*loose*/(-v);
-    }
-    __throw_typeerror("unary -", v);
+    __assert_number("unary -", v);
+    return /*loose*/(-v);
 }
 
 function __add(x, y) {
@@ -150,25 +154,16 @@ function __bitlsr(x, y) {
     return /*loose*/(x >>> y);
 }
 function __bitnot(v) {
-    var vtype = typeof v;
-    if (vtype === "number") {
-        return /*loose*/(~v);
-    }
-    __throw_typeerror("~", v);
+    __assert_number("~", v);
+    return /*loose*/(~v);
 }
 function __inc(v) {
-    var vtype = typeof v;
-    if (vtype === "number") {
-        return /*loose*/(v + 1);
-    }
-    __throw_typeerror("++", v);
+    __assert_number("++", v);
+    return /*loose*/(v + 1);
 }
 function __dec(v) {
-    var vtype = typeof v;
-    if (vtype === "number") {
-        return /*loose*/(v - 1);
-    }
-    __throw_typeerror("--", v);
+    __assert_number("--", v);
+    return /*loose*/(v - 1);
 }
 function __arg0(x) {
     return x;

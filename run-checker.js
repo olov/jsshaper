@@ -15,7 +15,7 @@ var src = readfile(filename);
 var root = parse(src);
 alterTree(root);
 var header = 'load("restrict-prelude.js");\n';
-print(header);
+//print(header);
 print(root.getSrc());
 //printTree(root);
 //print("run-checker.js done");

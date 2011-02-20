@@ -174,4 +174,4 @@ Restrict pedantic mode:
 In restrict pedantic mode, the use of the loose == and != operators is
 only valid when loose-annotated. For strict versions, use the built-in
 === and !== operators instead. + < > <= and >= are only valid with
-numbers.
+numbers. unary + disallowed?
