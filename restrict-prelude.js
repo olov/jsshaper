@@ -95,6 +95,9 @@ function __ge(x, y) {
     __throw_typeerror(">=", x, y);
 }
 
+function __uplus(v) {
+    return /*loose*/(+v);
+}
 function __neg(v) {
     __assert_number("unary -", v);
     return /*loose*/(-v);

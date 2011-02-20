@@ -207,6 +207,7 @@ function alterTree(root) {
 
     // INCREMENT, DECREMENT prefix, postfix
 
+    restrictfns[tkn.UNARY_PLUS] = "__uplus($)";
     restrictfns[tkn.UNARY_MINUS] = "__neg($)";
     restrictfns[tkn.BITWISE_AND] = "__bitand($, $)";
     restrictfns[tkn.BITWISE_OR] = "__bitor($, $)";

@@ -130,7 +130,7 @@ Operators without restrict equivalents, untranslated
 ||   calls toBoolean
 !    calls toBoolean
 ?:   calls toBoolean
-+n   calls toNumber, common shorthand for Number(n). TODO disallow?
++n   calls toNumber, common shorthand for Number(n)
 ,    doesn't coerce
 o.k  doesn't coerce
 o[k] calls toString
@@ -174,4 +174,4 @@ Restrict pedantic mode:
 In restrict pedantic mode, the use of the loose == and != operators is
 only valid when loose-annotated. For strict versions, use the built-in
 === and !== operators instead. + < > <= and >= are only valid with
-numbers. unary + disallowed?
+numbers. unary + is disallowed.
