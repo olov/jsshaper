@@ -333,6 +333,9 @@ function alterTree(root) {
     }});
 }
 function adjustStartEnd(root) {
+    root.start = Math.min(0, root.start);
+    root.end = Math.max(root.tokenizer.source.length, root.end);
+
     return traverseTree(root, {post: function(node, parent, parentProp) {
         if (parent) {
             if (parent.start === undefined || parent.end === undefined ||
