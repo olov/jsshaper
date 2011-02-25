@@ -83,7 +83,7 @@ function traverseTree(node, visitfns, parent, parentProp) {
 
     var old = node;
     visitfns.pre && (node = visitfns.pre(node, parent, parentProp) || node);
-    if (node === "stop") {
+    if (node === "stop-traversal") {
         return old;
     }
     else if (!(node instanceof Narcissus.parser.Node)) {
@@ -219,11 +219,40 @@ function alterTree(root) {
 
     // ASSIGN with .assignOp
 
-    traverseTree(root, {pre: function(node, parent, parentProp) {
+    var useRestrictStack = [false]; // TODO change default via options
+    function checkerPost(node, parent, parentProp) {
+        if (node.type === tkn.SCRIPT) {
+            useRestrictStack.pop();
+        }
+    }
+    function checkerPre(node, parent, parentProp) {
         // don't alter /*loose*/ annotated nodes or children
         if (node.loose) {
-            return "stop";
+            return "stop-traversal";
         }
+
+        // detect "use restrict"; literal in beginning of script/function
+        if (node.type === tkn.SCRIPT) {
+            var inRestrict = useRestrictStack.top();
+            for (var i = 0; i < node.children.length; i++) {
+                var c = node.children[i];
+                if (!(c.type === tkn.SEMICOLON &&
+                      c.expression.type === tkn.STRING)) {
+                    break;
+                }
+                if (c.expression.value.search("^use restrict") === 0) {
+                    inRestrict = c.expression.value;
+                    break;
+                }
+            }
+            useRestrictStack.push(inRestrict);
+        }
+
+        // don't alter node if we're not in restrict mode (but continue traversal)
+        if (useRestrictStack.top() === false) {
+            return undefined;
+        }
+
         var replaceNode;
         if (restrictfns[node.type] !== undefined) {
             replaceNode = parseExpression(restrictfns[node.type]);
@@ -331,7 +360,8 @@ function alterTree(root) {
         }
         setParent(parent, parentProp, replaceNode);
         return replaceNode;
-    }});
+    }
+    traverseTree(root, {pre: checkerPre, post: checkerPost});
 }
 function adjustStartEnd(root) {
     root.start = 0;
