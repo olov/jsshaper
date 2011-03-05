@@ -9,12 +9,15 @@ function __verbosetypeof(v) {
         "object (".concat(m[1], ")") :
         "object";
 }
+var __errorfn = null;
 function __throw_typeerror(opname, var_args) {
     var args = Array.prototype.slice.call(arguments, 1, arguments.length);
     var typeofs = args.map(__verbosetypeof).join(" and ");
     var e = new Error("restrict mode ".concat(opname, " called with ", typeofs));
-//    print(e.stack);
-    throw e;
+    if (!__errorfn) {
+        throw e;
+    }
+    __errorfn(e);
 }
 function __assert_number(opname, v) {
     var vtype = typeof v;
