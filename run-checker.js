@@ -12,10 +12,10 @@ var filename = arguments[0];
 load("checker.js");
 var readfile = this.snarf || this.read;
 var src = readfile(filename);
-var root = parse(src);
+var root = parse(src, filename);
 alterTree(root);
 var header = 'load("restrict-prelude.js");\n';
 //print(header);
-print(root.getSrc());
+print(root.getSrc()); // TODO remove trailing newline added by print
 //printTree(root);
 //print("run-checker.js done");

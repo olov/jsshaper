@@ -511,8 +511,8 @@ Narcissus.parser.Node.prototype.getSrc = function() {
     return srcs.join("");
 };
 
-function parse(str) {
-    return annotate(srcsify(adjustStartEnd(Narcissus.parser.parse(str, "test.js", 1))));
+function parse(str, filename) {
+    return annotate(srcsify(adjustStartEnd(Narcissus.parser.parse(str, filename || "<no filename>", 1))));
 }
 function parseExpression(expr) {
     // SCRIPT -> [SEMICOLON ->] expr
