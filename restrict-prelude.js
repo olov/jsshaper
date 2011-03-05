@@ -1,3 +1,5 @@
+"use strict"; "use restrict";
+
 function __verbosetypeof(v) {
     var t = typeof v;
     var m;

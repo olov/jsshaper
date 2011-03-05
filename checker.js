@@ -1,4 +1,4 @@
-"use strict";
+"use strict"; "use restrict";
 
 load('jsecma5.js');
 var Narcissus;

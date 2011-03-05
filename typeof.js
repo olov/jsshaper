@@ -1,4 +1,4 @@
-"use strict";
+"use strict"; "use restrict";
 
 function __typeof(v) {
     var t = typeof v;

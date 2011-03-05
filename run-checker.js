@@ -1,4 +1,4 @@
-"use strict";
+"use strict"; "use restrict";
 
 if (arguments.length > 0 && arguments[0] === '--') {
     arguments.shift();

@@ -1,4 +1,4 @@
-"use strict";
+"use strict"; "use restrict";
 
 load('checker.js');
 load('assert.js');

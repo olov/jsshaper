@@ -1,3 +1,5 @@
+"use strict"; "use restrict";
+
 function assertEquals(l, r) {
     if (l === r) {
         //print("PASS "+ l);

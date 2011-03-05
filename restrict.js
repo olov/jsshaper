@@ -1,4 +1,4 @@
-"use strict";
+"use strict"; "use restrict";
 
 var require;
 var nodejs = Boolean(require);
