@@ -6,7 +6,7 @@ var log = nodejs ? console.log : print;
 var load;
 if (nodejs) {
     load = function (filename) {
-        require('fs').readFile('./'+ filename, function(err, content) {
+        require("fs").readFile("./"+ filename, function(err, content) {
             if (err) throw err;
             eval(content.toString());
         });
@@ -32,10 +32,10 @@ function inspect(v) {
 }
 function assertEquals(l, r) {
     if (l === r) {
-//        log("PASS " + l);
+//        log("PASS "+ l);
     }
     else {
-        log("FAIL " + l + " !== " + r);
+        log("FAIL "+ l +" !== "+ r);
         throw new Error("assertion failed");
     }
 }
@@ -44,7 +44,7 @@ function assertThrows(fn) {
         fn();
     }
     catch (e) {
-        //log("PASS " + e);
+        //log("PASS "+ e);
         return;
     }
     log("FAIL no exception thrown");
@@ -52,7 +52,7 @@ function assertThrows(fn) {
 }
 
 Array.isArray = Array.isArray || function(o) {
-    return Object.prototype.toString.call(o) === '[object Array]';
+    return Object.prototype.toString.call(o) === "[object Array]";
 };
 
 var _str = String.concat;

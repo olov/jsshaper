@@ -2,7 +2,7 @@
 
 function __typeof(v) {
     var t = typeof v;
-    return t !== 'object' ? t :
+    return t !== "object" ? t :
         Array.isArray(v) ? "array" :
         v !== null ? typeof v.valueOf() : "object";
 }
@@ -54,17 +54,17 @@ function test__typeof() {
 }
 
 Array.isArray = Array.isArray || function(o) {
-    return Object.prototype.toString.call(o) === '[object Array]';
+    return Object.prototype.toString.call(o) === "[object Array]";
 };
 
 var log = print;
 
 function assertEquals(l, r) {
     if (l === r) {
-        log("PASS " + l);
+        log("PASS "+ l);
     }
     else {
-        log("FAIL " + l + " !== " + r);
+        log("FAIL "+ l +" !== "+ r);
         throw new Error("assertion failed");
     }
 }
@@ -74,7 +74,7 @@ function assertThrows(fn) {
         fn();
     }
     catch (e) {
-        log("PASS " + e);
+        log("PASS "+ e);
         return;
     }
     log("FAIL no exception thrown");

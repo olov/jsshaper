@@ -1,6 +1,6 @@
 "use strict"; "use restrict";
 
-if (arguments.length > 0 && arguments[0] === '--') {
+if (arguments.length > 0 && arguments[0] === "--") {
     arguments.shift();
 }
 if (arguments.length <= 0) {
@@ -9,7 +9,7 @@ if (arguments.length <= 0) {
 }
 var filename = arguments[0];
 
-load('checker.js');
+load("checker.js");
 var readfile = this.snarf || this.read;
 var src = readfile(filename);
 var root = parse(src);

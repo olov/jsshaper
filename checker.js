@@ -1,15 +1,15 @@
 "use strict"; "use restrict";
 
-load('jsecma5.js');
+load("jsecma5.js");
 var Narcissus;
-load('narcissus/lib/jsdefs.js');
-load('narcissus/lib/jslex.js');
-load('narcissus/lib/jsparse.js');
+load("narcissus/lib/jsdefs.js");
+load("narcissus/lib/jslex.js");
+load("narcissus/lib/jsparse.js");
 
 var tkn = Narcissus.definitions.tokenIds;
 
 Array.isArray = Array.isArray || function(o) {
-    return Object.prototype.toString.call(o) === '[object Array]';
+    return Object.prototype.toString.call(o) === "[object Array]";
 };
 function error(node, msg) {
     print(node.tokenizer.filename +":"+ String(node.lineno) +" error: "+ msg);
@@ -95,7 +95,7 @@ function traverseTree(node, visitfns, parent, parentProp) {
         var prop = subprops[i];
         if (Array.isArray(node[prop])) {
             for (var j = 0, k = node[prop].length; j < k; j++) {
-                traverseTree(node[prop][j], visitfns, node, prop + "[" + String(j) + "]");
+                traverseTree(node[prop][j], visitfns, node, prop +"["+ String(j) +"]");
             }
         }
         else {

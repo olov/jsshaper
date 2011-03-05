@@ -1,7 +1,7 @@
 "use strict"; "use restrict";
 
-load('checker.js');
-load('assert.js');
+load("checker.js");
+load("assert.js");
 
 function testParser() {
 //    assertEquals(parse("1").start, 0);
@@ -45,7 +45,7 @@ print(root.getSrc());
 //printTree(root);
 // print();
 // print(src);
-//load('narcissus/lib/jsdecomp.js');
+//load("narcissus/lib/jsdecomp.js");
 //print(Narcissus.decompiler.pp(root));
 //printTree(parseExpression("if (1+2) 3;"));
 
