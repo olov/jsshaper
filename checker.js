@@ -410,8 +410,14 @@ function srcsify(root) {
         }
     });
 }
+
+function annotation(re, applyfn) {
+    annotation.matchers.push({re: re, applyfn: applyfn});
+}
+annotation.matchers = [];
+
 function annotate(root) {
-    var annotations = null;
+    var annotations = [];
     function pushNodeFragment(node, frag) {
         // remove to-end-of-line comments (// comment)
         frag = frag.replace(/\/\/.*/g, "");
@@ -421,7 +427,7 @@ function annotate(root) {
             return;
         }
         // apply annotations captured on previous node fragment to this node
-        if (annotations) {
+        if (annotations.length > 0) {
             applyAnnotations(node);
             return;
         }
@@ -433,7 +439,7 @@ function annotate(root) {
         // (/*loose*/ x), (/*loose*/ (x)) or {/*loose*/}
         // in this case the annotations should be applied to the same node
         // for which it was captured, not next node
-        if (annotations && isTerminalNode) {
+        if (annotations.length > 0 && isTerminalNode) {
             applyAnnotations(node);
         }
     }
@@ -442,21 +448,23 @@ function annotate(root) {
         // to capture any registered annotation fragment
 
         // fragment includes /*loose*/? (optional extra '*' and ' ')
-        var match = frag.match(/\/\*+\s*loose\s*\*+\//);
-        if (match === null) {
-            return;
-        }
-        if (!allowTrailing) {
-            var tail = frag.slice(match.index + match[0].length);
-            // strip all /* inline */ comments [http://ostermiller.org/findcomment.html]
-            tail = tail.replace(/\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\//g, "");
-
-            // tail should only contain whitespace
-            if (tail.search(/\S/) !== -1) {
-                error(node, "invalid annotation: "+ frag.slice(match.index));
+        for (var i = 0; i < annotation.matchers.length; i++) {
+            var match = frag.match(annotation.matchers[i].re);
+            if (match === null) {
+                continue;
             }
+            if (!allowTrailing) {
+                var tail = frag.slice(match.index + match[0].length);
+                // strip all /* inline */ comments [http://ostermiller.org/findcomment.html]
+                tail = tail.replace(/\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\//g, "");
+
+                // tail should only contain whitespace
+                if (tail.search(/\S/) !== -1) {
+                    error(node, "invalid annotation: "+ frag.slice(match.index));
+                }
+            }
+            annotations.push({applyfn: annotation.matchers[i].applyfn, match: match});
         }
-        annotations = {loose: true};
     }
     function applyAnnotations(node) {
         // todo annotations could be per-node, per-subtree or have a
@@ -464,10 +472,12 @@ function annotate(root) {
         // for now only per-node is implemented
 
         //print("applyAnnotations: "+ nodeString(node));
-        for (var annotation in annotations) {
-            node[annotation] = annotations[annotation];
+        for (var i = 0; i < annotations.length; i++) {
+            var applyfn = annotations[i].applyfn;
+            var match = annotations[i].match;
+            applyfn(node, match);
         }
-        annotations = null;
+        annotations = [];
     }
 
     return traverseTree(root, {
@@ -509,5 +519,9 @@ function parseExpression(expr) {
     var stmnt = parse(expr).children[0];
     return stmnt.type === tkn.SEMICOLON ? stmnt.expression : stmnt;
 }
+
+annotation(/\/\*+\s*loose\s*\*+\//, function(node, match) {
+    node.loose = true;
+});
 
 //print("checker.js done");
