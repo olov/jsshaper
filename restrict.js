@@ -18,15 +18,15 @@ String.concat = function() {
 load("restrict-prelude.js");
 
 function inspect(v) {
-    var str = "inspect("+ detailedtypeof(v) +")";
+    var str = "inspect("+ __verbosetypeof(v) +")";
     var val;
     if (v.valueOf) {
         val = v.valueOf();
-        str += " valueOf: "+ String(val) +" ("+ detailedtypeof(val) +")";
+        str += " valueOf: "+ String(val) +" ("+ __verbosetypeof(val) +")";
     }
     if (v.toString) {
         val = v.toString();
-        str += " toString: "+ String(val) +" ("+ detailedtypeof(val) +")";
+        str += " toString: "+ String(val) +" ("+ __verbosetypeof(val) +")";
     }
     log(str);
 }

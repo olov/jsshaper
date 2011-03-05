@@ -1,17 +1,17 @@
-function detailedtypeof(v) {
+function __verbosetypeof(v) {
     var t = typeof v;
+    var m;
     return t !== "object" ? t :
         v === null ? "null" :
-        Array.isArray(v) ? "object (Array)" :
-        v instanceof Number ? "object (Number)" :
-        v instanceof String ? "object (String)" :
-        v instanceof Boolean ? "object (Boolean)" :
-        v instanceof Date ? "object (Date)" :
+        Object.prototype.toString.call(v) === "[object Array]" ? "object (Array)" :
+        typeof v.constructor === "function" &&
+        (m = v.constructor.toString().match(/^function (.+)\(/)) ?
+        "object (".concat(m[1], ")") :
         "object";
 }
 function __throw_typeerror(opname, var_args) {
     var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-    var typeofs = args.map(detailedtypeof).join(" and ");
+    var typeofs = args.map(__verbosetypeof).join(" and ");
     var e = new Error("restrict mode ".concat(opname, " called with ", typeofs));
 //    print(e.stack);
     throw e;
@@ -31,7 +31,6 @@ function __assert_numbers(opname, x, y) {
     }
     __throw_typeerror(opname, x, y);
 }
-
 function __eq(x, y) {
     var eq_strict = (x === y);
     var eq_loose = /*loose*/(x == y);
@@ -94,7 +93,6 @@ function __ge(x, y) {
     }
     __throw_typeerror(">=", x, y);
 }
-
 function __uplus(v) {
     return /*loose*/(+v);
 }
@@ -102,7 +100,6 @@ function __neg(v) {
     __assert_number("unary -", v);
     return /*loose*/(-v);
 }
-
 function __add(x, y) {
     var xtype = typeof x;
     var ytype = typeof y;
