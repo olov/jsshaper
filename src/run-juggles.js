@@ -4,12 +4,13 @@ if (arguments.length > 0 && arguments[0] === "--") {
     arguments.shift();
 }
 if (arguments.length <= 0) {
-    print("run-checker: filename");
+    print("run-juggles: filename");
     quit();
 }
 var filename = arguments[0];
 
-load("checker.js");
+load("juggles.js");
+load("restrict-checker.js");
 var readfile = this.snarf || this.read;
 
 var src = readfile(filename);
@@ -22,4 +23,4 @@ root = runJugglers(root);
 //print(header);
 //print(root.getSrc()); // TODO remove trailing newline added by print
 //printTree(root);
-//print("run-checker.js done");
+//print("run-juggles.js done");
