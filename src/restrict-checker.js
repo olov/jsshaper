@@ -178,4 +178,3 @@ annotate(/\/\*+\s*loose\s*\*+\//, function(node, match) {
     node.loose = true;
 });
 shape(restrictChecker);
-shape(printSource);
