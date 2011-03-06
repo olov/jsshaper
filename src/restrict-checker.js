@@ -1,3 +1,5 @@
+"use strict"; "use restrict";
+
 function restrictChecker(root) {
     var restrictfns = [];
     restrictfns[tkn.EQ] = "__eq($, $)";
@@ -172,8 +174,8 @@ function restrictChecker(root) {
     return traverseTree(root, {pre: checkerPre, post: checkerPost});
 }
 
-annotates(/\/\*+\s*loose\s*\*+\//, function(node, match) {
+annotate(/\/\*+\s*loose\s*\*+\//, function(node, match) {
     node.loose = true;
 });
-juggles(restrictChecker);
-juggles(printSource);
+shape(restrictChecker);
+shape(printSource);
