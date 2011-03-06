@@ -94,28 +94,28 @@ function restrictChecker(root) {
 
             if (c.type === tkn.IDENTIFIER) { // id++
                 if (node.postfix) {
-                    replaceNode = parseExpression("__arg0($, $ = "+ __op +"($))");
+                    replaceNode = parseExpression(Fmt("__arg0($, $ = {0}($))", __op));
                     replace(replaceNode, c, c, c);
                 }
                 else {
-                    replaceNode = parseExpression("($ = "+ __op +"($))");
+                    replaceNode = parseExpression(Fmt("($ = {0}($))", __op));
                     replace(replaceNode, c, c);
                 }
             }
             else if (c.type === tkn.DOT) { // expr.id++
                 var expr = c.children[0];
                 var id = c.children[1];
-                replaceNode = parseExpression(__postprefop +'($, "'+ id.value +'")');
+                replaceNode = parseExpression(Fmt('{0}($, "{1}")', __postprefop, id.value));
                 replace(replaceNode, expr);
             }
             else if (c.type === tkn.INDEX) { // expr1[expr2]++
                 var expr1 = c.children[0];
                 var expr2 = c.children[1];
                 if (expr2.type === tkn.STRING) {
-                    replaceNode = parseExpression(__postprefop +"($, $)");
+                    replaceNode = parseExpression(Fmt("{0}($, $)", __postprefop));
                 }
                 else {
-                    replaceNode = parseExpression(__postprefop +"($, String($))");
+                    replaceNode = parseExpression(Fmt("{0}($, String($))", __postprefop));
                 }
                 replace(replaceNode, expr1, expr2);
             }
@@ -130,23 +130,23 @@ function restrictChecker(root) {
             var __op = __opcall.slice(0, __opcall.indexOf("("));
 
             if (lvalue.type === tkn.IDENTIFIER) { // id += v
-                replaceNode = parseExpression("$ = "+ __op +"($, $)");
+                replaceNode = parseExpression(Fmt("$ = {0}($, $)", __op));
                 replace(replaceNode, lvalue, lvalue, v);
             }
             else if (lvalue.type === tkn.DOT) { // expr.id += v
                 var expr = lvalue.children[0];
                 var id = lvalue.children[1];
-                replaceNode = parseExpression('__op_set('+ __op +', $, "'+ id.value +'", $)');
+                replaceNode = parseExpression(Fmt('__op_set({0}, $, "{1}", $)', __op, id.value));
                 replace(replaceNode, expr, v);
             }
             else if (lvalue.type === tkn.INDEX) { // expr1[expr2] += v
                 var expr1 = lvalue.children[0];
                 var expr2 = lvalue.children[1];
                 if (expr2.type === tkn.STRING) {
-                    replaceNode = parseExpression('__op_set('+ __op +', $, $, $)');
+                    replaceNode = parseExpression(Fmt('__op_set({0}, $, $, $)', __op));
                 }
                 else {
-                    replaceNode = parseExpression('__op_set('+ __op +', $, String($), $)');
+                    replaceNode = parseExpression(Fmt('__op_set({0}, $, String($), $)', __op));
                 }
                 replace(replaceNode, expr1, expr2, v);
             }
@@ -177,4 +177,3 @@ annotates(/\/\*+\s*loose\s*\*+\//, function(node, match) {
 });
 juggles(restrictChecker);
 juggles(printSource);
-juggles(printTree);
