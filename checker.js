@@ -159,6 +159,10 @@ function printTree(root) {
     });
 }
 
+function printSource(root) {
+    print(root.getSrc());
+}
+
 function setParent(parent, parentProp, node) {
     if (parentProp[parentProp.length - 1] === "]") {
         var leftBracket = parentProp.indexOf("[");
@@ -171,26 +175,26 @@ function setParent(parent, parentProp, node) {
         parent[parentProp] = node;
     }
 }
-
-function alterTree(root) {
-    function replace(node, var_args) {
-        var placeholders = [];
-        //collect all $ nodes into placeholders array
-        traverseTree(node, {pre: function(node, parent, parentProp) {
-            if (node.type === tkn.IDENTIFIER && node.value === "$") {
-                placeholders.push({node: node, parent: parent, parentProp: parentProp});
-            }
-        }});
-        if (arguments.length - 1 !== placeholders.length) {
-            throw new Error("replace: placeholders.length mismatch");
+function replace(node, var_args) {
+    var placeholders = [];
+    //collect all $ nodes into placeholders array
+    traverseTree(node, {pre: function(node, parent, parentProp) {
+        if (node.type === tkn.IDENTIFIER && node.value === "$") {
+            placeholders.push({node: node, parent: parent, parentProp: parentProp});
         }
-
-        // replace placeholders with new nodes
-        for (var i = 0; i < placeholders.length; i++) {
-            var o = placeholders[i];
-            setParent(o.parent, o.parentProp, arguments[i + 1]);
-        }
+    }});
+    if (arguments.length - 1 !== placeholders.length) {
+        throw new Error("replace: placeholders.length mismatch");
     }
+
+    // replace placeholders with new nodes
+    for (var i = 0; i < placeholders.length; i++) {
+        var o = placeholders[i];
+        setParent(o.parent, o.parentProp, arguments[i + 1]);
+    }
+}
+
+function restrictChecker(root) {
     var restrictfns = [];
     restrictfns[tkn.EQ] = "__eq($, $)";
     restrictfns[tkn.NE] = "__ne($, $)";
@@ -361,7 +365,7 @@ function alterTree(root) {
         setParent(parent, parentProp, replaceNode);
         return replaceNode;
     }
-    traverseTree(root, {pre: checkerPre, post: checkerPost});
+    return traverseTree(root, {pre: checkerPre, post: checkerPost});
 }
 function adjustStartEnd(root) {
     root.start = 0;
@@ -411,12 +415,24 @@ function srcsify(root) {
     });
 }
 
-function annotation(re, applyfn) {
-    annotation.matchers.push({re: re, applyfn: applyfn});
+function annotates(re, applyfn) {
+    annotates.matchers.push({re: re, applyfn: applyfn});
 }
-annotation.matchers = [];
+annotates.matchers = [];
+function juggles(fn) {
+    juggles.passes.push(fn);
+}
+juggles.passes = [];
 
-function annotate(root) {
+function runJugglers(root) {
+    for (var i = 0; i < juggles.passes.length; i++) {
+        var fn = juggles.passes[i];
+        root = fn(root) || root;
+    }
+    return root;
+}
+
+function runAnnotations(root) {
     var annotations = [];
     function pushNodeFragment(node, frag) {
         // remove to-end-of-line comments (// comment)
@@ -444,12 +460,8 @@ function annotate(root) {
         }
     }
     function captureAnnotation(node, frag, allowTrailing) {
-        // hard-coded to /*loose*/ annotation for now, could be extended
-        // to capture any registered annotation fragment
-
-        // fragment includes /*loose*/? (optional extra '*' and ' ')
-        for (var i = 0; i < annotation.matchers.length; i++) {
-            var match = frag.match(annotation.matchers[i].re);
+        for (var i = 0; i < annotates.matchers.length; i++) {
+            var match = frag.match(annotates.matchers[i].re);
             if (match === null) {
                 continue;
             }
@@ -463,7 +475,7 @@ function annotate(root) {
                     error(node, "invalid annotation: "+ frag.slice(match.index));
                 }
             }
-            annotations.push({applyfn: annotation.matchers[i].applyfn, match: match});
+            annotations.push({applyfn: annotates.matchers[i].applyfn, match: match});
         }
     }
     function applyAnnotations(node) {
@@ -512,7 +524,7 @@ Narcissus.parser.Node.prototype.getSrc = function() {
 };
 
 function parse(str, filename) {
-    return annotate(srcsify(adjustStartEnd(Narcissus.parser.parse(str, filename || "<no filename>", 1))));
+    return srcsify(adjustStartEnd(Narcissus.parser.parse(str, filename || "<no filename>", 1)));
 }
 function parseExpression(expr) {
     // SCRIPT -> [SEMICOLON ->] expr
@@ -520,8 +532,9 @@ function parseExpression(expr) {
     return stmnt.type === tkn.SEMICOLON ? stmnt.expression : stmnt;
 }
 
-annotation(/\/\*+\s*loose\s*\*+\//, function(node, match) {
+annotates(/\/\*+\s*loose\s*\*+\//, function(node, match) {
     node.loose = true;
 });
-
+juggles(restrictChecker);
+juggles(printSource);
 //print("checker.js done");
