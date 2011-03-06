@@ -1,4 +1,4 @@
-1;
+"use strict"; "use restrict";
 
 // valid annotations
 /*loose*/function f(x){}

@@ -1,3 +1,5 @@
+"use strict"; "use restrict";
+
 ++id;
 ++expr.id;
 ++expr1[expr2];

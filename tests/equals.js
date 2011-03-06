@@ -1,4 +1,4 @@
-"use strict";"use restrict";
+"use strict"; "use restrict";
 var x = 1;
 var y = "1";
 var z = null;
