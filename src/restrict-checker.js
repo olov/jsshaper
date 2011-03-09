@@ -30,12 +30,12 @@ function restrictChecker(root) {
     // ASSIGN with .assignOp
 
     var useRestrictStack = [false]; // TODO change default via options
-    function checkerPost(node, parent, parentProp) {
+    function checkerPost(node, ref) {
         if (node.type === tkn.SCRIPT) {
             useRestrictStack.pop();
         }
     }
-    function checkerPre(node, parent, parentProp) {
+    function checkerPre(node, ref) {
         // don't alter /*loose*/ annotated nodes or children
         if (node.loose) {
             return "stop-traversal";
@@ -168,7 +168,7 @@ function restrictChecker(root) {
             // no-op
             return undefined;
         }
-        setParent(parent, parentProp, replaceNode);
+        setRef(ref, replaceNode);
         return replaceNode;
     }
     return traverseTree(root, {pre: checkerPre, post: checkerPost});

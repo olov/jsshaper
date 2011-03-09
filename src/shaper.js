@@ -71,18 +71,19 @@ var Shaper = (function() {
 
     //// generic traverse
     // visitfns: {pre: function, post: function}
-    // visit function signature: function(node, parent, parentProp)
-    function traverseTree(node, visitfns, parent, parentProp) {
+    // visit function signature: function(node, ref)
+    function traverseTree(node, visitfns, ref) {
         if (!node) {
             return node;
         }
         if (!(node instanceof Narcissus.parser.Node)) {
             throw new Error("traverseTree: expected Node, got "+ typeof node +
-                            ". parentProp: "+ parentProp);
+                            ". "+ strRef(ref));
         }
+        ref = ref || {base: undefined, prop: undefined};
 
         var old = node;
-        visitfns.pre && (node = visitfns.pre(node, parent, parentProp) || node);
+        visitfns.pre && (node = visitfns.pre(node, ref) || node);
         if (node === "stop-traversal") {
             return old;
         }
@@ -95,15 +96,15 @@ var Shaper = (function() {
             var prop = subprops[i];
             if (Array.isArray(node[prop])) {
                 for (var j = 0, k = node[prop].length; j < k; j++) {
-                    traverseTree(node[prop][j], visitfns, node, prop +"["+ String(j) +"]");
+                    traverseTree(node[prop][j], visitfns, {base: node, prop: [prop, j]});
                 }
             }
             else {
-                traverseTree(node[prop], visitfns, node, prop);
+                traverseTree(node[prop], visitfns, {base: node, prop: prop});
             }
         }
 
-        visitfns.post && (node = visitfns.post(node, parent, parentProp) || node);
+        visitfns.post && (node = visitfns.post(node, ref) || node);
         if (!(node instanceof Narcissus.parser.Node)) {
             throw new Error("traverseTree: visitfns.post invalid return type");
         }
@@ -112,24 +113,41 @@ var Shaper = (function() {
     }
 
     //// mutate nodes
-    function setParent(parent, parentProp, node) {
-        if (parentProp[parentProp.length - 1] === "]") {
-            var leftBracket = parentProp.indexOf("[");
-            var index = parentProp.slice(leftBracket + 1,
-                                         parentProp.length - 1);
-            var base = parentProp.slice(0, leftBracket);
-            parent[base][index] = node;
+    function simplifyRef(ref) {
+        var base = ref.base;
+        var prop;
+
+        // {base: obj, prop: "property"}
+        if (Array.isArray(ref.prop)) {
+            var i;
+            for (i = 0; i < ref.prop.length - 1; i++) {
+                base = base[ref.prop[i]];
+            }
+            prop = ref.prop[i];
         }
+        // {base: obj, prop: ["children", "0"]
         else {
-            parent[parentProp] = node;
+            prop = ref.prop;
         }
+        return {base: base, prop: prop};
+    }
+    function setRef(ref, value) {
+        ref = simplifyRef(ref);
+        ref.base[ref.prop] = value;
+    }
+    function getRef(ref) {
+        ref = simplifyRef(ref);
+        return ref.base[ref.prop];
+    }
+    function strRef(ref, basestr) {
+        return Fmt('ref["{0}"]', Array.isArray(ref.prop) ? ref.prop.join('"]["') : ref.prop);
     }
     function replace(node, var_args) {
         var placeholders = [];
         //collect all $ nodes into placeholders array
-        traverseTree(node, {pre: function(node, parent, parentProp) {
+        traverseTree(node, {pre: function(node, ref) {
             if (node.type === tkn.IDENTIFIER && node.value === "$") {
-                placeholders.push({node: node, parent: parent, parentProp: parentProp});
+                placeholders.push(ref);
             }
         }});
         if (arguments.length - 1 !== placeholders.length) {
@@ -138,8 +156,7 @@ var Shaper = (function() {
 
         // replace placeholders with new nodes
         for (var i = 0; i < placeholders.length; i++) {
-            var o = placeholders[i];
-            setParent(o.parent, o.parentProp, arguments[i + 1]);
+            setRef(placeholders[i], arguments[i + 1]);
         }
     }
 
@@ -166,12 +183,12 @@ var Shaper = (function() {
     function printTree(root) {
         var level = 0;
         traverseTree(root, {
-            pre: function(node, parent, parentProp) {
-                print(Fmt.repeat(" ", level * 2) + (parentProp || "root") +": "+
+            pre: function(node, ref) {
+                print(Fmt.repeat(" ", level * 2) + (ref || "root") +": "+
                       nodeString(node));
                 ++level;
             },
-            post: function(node, parent, parentProp) {
+            post: function(node, ref) {
                 --level;
             }
         });
@@ -182,13 +199,14 @@ var Shaper = (function() {
     Narcissus.parser.Node.prototype.getSrc = function() {
         var srcs = [];
         traverseTree(this, {
-            pre: function(node, parent, parentProp) {
+            pre: function(node, ref) {
+                var parent = ref.base;
                 if (parent) {
                     srcs.push(parent.srcs[parent.nPushed++]);
                 }
                 node.nPushed = 0;
             },
-            post: function(node, parent, parentProp) {
+            post: function(node, ref) {
                 srcs.push(node.srcs[node.nPushed++]);
                 delete node.nPushed;
             }
@@ -209,7 +227,8 @@ var Shaper = (function() {
         root.start = 0;
         root.end = root.tokenizer.source.length;
 
-        return traverseTree(root, {post: function(node, parent, parentProp) {
+        return traverseTree(root, {post: function(node, ref) {
+            var parent = ref.base;
             if (parent) {
                 if (parent.start === undefined || parent.end === undefined ||
                     node.start === undefined || node.end === undefined) {
@@ -224,7 +243,8 @@ var Shaper = (function() {
         var tokenizer = {source: "", filename: root.tokenizer.filename};
 
         return traverseTree(root, {
-            pre: function(node, parent, parentProp) {
+            pre: function(node, ref) {
+                var parent = ref.base;
                 node.pos = node.start;
                 node.srcs = [];
 
@@ -233,7 +253,7 @@ var Shaper = (function() {
                        node.start === undefined || node.end === undefined) {
                         throw new Error("srcsify: src already covered."+
                                         " parent: "+ nodeString(parent) +
-                                        " parent."+ parentProp +": "+ nodeString(node));
+                                        " "+ strRef(ref) +": "+ nodeString(node));
                     }
                     var src = parent.tokenizer.source;
                     var frag = src.slice(parent.pos, node.start);
@@ -241,7 +261,7 @@ var Shaper = (function() {
                     parent.pos = node.end;
                 }
             },
-            post: function(node, parent, parentProp) {
+            post: function(node, ref) {
                 var src = node.tokenizer.source;
                 node.srcs.push(src.slice(node.pos, node.end));
                 delete node.pos;
@@ -271,19 +291,21 @@ var Shaper = (function() {
         traverseTree: traverseTree,
         printTree: printTree,
         printSource: printSource,
-        setParent: setParent,
         replace: replace,
         parse: parse,
         parseExpression: parseExpression,
         shape: shape,
+        setRef: setRef,
+        getRef: getRef,
         run: run
     };
 })();
 var traverseTree = Shaper.traverseTree;
 var printTree = Shaper.printTree;
 var printSource = Shaper.printSource;
-var setParent = Shaper.setParent;
 var replace = Shaper.replace;
 var parse = Shaper.parse;
 var parseExpression = Shaper.parseExpression;
 var shape = Shaper.shape;
+var setRef = Shaper.setRef;
+var getRef = Shaper.setRef;

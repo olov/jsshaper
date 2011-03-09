@@ -66,13 +66,14 @@ function annotater(root) {
     }
 
     return traverseTree(root, {
-        pre: function(node, parent, parentProp) {
+        pre: function(node, ref) {
+            var parent = ref.base;
             if (parent) {
                 pushNodeFragment(parent, parent.srcs[parent.nPushed++]);
             }
             node.nPushed = 0;
         },
-        post: function(node, parent, parentProp) {
+        post: function(node, ref) {
             pushNodeFragment(node, node.srcs[node.nPushed++]);
             delete node.nPushed;
         }
