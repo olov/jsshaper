@@ -6,6 +6,7 @@ load("narcissus/lib/jsdefs.js");
 load("narcissus/lib/jslex.js");
 load("narcissus/lib/jsparse.js");
 load("fmt.js");
+load("ref.js");
 
 var tkn = Narcissus.definitions.tokenIds;
 var Shaper = (function() {
@@ -78,9 +79,9 @@ var Shaper = (function() {
         }
         if (!(node instanceof Narcissus.parser.Node)) {
             throw new Error("traverseTree: expected Node, got "+ typeof node +
-                            ". "+ strRef(ref));
+                            ". "+ String(ref));
         }
-        ref = ref || {base: undefined, prop: undefined};
+        ref = ref || new Ref();
 
         var old = node;
         visitfns.pre && (node = visitfns.pre(node, ref) || node);
@@ -96,11 +97,11 @@ var Shaper = (function() {
             var prop = subprops[i];
             if (Array.isArray(node[prop])) {
                 for (var j = 0, k = node[prop].length; j < k; j++) {
-                    traverseTree(node[prop][j], visitfns, {base: node, prop: [prop, j]});
+                    traverseTree(node[prop][j], visitfns, new Ref(node, prop, j));
                 }
             }
             else {
-                traverseTree(node[prop], visitfns, {base: node, prop: prop});
+                traverseTree(node[prop], visitfns, new Ref(node, prop));
             }
         }
 
@@ -113,35 +114,6 @@ var Shaper = (function() {
     }
 
     //// mutate nodes
-    function simplifyRef(ref) {
-        var base = ref.base;
-        var prop;
-
-        // {base: obj, prop: "property"}
-        if (Array.isArray(ref.prop)) {
-            var i;
-            for (i = 0; i < ref.prop.length - 1; i++) {
-                base = base[ref.prop[i]];
-            }
-            prop = ref.prop[i];
-        }
-        // {base: obj, prop: ["children", "0"]
-        else {
-            prop = ref.prop;
-        }
-        return {base: base, prop: prop};
-    }
-    function setRef(ref, value) {
-        ref = simplifyRef(ref);
-        ref.base[ref.prop] = value;
-    }
-    function getRef(ref) {
-        ref = simplifyRef(ref);
-        return ref.base[ref.prop];
-    }
-    function strRef(ref, basestr) {
-        return Fmt('ref["{0}"]', Array.isArray(ref.prop) ? ref.prop.join('"]["') : ref.prop);
-    }
     function replace(node, var_args) {
         var placeholders = [];
         //collect all $ nodes into placeholders array
@@ -156,7 +128,7 @@ var Shaper = (function() {
 
         // replace placeholders with new nodes
         for (var i = 0; i < placeholders.length; i++) {
-            setRef(placeholders[i], arguments[i + 1]);
+            placeholders[i].set(arguments[i + 1]);
         }
     }
 
@@ -253,7 +225,7 @@ var Shaper = (function() {
                        node.start === undefined || node.end === undefined) {
                         throw new Error("srcsify: src already covered."+
                                         " parent: "+ nodeString(parent) +
-                                        " "+ strRef(ref) +": "+ nodeString(node));
+                                        " "+ String(ref) +": "+ nodeString(node));
                     }
                     var src = parent.tokenizer.source;
                     var frag = src.slice(parent.pos, node.start);
@@ -295,8 +267,6 @@ var Shaper = (function() {
         parse: parse,
         parseExpression: parseExpression,
         shape: shape,
-        setRef: setRef,
-        getRef: getRef,
         run: run
     };
 })();
@@ -307,5 +277,3 @@ var replace = Shaper.replace;
 var parse = Shaper.parse;
 var parseExpression = Shaper.parseExpression;
 var shape = Shaper.shape;
-var setRef = Shaper.setRef;
-var getRef = Shaper.setRef;

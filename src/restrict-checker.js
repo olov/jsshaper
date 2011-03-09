@@ -168,7 +168,7 @@ function restrictChecker(root) {
             // no-op
             return undefined;
         }
-        setRef(ref, replaceNode);
+        ref.set(replaceNode);
         return replaceNode;
     }
     return traverseTree(root, {pre: checkerPre, post: checkerPost});
