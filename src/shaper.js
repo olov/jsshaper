@@ -73,9 +73,9 @@ var Shaper = (function() {
     // visitfns: {pre: function, post: function}
     // visit function signature: function(node, parent, parentProp)
     function traverseTree(node, visitfns, parent, parentProp) {
-            if (!node) {
-                return node;
-            }
+        if (!node) {
+            return node;
+        }
         if (!(node instanceof Narcissus.parser.Node)) {
             throw new Error("traverseTree: expected Node, got "+ typeof node +
                             ". parentProp: "+ parentProp);
@@ -240,7 +240,7 @@ var Shaper = (function() {
                     parent.srcs.push(frag);
                     parent.pos = node.end;
                 }
-                },
+            },
             post: function(node, parent, parentProp) {
                 var src = node.tokenizer.source;
                 node.srcs.push(src.slice(node.pos, node.end));
