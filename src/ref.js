@@ -20,11 +20,11 @@ var Ref = (function() {
     };
     Ref.prototype.set = function(value) {
         var ref = this.canonical();
-        this.base[this.prop[0]] = value;
+        ref.base[ref.prop[0]] = value;
     };
     Ref.prototype.get = function() {
         var ref = this.canonical();
-        return this.base[this.prop[0]];
+        return ref.base[ref.prop[0]];
     };
     Ref.prototype.toString = function() {
         return Fmt('ref["{0}"]', this.prop.join('"]["'));
