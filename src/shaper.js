@@ -14,7 +14,7 @@ var Shaper = (function() {
         return Object.prototype.toString.call(o) === "[object Array]";
     };
     function error(node, msg) {
-        print(node.tokenizer.filename +":"+ String(node.lineno) +" error: "+ msg);
+        print(Fmt("{0}:{1} error: {2}", node.tokenizer.filename, node.lineno, msg));
         quit(-1);
     }
 
@@ -78,8 +78,8 @@ var Shaper = (function() {
             return node;
         }
         if (!(node instanceof Narcissus.parser.Node)) {
-            throw new Error("traverseTree: expected Node, got "+ typeof node +
-                            ". "+ String(ref));
+            throw new Error(Fmt("traverseTree: expected Node, got {0}. {1}",
+                                typeof node, ref));
         }
         ref = ref || new Ref();
 
@@ -156,8 +156,8 @@ var Shaper = (function() {
         var level = 0;
         traverseTree(root, {
             pre: function(node, ref) {
-                print(Fmt.repeat(" ", level * 2) + (ref || "root") +": "+
-                      nodeString(node));
+                print(Fmt("{0}{1}: {2}", Fmt.repeat(" ", level * 2),
+                          (ref || "root"), nodeString(node)));
                 ++level;
             },
             post: function(node, ref) {
@@ -223,9 +223,8 @@ var Shaper = (function() {
                 if (parent) {
                     if(parent.pos > node.start ||
                        node.start === undefined || node.end === undefined) {
-                        throw new Error("srcsify: src already covered."+
-                                        " parent: "+ nodeString(parent) +
-                                        " "+ String(ref) +": "+ nodeString(node));
+                        throw new Error(Fmt("srcsify: src already covered. parent: {0} {1}:{2}",
+                                            nodeString(parent), ref, nodeString(node)));
                     }
                     var src = parent.tokenizer.source;
                     var frag = src.slice(parent.pos, node.start);
