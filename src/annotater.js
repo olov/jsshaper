@@ -3,12 +3,7 @@
 var load, require = require || load;
 var Shaper = Shaper || require("./shaper.js") || Shaper;
 
-function annotate(re, applyfn) {
-    annotate.matchers.push({re: re, applyfn: applyfn});
-}
-annotate.matchers = [];
-
-function annotater(root) {
+Shaper("annotater", function(root) {
     var annotations = [];
     function pushNodeFragment(node, frag) {
         // remove to-end-of-line comments (// comment)
@@ -81,11 +76,13 @@ function annotater(root) {
             delete node.nPushed;
         }
     });
+});
+
+function Annotater(re, applyfn) {
+    Annotater.matchers.push({re: re, applyfn: applyfn});
 }
-var Annotater = {
-    annotate: annotate
-};
+Annotater.matchers = [];
+
 if (typeof exports !== "undefined") {
     module.exports = Annotater;
 }
-Shaper.shape(annotater);

@@ -4,7 +4,7 @@ var load, require = require || load;
 var Shaper = Shaper || require("./shaper.js") || Shaper;
 var Annotater = Annotater || require("./annotater.js") || Annotater;
 
-function restrictChecker(root) {
+Shaper("restrict-checker", function(root) {
     var restrictfns = [];
     restrictfns[tkn.EQ] = "__eq($, $)";
     restrictfns[tkn.NE] = "__ne($, $)";
@@ -176,9 +176,8 @@ function restrictChecker(root) {
         return replaceNode;
     }
     return Shaper.traverseTree(root, {pre: checkerPre, post: checkerPost});
-}
+});
 
-Annotater.annotate(/\/\*+\s*loose\s*\*+\//, function(node, match) {
+Annotater(/\/\*+\s*loose\s*\*+\//, function(node, match) {
     node.loose = true;
 });
-Shaper.shape(restrictChecker);

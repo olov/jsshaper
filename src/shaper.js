@@ -1,7 +1,6 @@
 "use strict"; "use restrict";
 
-//var Narcissus = Narcissus || require("./narcissus.js") || Narcissus;
-require("./narcissus.js");
+/* global Narcissus, tkn */ require("./narcissus.js");
 var Fmt = Fmt || require("./fmt.js") || Fmt;
 var Ref = Ref || require("./ref.js") || Ref;
 var print = print || console.log;
@@ -184,12 +183,12 @@ var Shaper = (function() {
     };
 
     //// parse and adjust
-    function parse(str, filename) {
+    function parseScript(str, filename) {
         return srcsify(adjustStartEnd(Narcissus.parser.parse(str, filename || "<no filename>", 1)));
     }
     function parseExpression(expr) {
         // SCRIPT -> [SEMICOLON ->] expr
-        var stmnt = parse(expr).children[0];
+        var stmnt = parseScript(expr).children[0];
         return stmnt.type === tkn.SEMICOLON ? stmnt.expression : stmnt;
     }
     function adjustStartEnd(root) {
@@ -241,38 +240,39 @@ var Shaper = (function() {
         });
     }
 
-    // collect shapes and run
-    var passes = [];
-    function shape(fn) {
-        passes.push(fn);
+    // register shapes and run pipeline
+    var shapes = {};
+    function register(name, fn) {
+        shapes[name] = fn;
     }
-    function run(root) {
-        for (var i = 0; i < passes.length; i++) {
-            var fn = passes[i];
-            root = fn(root) || root;
+    function get(name) {
+        return shapes[name];
+    }
+    function run(root, pipeline) {
+        for (var i = 0; i < pipeline.length; i++) {
+            var shape = pipeline[i];
+            if (typeof shape !== "function") {
+                shape = shapes[shape];
+            }
+            root = shape(root) || root;
         }
-        passes = [];
         return root;
     }
 
-    return {
-        traverseTree: traverseTree,
-        printTree: printTree,
-        printSource: printSource,
-        replace: replace,
-        parse: parse,
-        parseExpression: parseExpression,
-        shape: shape,
-        run: run
-    };
+    register("tree", printTree);
+    register("print", printSource);
+
+    Object.defineProperties(register, {
+        traverseTree: {value: traverseTree},
+        replace: {value: replace},
+        parseScript: {value: parseScript},
+        parseExpression: {value: parseExpression},
+        get: {value: get},
+        run: {value: run}
+    });
+    return register;
 })();
+
 if (typeof exports !== "undefined") {
     module.exports = Shaper;
 }
-var traverseTree = Shaper.traverseTree;
-var printTree = Shaper.printTree;
-var printSource = Shaper.printSource;
-var replace = Shaper.replace;
-var parse = Shaper.parse;
-var parseExpression = Shaper.parseExpression;
-var shape = Shaper.shape;

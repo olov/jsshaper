@@ -13,20 +13,21 @@ if (args.length <= 0) {
 var filename = args.pop();
 
 var Shaper = Shaper || require("./shaper.js") || Shaper;
+
+var pipeline = [];
 while (args.length > 0) {
     var shapename = args.shift();
-    if (shapename === "--tree") {
-        Shaper.shape(Shaper.printTree);
+
+    if (shapename.slice(0,2) === "--") { // builtin
+        pipeline.push(shapename.slice(2));
     }
-    else if (shapename === "--print") {
-        Shaper.shape(Shaper.printSource);
-    }
-    else {
+    else { // plugin
         require("./"+ shapename);
+        pipeline.push(shapename.slice(0, shapename.length - 3));
     }
 }
 
 var read = read || require("fs").readFileSync;
 var src = read(filename);
-var root = Shaper.parse(src, filename);
-root = Shaper.run(root);
+var root = Shaper.parseScript(src, filename);
+root = Shaper.run(root, pipeline);
