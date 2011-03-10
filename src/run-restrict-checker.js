@@ -1,13 +1,24 @@
 "use strict"; "use restrict";
+var load, require = require || load;
+var args = (typeof process !== "undefined" && process.argv !== undefined) ?
+    process.argv.slice(2) : arguments;
 
-if (arguments.length > 0 && arguments[0] === "--") {
-    arguments.shift();
+if (args.length > 0 && args[0] === "--") {
+    args.shift();
 }
-if (arguments.length !== 1) {
+if (args.length !== 1) {
     print("run-restrict-checker: filename");
     quit();
 }
-var filename = arguments.pop();
-arguments.push("annotater.js", "restrict-checker.js", "--print", filename);
+var filename = args.pop();
 
-load("run-shaper.js");
+if (typeof process !== "undefined" && process.argv !== undefined) {
+    process.argv = process.argv.slice(0, 2);
+    args = process.argv;
+}
+else {
+    args = arguments;
+}
+args.push("annotater.js", "restrict-checker.js", "--print", filename);
+
+require("./run-shaper.js");

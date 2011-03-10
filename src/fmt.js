@@ -50,3 +50,5 @@ var Fmt = (function() {
 if (typeof exports !== "undefined") {
     module.exports = Fmt;
 }
+
+//print("fmt done");

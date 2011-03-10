@@ -1,5 +1,8 @@
 "use strict"; "use restrict";
 
+var load, require = require || load;
+var Shaper = Shaper || require("./shaper.js") || Shaper;
+
 function annotate(re, applyfn) {
     annotate.matchers.push({re: re, applyfn: applyfn});
 }
@@ -61,11 +64,11 @@ function annotater(root) {
             var applyfn = annotations[i].applyfn;
             var match = annotations[i].match;
             applyfn(node, match);
-            }
+        }
         annotations = [];
     }
 
-    return traverseTree(root, {
+    return Shaper.traverseTree(root, {
         pre: function(node, ref) {
             var parent = ref.base;
             if (parent) {
@@ -79,4 +82,10 @@ function annotater(root) {
         }
     });
 }
-shape(annotater);
+var Annotater = {
+    annotate: annotate
+};
+if (typeof exports !== "undefined") {
+    module.exports = Annotater;
+}
+Shaper.shape(annotater);

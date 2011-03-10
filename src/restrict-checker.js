@@ -1,5 +1,9 @@
 "use strict"; "use restrict";
 
+var load, require = require || load;
+var Shaper = Shaper || require("./shaper.js") || Shaper;
+var Annotater = Annotater || require("./annotater.js") || Annotater;
+
 function restrictChecker(root) {
     var restrictfns = [];
     restrictfns[tkn.EQ] = "__eq($, $)";
@@ -65,12 +69,12 @@ function restrictChecker(root) {
 
         var replaceNode;
         if (restrictfns[node.type] !== undefined) {
-            replaceNode = parseExpression(restrictfns[node.type]);
+            replaceNode = Shaper.parseExpression(restrictfns[node.type]);
             if (node.children.length === 1) {
-                replace(replaceNode, node.children[0]);
+                Shaper.replace(replaceNode, node.children[0]);
             }
             else {
-                replace(replaceNode, node.children[0], node.children[1]);
+                Shaper.replace(replaceNode, node.children[0], node.children[1]);
             }
         }
         // ++ -- += -= *= /= %= &= |= ^= <<= >>= >>>=
@@ -171,10 +175,10 @@ function restrictChecker(root) {
         ref.set(replaceNode);
         return replaceNode;
     }
-    return traverseTree(root, {pre: checkerPre, post: checkerPost});
+    return Shaper.traverseTree(root, {pre: checkerPre, post: checkerPost});
 }
 
-annotate(/\/\*+\s*loose\s*\*+\//, function(node, match) {
+Annotater.annotate(/\/\*+\s*loose\s*\*+\//, function(node, match) {
     node.loose = true;
 });
-shape(restrictChecker);
+Shaper.shape(restrictChecker);

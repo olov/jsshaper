@@ -1,14 +1,11 @@
 "use strict"; "use restrict";
 
-load("jsecma5.js");
-var Narcissus;
-load("narcissus/lib/jsdefs.js");
-load("narcissus/lib/jslex.js");
-load("narcissus/lib/jsparse.js");
-load("fmt.js");
-load("ref.js");
+//var Narcissus = Narcissus || require("./narcissus.js") || Narcissus;
+require("./narcissus.js");
+var Fmt = Fmt || require("./fmt.js") || Fmt;
+var Ref = Ref || require("./ref.js") || Ref;
+var print = print || console.log;
 
-var tkn = Narcissus.definitions.tokenIds;
 var Shaper = (function() {
     Array.isArray = Array.isArray || function(o) {
         return Object.prototype.toString.call(o) === "[object Array]";
@@ -269,6 +266,9 @@ var Shaper = (function() {
         run: run
     };
 })();
+if (typeof exports !== "undefined") {
+    module.exports = Shaper;
+}
 var traverseTree = Shaper.traverseTree;
 var printTree = Shaper.printTree;
 var printSource = Shaper.printSource;

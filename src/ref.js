@@ -1,6 +1,6 @@
 "use strict"; "use restrict";
 
-//var Fmt = load("./fmt.js");
+var Fmt = Fmt || require("./fmt.js") || Fmt;
 var Ref = (function() {
     // examples:
     // {base: obj, prop: ["property"]}
@@ -35,3 +35,4 @@ var Ref = (function() {
 if (typeof exports !== "undefined") {
     module.exports = Ref;
 }
+//print("ref done");
