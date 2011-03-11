@@ -20,7 +20,7 @@ Shaper("annotater", function(root) {
         }
 
         var isTerminalNode = (node.srcs.length === 1);
-            captureAnnotation(node, frag, isTerminalNode);
+        captureAnnotation(node, frag, isTerminalNode);
 
         // special-case for terminal node, for example where fragment is
         // (/*loose*/ x), (/*loose*/ (x)) or {/*loose*/}
