@@ -100,30 +100,30 @@ Shaper("restrict-checker", function(root) {
 
             if (c.type === tkn.IDENTIFIER) { // id++
                 if (node.postfix) {
-                    replaceNode = parseExpression(Fmt("__arg0($, $ = {0}($))", __op));
-                    replace(replaceNode, c, c, c);
+                    replaceNode = Shaper.parseExpression(Fmt("__arg0($, $ = {0}($))", __op));
+                    Shaper.replace(replaceNode, c, c, c);
                 }
                 else {
-                    replaceNode = parseExpression(Fmt("($ = {0}($))", __op));
-                    replace(replaceNode, c, c);
+                    replaceNode = Shaper.parseExpression(Fmt("($ = {0}($))", __op));
+                    Shaper.replace(replaceNode, c, c);
                 }
             }
             else if (c.type === tkn.DOT) { // expr.id++
                 var expr = c.children[0];
                 var id = c.children[1];
-                replaceNode = parseExpression(Fmt('{0}($, "{1}")', __postprefop, id.value));
-                replace(replaceNode, expr);
+                replaceNode = Shaper.parseExpression(Fmt('{0}($, "{1}")', __postprefop, id.value));
+                Shaper.replace(replaceNode, expr);
             }
             else if (c.type === tkn.INDEX) { // expr1[expr2]++
                 var expr1 = c.children[0];
                 var expr2 = c.children[1];
                 if (expr2.type === tkn.STRING) {
-                    replaceNode = parseExpression(Fmt("{0}($, $)", __postprefop));
+                    replaceNode = Shaper.parseExpression(Fmt("{0}($, $)", __postprefop));
                 }
                 else {
-                    replaceNode = parseExpression(Fmt("{0}($, String($))", __postprefop));
+                    replaceNode = Shaper.parseExpression(Fmt("{0}($, String($))", __postprefop));
                 }
-                replace(replaceNode, expr1, expr2);
+                Shaper.replace(replaceNode, expr1, expr2);
             }
             else {
                 throw new Error("replace: invalid INCREMENT/DECREMENT form");
@@ -136,25 +136,25 @@ Shaper("restrict-checker", function(root) {
             var __op = __opcall.slice(0, __opcall.indexOf("("));
 
             if (lvalue.type === tkn.IDENTIFIER) { // id += v
-                replaceNode = parseExpression(Fmt("$ = {0}($, $)", __op));
-                replace(replaceNode, lvalue, lvalue, v);
+                replaceNode = Shaper.parseExpression(Fmt("$ = {0}($, $)", __op));
+                Shaper.replace(replaceNode, lvalue, lvalue, v);
             }
             else if (lvalue.type === tkn.DOT) { // expr.id += v
                 var expr = lvalue.children[0];
                 var id = lvalue.children[1];
-                replaceNode = parseExpression(Fmt('__op_set({0}, $, "{1}", $)', __op, id.value));
-                replace(replaceNode, expr, v);
+                replaceNode = Shaper.parseExpression(Fmt('__op_set({0}, $, "{1}", $)', __op, id.value));
+                Shaper.replace(replaceNode, expr, v);
             }
             else if (lvalue.type === tkn.INDEX) { // expr1[expr2] += v
                 var expr1 = lvalue.children[0];
                 var expr2 = lvalue.children[1];
                 if (expr2.type === tkn.STRING) {
-                    replaceNode = parseExpression(Fmt('__op_set({0}, $, $, $)', __op));
+                    replaceNode = Shaper.parseExpression(Fmt('__op_set({0}, $, $, $)', __op));
                 }
                 else {
-                    replaceNode = parseExpression(Fmt('__op_set({0}, $, String($), $)', __op));
+                    replaceNode = Shaper.parseExpression(Fmt('__op_set({0}, $, String($), $)', __op));
                 }
-                replace(replaceNode, expr1, expr2, v);
+                Shaper.replace(replaceNode, expr1, expr2, v);
             }
             else {
                 throw new Error("replace: invalid ASSIGN form");
