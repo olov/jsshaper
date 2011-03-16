@@ -31,8 +31,8 @@ Shaper("annotater", function(root) {
         }
     }
     function captureAnnotation(node, frag, allowTrailing) {
-        for (var i = 0; i < annotate.matchers.length; i++) {
-            var match = frag.match(annotate.matchers[i].re);
+        for (var i = 0; i < Annotater.matchers.length; i++) {
+            var match = frag.match(Annotater.matchers[i].re);
             if (match === null) {
                 continue;
             }
@@ -46,7 +46,7 @@ Shaper("annotater", function(root) {
                     error(node, "invalid annotation: "+ frag.slice(match.index));
                 }
             }
-            annotations.push({applyfn: annotate.matchers[i].applyfn, match: match});
+            annotations.push({applyfn: Annotater.matchers[i].applyfn, match: match});
         }
     }
     function applyAnnotations(node) {
