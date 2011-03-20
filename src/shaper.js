@@ -3,6 +3,7 @@
 /* global Narcissus, tkn */ require("./narcissus.js");
 var Fmt = Fmt || require("./fmt.js") || Fmt;
 var Ref = Ref || require("./ref.js") || Ref;
+var Comments = Comments || require("./comments.js") || Comments;
 var print = print || console.log;
 
 var Shaper = (function() {
@@ -140,13 +141,13 @@ var Shaper = (function() {
         }
         var src = node.tokenizer.source;
         return tokenString(node.type) +
-            ("srcs" in node ? " ["+ String(node.srcs) +"]" :
+            ("srcs" in node ? JSON.stringify(node.srcs) :
              "start" in node && "end" in node ?
-             " '"+ Fmt.abbrev(src.slice(node.start, node.end), 30) +"'" :
-             (node.value !== undefined ? " ("+ node.value +")" : "")) +
+             Fmt(" '{0}'", JSON.stringify(Fmt.abbrev(src.slice(node.start, node.end), 30))) :
+             (node.value !== undefined ? Fmt(" ({0})", node.value) : "")) +
             ("start" in node || "end" in node ?
-             " ("+ strPos(node.start) +".."+ strPos(node.end) +")" : "") +
-            ("parenthesized" in node ? " parenthesized": "");
+             Fmt(" ({0}..{1})", strPos(node.start), strPos(node.end)) : "") +
+            (node.parenthesized ? " parenthesized": "");
     }
     function printTree(root) {
         var level = 0;
@@ -184,7 +185,7 @@ var Shaper = (function() {
 
     //// parse and adjust
     function parseScript(str, filename) {
-        return srcsify(adjustStartEnd(Narcissus.parser.parse(str, filename || "<no filename>", 1)));
+        return srcsify(adjustStartEnd(adjustComments(adjustStartEnd(Narcissus.parser.parse(str, filename || "<no filename>", 1)))));
     }
     function parseExpression(expr) {
         // SCRIPT -> [SEMICOLON ->] expr
@@ -207,6 +208,55 @@ var Shaper = (function() {
             }
         }});
     }
+    function adjustComments(root) {
+        var comments = Comments.indexArray(root.tokenizer.source);
+
+        // extend node.start to left to cover leading comment
+        // before: /*c*/ x*y+z, after: /*c*/ x*y+z
+        //               -----         -----------
+        var i = 0;
+        traverseTree(root, {pre: function(node, ref) {
+            while (true) {
+                if (i === comments.length) {
+                    return "stop-traversal"; // throw?
+                }
+                else if (comments[i].next > node.start) {
+                    return undefined;
+                }
+                else if (comments[i].next === node.start) {
+                    node.start = comments[i].start;
+                    comments[i] = null;
+                }
+                ++i;
+            }
+        }});
+
+        // extend node.end to right to cover trailing comment
+        // before: x*y+z /*c*/, after: x*y+z /*c*/
+        //         -----               -----------
+        i = 0;
+        traverseTree(root, {post: function(node, ref) {
+            while (true) {
+                while (i < comments.length && comments[i] === null) {
+                    ++i;
+                }
+                if (i === comments.length) {
+//                    return "stop-traversal"; // throw?
+                    return undefined;
+                }
+                if (comments[i].prev > node.end) {
+                    return undefined;
+                }
+                if (comments[i].prev === node.end) {
+                    node.end = comments[i].end;
+                    comments[i] = null;
+                }
+                ++i;
+            }
+        }});
+
+        return root;
+    }
     function srcsify(root) {
         var tokenizer = {source: "", filename: root.tokenizer.filename};
 
@@ -217,7 +267,7 @@ var Shaper = (function() {
                 node.srcs = [];
 
                 if (parent) {
-                    if(parent.pos > node.start ||
+                    if (parent.pos > node.start ||
                        node.start === undefined || node.end === undefined) {
                         throw new Error(Fmt("srcsify: src already covered. parent: {0} {1}:{2}",
                                             nodeString(parent), ref, nodeString(node)));
@@ -265,6 +315,7 @@ var Shaper = (function() {
     Object.defineProperties(register, {
         traverseTree: {value: traverseTree},
         replace: {value: replace},
+        printTree: {value: printTree},
         parseScript: {value: parseScript},
         parseExpression: {value: parseExpression},
         get: {value: get},
