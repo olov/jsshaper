@@ -54,7 +54,6 @@ Shaper("annotater", function(root) {
         // custom, possibly tree-modifying, apply function
         // for now only per-node is implemented
 
-        //print("applyAnnotations: "+ nodeString(node));
         for (var i = 0; i < annotations.length; i++) {
             var applyfn = annotations[i].applyfn;
             var match = annotations[i].match;

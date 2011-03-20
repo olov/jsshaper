@@ -42,7 +42,7 @@ Shaper("restrict-checker", function(root) {
     function checkerPre(node, ref) {
         // don't alter /*loose*/ annotated nodes or children
         if (node.loose) {
-            return "stop-traversal";
+            return "break";
         }
 
         // detect "use restrict"; literal in beginning of script/function

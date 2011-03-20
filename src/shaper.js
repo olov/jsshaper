@@ -71,6 +71,7 @@ var Shaper = (function() {
     // visitfns: {pre: function, post: function}
     // visit function signature: function(node, ref)
     function traverseTree(node, visitfns, ref) {
+        // preconditions
         if (!node) {
             return node;
         }
@@ -80,15 +81,19 @@ var Shaper = (function() {
         }
         ref = ref || new Ref();
 
-        var old = node;
-        visitfns.pre && (node = visitfns.pre(node, ref) || node);
-        if (node === "stop-traversal") {
-            return old;
-        }
-        else if (!(node instanceof Narcissus.parser.Node)) {
-            throw new Error("traverseTree: visitfns.post invalid return type");
+        // call pre callback, if any
+        if (visitfns.pre) {
+            var old = node;
+            node = visitfns.pre(node, ref) || node;
+            if (node === "break") {
+                return old;
+            }
+            else if (!(node instanceof Narcissus.parser.Node)) {
+                throw new Error("traverseTree: visitfns.post invalid return type");
+            }
         }
 
+        // traverse descendants
         var subprops = traverseData[node.type] || [];
         for (var i = 0; i < subprops.length; i++) {
             var prop = subprops[i];
@@ -102,9 +107,12 @@ var Shaper = (function() {
             }
         }
 
-        visitfns.post && (node = visitfns.post(node, ref) || node);
-        if (!(node instanceof Narcissus.parser.Node)) {
-            throw new Error("traverseTree: visitfns.post invalid return type");
+        // call post callback, if any
+        if (visitfns.post) {
+            node = visitfns.post(node, ref) || node;
+            if (!(node instanceof Narcissus.parser.Node)) {
+                throw new Error("traverseTree: visitfns.post invalid return type");
+            }
         }
 
         return node;
@@ -130,7 +138,8 @@ var Shaper = (function() {
     }
 
     //// printers
-    function nodeString(node) {
+    Narcissus.parser.Node.prototype.verboseString = Narcissus.parser.Node.prototype.toString;
+    Narcissus.parser.Node.prototype.toString = function() {
         function tokenString(tt) {
             var defs = Narcissus.definitions;
             var t = defs.tokens[tt];
@@ -139,32 +148,16 @@ var Shaper = (function() {
         function strPos(pos) {
             return pos === undefined ? "?" : String(pos);
         }
-        var src = node.tokenizer.source;
-        return tokenString(node.type) +
-            ("srcs" in node ? JSON.stringify(node.srcs) :
-             "start" in node && "end" in node ?
-             Fmt(" '{0}'", JSON.stringify(Fmt.abbrev(src.slice(node.start, node.end), 30))) :
-             (node.value !== undefined ? Fmt(" ({0})", node.value) : "")) +
-            ("start" in node || "end" in node ?
-             Fmt(" ({0}..{1})", strPos(node.start), strPos(node.end)) : "") +
-            (node.parenthesized ? " parenthesized": "");
-    }
-    function printTree(root) {
-        var level = 0;
-        traverseTree(root, {
-            pre: function(node, ref) {
-                print(Fmt("{0}{1}: {2}", Fmt.repeat(" ", level * 2),
-                          (ref || "root"), nodeString(node)));
-                ++level;
-            },
-            post: function(node, ref) {
-                --level;
-            }
-        });
-    }
-    function printSource(root) {
-        print(root.getSrc());
-    }
+        var src = this.tokenizer.source;
+        return tokenString(this.type) +
+            ("srcs" in this ? JSON.stringify(this.srcs) :
+             "start" in this && "end" in this ?
+             Fmt(" '{0}'", JSON.stringify(Fmt.abbrev(src.slice(this.start, this.end), 30))) :
+             (this.value !== undefined ? Fmt(" ({0})", this.value) : "")) +
+            ("start" in this || "end" in this ?
+             Fmt(" ({0}..{1})", strPos(this.start), strPos(this.end)) : "") +
+            (this.parenthesized ? " parenthesized": "");
+    };
     Narcissus.parser.Node.prototype.getSrc = function() {
         var srcs = [];
         traverseTree(this, {
@@ -182,6 +175,24 @@ var Shaper = (function() {
         });
         return srcs.join("");
     };
+    Narcissus.parser.Node.prototype.printTree = function() {
+        var level = 0;
+        traverseTree(this, {
+            pre: function(node, ref) {
+                print(Fmt("{0}{1}: <{2}>", Fmt.repeat(" ", level * 2), node, ref.prop[0] || "root"));
+                ++level;
+            },
+            post: function(node, ref) {
+                --level;
+            }
+        });
+    };
+    function printTree(root) {
+        root.printTree();
+    }
+    function printSource(root) {
+        print(root.getSrc());
+    }
 
     //// parse and adjust
     function parseScript(str, filename) {
@@ -215,45 +226,48 @@ var Shaper = (function() {
         // before: /*c*/ x*y+z, after: /*c*/ x*y+z
         //               -----         -----------
         var i = 0;
-        traverseTree(root, {pre: function(node, ref) {
-            while (true) {
-                if (i === comments.length) {
-                    return "stop-traversal"; // throw?
+        try {
+            traverseTree(root, {pre: function(node, ref) {
+                while (true) {
+                    if (i === comments.length) {
+                        throw true; // abort traversal
+                    }
+                    else if (comments[i].next > node.start) {
+                        return undefined;
+                    }
+                    else if (comments[i].next === node.start) {
+                        node.start = comments[i].start;
+                        comments[i] = null;
+                    }
+                    ++i;
                 }
-                else if (comments[i].next > node.start) {
-                    return undefined;
-                }
-                else if (comments[i].next === node.start) {
-                    node.start = comments[i].start;
-                    comments[i] = null;
-                }
-                ++i;
-            }
-        }});
+            }});
+        } catch (e) {}
 
         // extend node.end to right to cover trailing comment
         // before: x*y+z /*c*/, after: x*y+z /*c*/
         //         -----               -----------
         i = 0;
-        traverseTree(root, {post: function(node, ref) {
-            while (true) {
-                while (i < comments.length && comments[i] === null) {
+        try {
+            traverseTree(root, {post: function(node, ref) {
+                while (true) {
+                    while (i < comments.length && comments[i] === null) {
+                        ++i;
+                    }
+                    if (i === comments.length) {
+                        throw true; // abort traversal
+                    }
+                    if (comments[i].prev > node.end) {
+                        return undefined;
+                    }
+                    if (comments[i].prev === node.end) {
+                        node.end = comments[i].end;
+                        comments[i] = null;
+                    }
                     ++i;
                 }
-                if (i === comments.length) {
-//                    return "stop-traversal"; // throw?
-                    return undefined;
-                }
-                if (comments[i].prev > node.end) {
-                    return undefined;
-                }
-                if (comments[i].prev === node.end) {
-                    node.end = comments[i].end;
-                    comments[i] = null;
-                }
-                ++i;
-            }
-        }});
+            }});
+        } catch (e) {}
 
         return root;
     }
@@ -270,7 +284,7 @@ var Shaper = (function() {
                     if (parent.pos > node.start ||
                        node.start === undefined || node.end === undefined) {
                         throw new Error(Fmt("srcsify: src already covered. parent: {0} {1}:{2}",
-                                            nodeString(parent), ref, nodeString(node)));
+                                            parent, ref, node));
                     }
                     var src = parent.tokenizer.source;
                     var frag = src.slice(parent.pos, node.start);
@@ -292,7 +306,7 @@ var Shaper = (function() {
 
     // register shapes and run pipeline
     var shapes = {};
-    function register(name, fn) {
+    function shaper(name, fn) {
         shapes[name] = fn;
     }
     function get(name) {
@@ -309,19 +323,18 @@ var Shaper = (function() {
         return root;
     }
 
-    register("tree", printTree);
-    register("print", printSource);
+    shaper("tree", printTree);
+    shaper("print", printSource);
 
-    Object.defineProperties(register, {
+    Object.defineProperties(shaper, {
         traverseTree: {value: traverseTree},
         replace: {value: replace},
-        printTree: {value: printTree},
         parseScript: {value: parseScript},
         parseExpression: {value: parseExpression},
         get: {value: get},
         run: {value: run}
     });
-    return register;
+    return shaper;
 })();
 
 if (typeof exports !== "undefined") {

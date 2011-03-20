@@ -8,10 +8,12 @@ function f() {}
 
 function g() /**e*/ {}
 
-/**f*/ f.x;
+function h() {/*block inline comment*/}
 
-o = {
-    first: 42,
+(/**f*/ f.x /**post*/);
+
+/*semicolon_comment*/ o = /*object_init_comment*/ {
+    /*property_init_comment*/ first: 42,
     second: 1
 };
-[1,2,3];
+(/*array_init_comment*/[1,2,3]);
