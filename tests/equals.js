@@ -11,6 +11,3 @@ print(z !== w);
 print(NaN == NaN);
 print(NaN === NaN);
 print(1 < undefined);
-// throws exception in restrict mode:
-//print(x == y);
-//print(z != w);

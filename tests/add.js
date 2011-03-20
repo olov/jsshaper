@@ -1,2 +1,2 @@
 "use strict"; "use restrict";
-1+2;
+(/*plus comment*/1/*one comment*/ + /*two comment 1*/2/*two comment 2*/);

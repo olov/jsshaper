@@ -127,6 +127,8 @@ var Comments = (function() {
     return {
         split: split,
         trailing: trailing,
+        isBlankString: isBlankString,
+        isComment: isComment,
         indexArray: indexArray
     };
 })();

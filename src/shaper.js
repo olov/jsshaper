@@ -155,8 +155,7 @@ var Shaper = (function() {
              Fmt(" '{0}'", JSON.stringify(Fmt.abbrev(src.slice(this.start, this.end), 30))) :
              (this.value !== undefined ? Fmt(" ({0})", this.value) : "")) +
             ("start" in this || "end" in this ?
-             Fmt(" ({0}..{1})", strPos(this.start), strPos(this.end)) : "") +
-            (this.parenthesized ? " parenthesized": "");
+             Fmt(" ({0}..{1})", strPos(this.start), strPos(this.end)) : "");
     };
     Narcissus.parser.Node.prototype.getSrc = function() {
         var srcs = [];

@@ -1,19 +1,24 @@
-(/* a @type */ "2"-0);
-/* b @type */("4"-1)+3;
+(/*minus comment*/ "2"-0);
+(/*first*/   /*second*/"2"-0);
+/*semicolon comment*/("4"-1)+3;
+(/*number comment*/1);
 var x = 1;
-/** c @type */
+/** @type1 */
 var y = 3;
-/** d @type */
+/** @type2 {asdf} */
 function f() {}
 
+// line1
+
+// line2
 function g() /**e*/ {}
 
 function h() {/*block inline comment*/}
 
 (/**f*/ f.x /**post*/);
 
-/*semicolon_comment*/ o = /*object_init_comment*/ {
-    /*property_init_comment*/ first: 42,
+/*semicolon comment*/ o = /*object_init comment*/ {
+    /*property_init comment*/ first: 42,
     second: 1
 };
-(/*array_init_comment*/[1,2,3]);
+(/*array_init comment*/[1,2,3]);

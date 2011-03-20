@@ -12,14 +12,6 @@ var Fmt = (function() {
             return (match in obj ? obj[match] : s);
         });
     }
-    /* // alternative version of fmt
-    function fmt(str, var_args) {
-        for (var i = 0; i < arguments.length - 1; i++) {
-            var re = new RegExp("\\{"+ String(i) +"\\}", "g");
-            str = str.replace(re, arguments[i + 1]);
-        }
-        return str;
-    }*/
     function cat(var_args) {
         return String.prototype.concat.apply(String.prototype, arguments);
     }
