@@ -136,6 +136,22 @@ var Shaper = (function() {
             placeholders[i].set(arguments[i + 1]);
         }
     }
+    function renameIdentifier(node, name) {
+        if (node.type !== tkn.IDENTIFIER) {
+            throw new Error(Fmt("renameIdentifier: got {0}", node));
+        }
+        var oldValue = node.value;
+        node.value = name;
+
+        var comments = Comments.split(node.srcs[0]);
+        for (var i = 0 ; i < comments.length; i++) {
+            if (Comments.isComment(comments[i])) {
+                continue;
+            }
+            comments[i] = comments[i].replace(oldValue, node.value);
+        }
+        node.srcs[0] = comments.join("");
+    }
 
     //// printers
     Narcissus.parser.Node.prototype.verboseString = Narcissus.parser.Node.prototype.toString;
@@ -328,6 +344,7 @@ var Shaper = (function() {
     Object.defineProperties(shaper, {
         traverseTree: {value: traverseTree},
         replace: {value: replace},
+        renameIdentifier: {value: renameIdentifier},
         parseScript: {value: parseScript},
         parseExpression: {value: parseExpression},
         get: {value: get},
