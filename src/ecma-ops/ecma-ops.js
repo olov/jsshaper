@@ -1,78 +1,9 @@
 "use strict"; "use restrict";
 
-var require;
-var nodejs = Boolean(require);
-var log = nodejs ? console.log : print;
-var load;
-if (nodejs) {
-    load = function (filename) {
-        require("fs").readFile("./"+ filename, function(err, content) {
-            if (err) throw err;
-            eval(content.toString());
-        });
-    };
-}
-String.concat = function() {
-    return String.prototype.concat.apply(String.prototype, arguments);
-};
-load("restrict-prelude.js");
-
-function inspect(v) {
-    var str = "inspect("+ __verbosetypeof(v) +")";
-    var val;
-    if (v.valueOf) {
-        val = v.valueOf();
-        str += " valueOf: "+ String(val) +" ("+ __verbosetypeof(val) +")";
-    }
-    if (v.toString) {
-        val = v.toString();
-        str += " toString: "+ String(val) +" ("+ __verbosetypeof(val) +")";
-    }
-    log(str);
-}
-function assertEquals(l, r) {
-    if (l === r) {
-//        log("PASS "+ l);
-    }
-    else {
-        log("FAIL "+ l +" !== "+ r);
-        throw new Error("assertion failed");
-    }
-}
-function assertThrows(fn) {
-    try {
-        fn();
-    }
-    catch (e) {
-        //log("PASS "+ e);
-        return;
-    }
-    log("FAIL no exception thrown");
-    throw new Error("assertion failed");
-}
-
-Array.isArray = Array.isArray || function(o) {
-    return Object.prototype.toString.call(o) === "[object Array]";
-};
-
-var _str = String.concat;
-assertEquals(_str(), "");
-assertEquals(_str(""), "");
-assertEquals(_str("one"), "one");
-assertEquals(_str(1), "1");
-assertEquals(_str("one", 2), "one2");
-assertEquals(_str("one", 2, "three", 4), "one2three4");
-
-assertEquals(__lt(1, 2), true);
-assertEquals(__lt("abc", "bac"), true);
-assertEquals(__lt("abc", "abc"), false);
-assertThrows(function() { __lt([1,2,3], [2,3,4]); });
-assertThrows(function() { __lt([10], [2]); } );
-assertThrows(function() { __lt([[2]], [["1"]]); } );
-assertThrows(function() { __lt(new Number(1), 2); });
-assertEquals(__sub(1,2), -1);
-assertThrows(function() { __sub("1", 0); });
-
+var load, require = require || function(f) { load(f); };
+var Fmt = Fmt || require("../fmt.js") || Fmt;
+var print = print || console.log;
+require("../restrict-prelude.js");
 
 function __toBoolean(v) {
     //short version:
@@ -370,11 +301,21 @@ function test_loose() {
     assertEquals(typeof __toPrimitive(f), "string"); // "function f..."
     assertEquals(typeof __toString(f), "string"); // "function f..."
     assertEquals(typeof __defaultValue(f), "string"); // "function f..."
+
+    assertEquals(__lt(1, 2), true);
+    assertEquals(__lt("abc", "bac"), true);
+    assertEquals(__lt("abc", "abc"), false);
+    assertThrows(function() { __lt([1,2,3], [2,3,4]); });
+    assertThrows(function() { __lt([10], [2]); } );
+    assertThrows(function() { __lt([[2]], [["1"]]); } );
+    assertThrows(function() { __lt(new Number(1), 2); });
+    assertEquals(__sub(1,2), -1);
+    assertThrows(function() { __sub("1", 0); });
 }
-//test_loose();
+test_loose();
 
 function test_binary_operator() {
-    function create_getter(o, key, val) { // why can't it be in the loop?
+    function create_getter(o, key, val) {
         o[key] = function() { return val; };
         return o;
     }
@@ -468,10 +409,10 @@ function test_binary_operator() {
 */
     flat = [];
     for (var type in values) {
-        log(type +": "+ String(values[type].length));
+        print(Fmt("{0}: {1} values", type, values[type].length));
         flat = flat.concat(values[type]);
     }
-    log(flat.length);
+    print(Fmt("Total {0} values", flat.length));
 
     var j;
     for (i = 0; i < flat.length; i++) {
@@ -489,15 +430,14 @@ function test_binary_operator() {
             }
             else {
                 if (val_a !== val_b && !(isNaN(val_a) && isNaN(val_b))) {
-//                    log(i,j); continue;
+//                    print(i,j); continue;
 
-                    log(String.concat(
-                        "flat[", i, "] == flat[", j, "] yields ", val_a,
-                        " but ",
-                        "__loose_eq(flat[", i, "], flat[", j,"]) yields ", val_b));
+                    print(Fmt(
+                        "flat[{0}] == flat[{1}] yields {2} but __loose_eq(flat[{0}], flat[{1}]) yields {3}",
+                        i, j, val_a, val_b));
                     inspect(flat[i]);
                     inspect(flat[j]);
-                    log();
+                    print();
 //                    assertEquals(true, false);
                 }
             }
@@ -516,10 +456,48 @@ function test_jsvm_differences(vmstr) {
     assertEquals(/*loose*/("" == {valueOf: function() { return null; }}), vm.js);
 
     assertEquals(/*loose*/(false == new Date(0)), !vm.js);
-    assertEquals(/*loose*/(0== new Date(0)), !(vm.js || vm.v8));
+    assertEquals(/*loose*/(0 == new Date(0)), !vm.js);
     assertEquals(/*loose*/(316998000000 == new Date(1980, 1-1, 18)), !vm.js);
     assertEquals(/*loose*/(1282600800000 == new Date(2010, 8-1, 24)), !vm.js);
 }
 //test_jsvm_differences("v8");
 
-log("restrict.js done");
+function inspect(v) {
+    var str = "inspect("+ __verbosetypeof(v) +")";
+    var val;
+    if (v.valueOf) {
+        val = v.valueOf();
+        str += Fmt(" valueOf: {0} ({1})", val, __verbosetypeof(val));
+    }
+    if (v.toString) {
+        val = v.toString();
+        str += Fmt(" toString: {0} ({1})", val, __verbosetypeof(val));
+    }
+    print(str);
+}
+function assertEquals(l, r) {
+    if (l === r) {
+//        print("PASS "+ l);
+    }
+    else {
+        print("FAIL "+ l +" !== "+ r);
+        throw new Error("assertion failed");
+    }
+}
+function assertThrows(fn) {
+    try {
+        fn();
+    }
+    catch (e) {
+        //print("PASS "+ e);
+        return;
+    }
+    print("FAIL no exception thrown");
+    throw new Error("assertion failed");
+}
+
+Array.isArray = Array.isArray || function(o) {
+    return Object.prototype.toString.call(o) === "[object Array]";
+};
+
+print("ecma-ops.js done");
