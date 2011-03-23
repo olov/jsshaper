@@ -19,6 +19,6 @@ if (typeof process !== "undefined" && process.argv !== undefined) {
 else {
     args = arguments;
 }
-args.push("annotater.js", "restrict-checker.js", "--print", filename);
+args.push("annotater.js", "plugins/restricter.js", "--print", filename);
 
 require("./run-shaper.js");

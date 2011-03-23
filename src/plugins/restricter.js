@@ -1,9 +1,9 @@
 "use strict"; "use restrict";
 
-var Shaper = Shaper || require("./shaper.js") || Shaper;
-var Annotater = Annotater || require("./annotater.js") || Annotater;
+var Shaper = Shaper || require("../shaper.js") || Shaper;
+var Annotater = Annotater || require("../annotater.js") || Annotater;
 
-Shaper("restrict-checker", function(root) {
+Shaper("restricter", function(root) {
     var restrictfns = [];
     restrictfns[tkn.EQ] = "__eq($, $)";
     restrictfns[tkn.NE] = "__ne($, $)";
