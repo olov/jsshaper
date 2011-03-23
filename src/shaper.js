@@ -12,7 +12,7 @@ var Shaper = (function() {
     };
     function error(node, msg) {
         print(Fmt("{0}:{1} error: {2}", node.tokenizer.filename, node.lineno, msg));
-        quit(-1);
+        (typeof quit === "undefined" ? process.exit : quit)(-1);
     }
 
     var traverseData = (function() {
@@ -154,8 +154,23 @@ var Shaper = (function() {
     }
 
     //// printers
-    Narcissus.parser.Node.prototype.verboseString = Narcissus.parser.Node.prototype.toString;
-    Narcissus.parser.Node.prototype.toString = function() {
+    var Node = Narcissus.parser.Node;
+    Node.prototype.verboseString = (function(oldToString) {
+        return function(recursiveVerbose) {
+            var res;
+            if (recursiveVerbose === true) {
+                var newToString = Node.prototype.toString;
+                Node.prototype.toString = oldToString;
+                res = this.toString();
+                Node.prototype.toString = newToString;
+            }
+            else {
+                res = oldToString.call(this);
+            }
+            return res;
+        };
+    })(Node.prototype.toString);
+    Node.prototype.toString = function() {
         function tokenString(tt) {
             var defs = Narcissus.definitions;
             var t = defs.tokens[tt];
@@ -173,7 +188,7 @@ var Shaper = (function() {
             ("start" in this || "end" in this ?
              Fmt(" ({0}..{1})", strPos(this.start), strPos(this.end)) : "");
     };
-    Narcissus.parser.Node.prototype.getSrc = function() {
+    Node.prototype.getSrc = function() {
         var srcs = [];
         traverseTree(this, {
             pre: function(node, ref) {
@@ -190,7 +205,7 @@ var Shaper = (function() {
         });
         return srcs.join("");
     };
-    Narcissus.parser.Node.prototype.printTree = function() {
+    Node.prototype.printTree = function() {
         var level = 0;
         traverseTree(this, {
             pre: function(node, ref) {
@@ -342,6 +357,7 @@ var Shaper = (function() {
     shaper("print", printSource);
 
     Object.defineProperties(shaper, {
+        error: {value: error},
         traverseTree: {value: traverseTree},
         replace: {value: replace},
         renameIdentifier: {value: renameIdentifier},
