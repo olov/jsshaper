@@ -20,7 +20,7 @@ var Ref = (function() {
     };
     Ref.prototype.set = function(value) {
         var ref = this.canonical();
-        ref.base[ref.prop[0]] = value;
+        return ref.base[ref.prop[0]] = value;
     };
     Ref.prototype.get = function() {
         var ref = this.canonical();
