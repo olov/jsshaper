@@ -3,7 +3,7 @@
 var Shaper = Shaper || require("../shaper.js") || Shaper;
 var Annotater = Annotater || require("../annotater.js") || Annotater;
 
-Shaper("bitwise", function(root) {
+Shaper("bitwiser", function(root) {
     var bitwise_stack = [];
     return Shaper.traverseTree(root, {
         pre: function(node, ref) {
