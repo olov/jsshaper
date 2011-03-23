@@ -1,5 +1,5 @@
 "use strict"; "use restrict";
-var load, require = require || load;
+var load, require = require || function(f) { load(f); };
 var args = (typeof process !== "undefined" && process.argv !== undefined) ?
     process.argv.slice(2) : arguments;
 

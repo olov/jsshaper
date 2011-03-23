@@ -3,7 +3,14 @@
 var load, require = require || function(f) { load(f); };
 var Fmt = Fmt || require("../fmt.js") || Fmt;
 var print = print || console.log;
-require("../restrict-prelude.js");
+
+// we want to load restrict-prelude into the global namespace
+if (typeof process !== "undefined") { // node
+    eval(require("fs").readFileSync("../restrict-prelude.js").toString());
+}
+else { // js, jsc or v8/d8
+    load("../restrict-prelude.js");
+}
 
 function __toBoolean(v) {
     //short version:

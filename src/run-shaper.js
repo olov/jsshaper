@@ -1,5 +1,5 @@
 "use strict"; "use restrict";
-var load, require = require || load;
+var load, require = require || function(f) { load(f); };
 var args = (typeof process !== "undefined" && process.argv !== undefined) ?
     process.argv.slice(2) : arguments;
 
@@ -23,7 +23,8 @@ while (args.length > 0) {
     }
     else { // plugin
         require("./"+ shapename);
-        pipeline.push(shapename.slice(0, shapename.length - 3));
+        var slash = shapename.lastIndexOf("/");
+        pipeline.push(shapename.slice(slash !== -1 ? slash + 1 : 0, shapename.length - 3));
     }
 }
 

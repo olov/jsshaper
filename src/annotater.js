@@ -1,6 +1,5 @@
 "use strict"; "use restrict";
 
-var load, require = require || load;
 var Shaper = Shaper || require("./shaper.js") || Shaper;
 var Comments = Comments || require("./comments.js") || Comments;
 
