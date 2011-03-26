@@ -2,43 +2,75 @@
 
 var Comments = (function() {
     function split(str) {
-        var i = 0;
-        var len = str.length;
         var arr = [];
-
         function push(begin, end) {
             if (begin < end) {
                 arr.push(str.slice(begin, end));
             }
         }
+        var NOTFOUND = Number.MAX_VALUE;
+        function myIndexOf(str, match, pos) {
+            var ret = str.indexOf(match, pos);
+            return (ret === -1) ? NOTFOUND : ret;
+        }
 
-        while (i < len) {
-            var frag = str.indexOf("/*", i);
-            var line = str.indexOf("//", i);
+        var i = 0;
+        var begin = 0;
+        var len = str.length;
+        while (i <= len) {
+            var string = Math.min(myIndexOf(str, "'", i), myIndexOf(str, '"', i));
+            var regexp = myIndexOf(str, "/", i);
+            var frag = myIndexOf(str, "/*", i);
+            var line = myIndexOf(str, "//", i);
 
-            if (frag === -1 && line === -1) {
-                // rest
-                push(i, len);
+            if (frag === NOTFOUND && line === NOTFOUND) {
+                // no remaining comment, push rest
+                push(begin, len);
                 break;
             }
-            else if (frag === -1 || (line !== -1 && line < frag)) {
+            else if (string < frag && string < line && string < regexp) {
+                // string found before /*, // or regexp
+                // ffwd to matching un-escaped ' or "
+                var singlequote = str[string] === "'"; // true if ', false if "
+                while (string < len) {
+                    string = myIndexOf(str, singlequote ? "'" : '"', string + 1);
+                    if (str[string - 1] !== "\\" || str[string - 2] === "\\") {
+                        break;
+                    }
+                }
+                i = string + 1;
+                continue;
+            }
+            else if (regexp < frag && regexp < line && regexp < string) {
+                // regexp found before /*, // or string
+                // ffwd to matching un-escaped /
+                while (regexp < len) {
+                    regexp = myIndexOf(str, "/", regexp + 1);
+                    if (str[regexp - 1] !== "\\" || str[regexp - 2] === "\\") {
+                        break;
+                    }
+                }
+                i = regexp + 1;
+                continue;
+            }
+            else if (line < frag) {
                 // line
-                push(i, line);
+                push(begin, line);
                 var lf = str.indexOf("\n", line + 2);
                 if (lf === -1) {
                     lf = len - 1;
                 }
-                i = lf + 1;
+                i = begin = lf + 1;
                 push(line, i);
             }
             else {
                 // frag
-                push(i, frag);
+                push(begin, frag);
                 var starslash = str.indexOf("*/", frag + 2);
                 if (starslash === -1) {
                     throw new Error("split: /* and */ mismatch in "+ str);
                 }
-                i = starslash + 2;
+                i = begin = starslash + 2;
                 push(frag, i);
             }
         }
