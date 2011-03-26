@@ -1,6 +1,6 @@
 // This file implements run-time checking for JavaScript restrict mode
 // <http://restrictmode.org>. It's used in conjunction with JSShaper
-// <http://lassus.se/jsshaper>.
+// <https://github.com/olov/jsshaper>
 
 // Copyright (c) 2010, 2011 Olov Lassus <olov.lassus@gmail.com>
 

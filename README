@@ -19,7 +19,7 @@ JSShaper comes with the following plugins:
 
 It also comes with a few small and simple examples.
 
-Its web site is at <http://lassus.se/jsshaper>.
+Its web site is at <https://github.com/olov/jsshaper> for now.
 
 Get the source code from <https://github.com/olov/jsshaper>:
 git clone git://github.com/olov/jsshaper.git
