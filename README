@@ -21,6 +21,11 @@ It also comes with a few small and simple examples.
 
 Its web site is at <http://lassus.se/jsshaper>.
 
+Get the source code from <https://github.com/olov/jsshaper>:
+git clone git://github.com/olov/jsshaper.git
+git submodule init
+git submodule update
+
 JSShaper is young, not very documented, and may crash with horrible
 error messages. Thanks for being an early adopter and reporting bugs or
 annoyances. Contributors are welcome!
