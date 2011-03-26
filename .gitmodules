@@ -1,0 +1,3 @@
+[submodule "src/narcissus"]
+	path = src/narcissus
+	url = git://github.com/olov/narcissus.git
