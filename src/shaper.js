@@ -354,7 +354,7 @@ var Shaper = (function() {
     }
 
     shaper("tree", printTree);
-    shaper("print", printSource);
+    shaper("source", printSource);
 
     Object.defineProperties(shaper, {
         error: {value: error},

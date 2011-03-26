@@ -1,1 +1,55 @@
-Licensed under the MIT license, see LICENSE file for terms and conditions.
+JSShaper is an extensible framework for JavaScript syntax tree
+shaping, created by Olov Lassus <olov.lassus@gmail.com>.
+
+JSShaper and its plugins are implemented in JavaScript. Syntax tree
+shaping means performing complex manipulations to a syntax tree
+representation of your textual source code, and then turning it back
+into source code again. JSShaper goes very far to keep all your source
+code formatting, intendation, whitespace and comments.
+
+JSShaper comes with the following plugins:
+  annotation-printer: prints /* @annotations */
+  bitwiser: static analysis. requires @bitwise annotation for the
+  bitwise operators | (or), & (and), to detect misspelling of the
+  logical operators ||, &&.
+  stringconverter: detects the ""+expr pattern and turns it into String(expr)
+  restricter: adds run-time checking for restrict mode programs by
+  converting operators into function calls in a compatible way. it
+  comes with a small run-time library.
+
+It also comes with a few small and simple examples.
+
+Its web site is at <http://lassus.se/jsshaper>.
+
+JSShaper is young, not very documented, and may crash with horrible
+error messages. It will become rock solid with extensive
+documentation. Thanks for being an early adopter and reporting bugs or
+annoyances. Contributors are welcome!
+
+JSShaper is designed to run from the command line.
+
+It should be possible to use with the following JS shells:
+  js: recent versions of Mozilla SpiderMonkey/TraceMonkey
+  d8: Google V8 debug shell
+  node: Embedded V8 with lots more
+
+It doesn't work with the JavaScriptCore jsc shell since it has no load
+function.
+
+Run it like this (replace d8 with your preferred shell):
+d8 run-shaper.js -- filename [shape1 .. shapeN]
+  where shape is a plugin (see plugins/) or --builtin (--tree or --source)
+example: d8 run-shaper.js -- myfile.js plugins/annotater.js plugins/bitwiser.js --source
+example: d8 run-shaper.js -- myfile.js plugins/annotater.js plugins/restricter.js --source
+
+For restricter, you can also run the more convenient run-restricter:
+example: d8 run-restricter.js -- myfile.js
+
+JSShaper and its plugins are Open Source and licensed under the MIT
+license, see LICENSE file for terms and conditions.
+
+JSShaper uses the parser from the Mozilla Narcissus
+JavaScript-in-JavaScript interpreter
+<https://github.com/mozilla/narcissus>, under the terms of the MPL 1.1
+license. For full Narcissus licensing information read the
+src/narcissus/LICENSE file.
