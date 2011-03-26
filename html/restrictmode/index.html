@@ -61,9 +61,12 @@ Restrict mode for JavaScript (ECMAScript) is a proper subset of the
 <li> <code>+ < <= >= ></code> are restricted to primitive <code>strings</code> or <code>numbers</code> (but never a mix)
 <a id="a2" href="#a">why?</a><div id="div2">Because type coercion
     for <code>+</code> is such a common source of bugs. <code>a + b</code> either adds
-    <code>numbers</code> or concatenates <code>strings</code>. Use the <code>String()</code> or <code>Number()</code>
-    functions (without <code>new</code>) to type-convert explicitly, when you must. For <code>string</code>
-    formatting, you're often better off using <code>Fmt()</code> or something similar.
+    <code>numbers</code> or concatenates <code>strings</code>. Use
+    the <code>String()</code> or <code>Number()</code> functions
+    (without <code>new</code>) to type-convert explicitly, when you
+    must. For <code>string</code> formatting, you're often better off
+    using <code><a href="https://github.com/olov/jsshaper/blob/master/src/fmt.js">Fmt()</a></code>
+    or something similar.
 
     Because <code>< >= >= ></code> either compares <code>numbers</code> or <code>strings</code>
     (lexically). Mixing these types yields unrobust programs. Relying
@@ -176,7 +179,8 @@ function. There's always the option to bail out: <code>(/*@loose*/ "1"+2+3)</cod
 <p>In fact, chances are that you are already mostly conforming to
 restrict mode, except that you may use <code>str + num</code> to
 perform string conversion and concatenation at the same time. You may
-find that replacing that with <code>Fmt()</code>
+find that replacing that
+with <code><a href="https://github.com/olov/jsshaper/blob/master/src/fmt.js">Fmt()</a></code>
 or <code>String()</code> calls here and there is easy. You may also
 find that restrict mode conforming programs are easier to read and
 reason about.
