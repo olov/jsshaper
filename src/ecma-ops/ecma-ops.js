@@ -2,7 +2,7 @@
 
 var load, require = require || function(f) { load(f); };
 var Fmt = Fmt || require("../fmt.js") || Fmt;
-var print = print || console.log;
+var log = (typeof console !== "undefined") && console.log || print;
 
 // we want to load restrict-prelude into the global namespace
 if (typeof process !== "undefined") { // node
@@ -416,10 +416,10 @@ function test_binary_operator() {
 */
     flat = [];
     for (var type in values) {
-        print(Fmt("{0}: {1} values", type, values[type].length));
+        log(Fmt("{0}: {1} values", type, values[type].length));
         flat = flat.concat(values[type]);
     }
-    print(Fmt("Total {0} values", flat.length));
+    log(Fmt("Total {0} values", flat.length));
 
     var j;
     for (i = 0; i < flat.length; i++) {
@@ -437,14 +437,14 @@ function test_binary_operator() {
             }
             else {
                 if (val_a !== val_b && !(isNaN(val_a) && isNaN(val_b))) {
-//                    print(i,j); continue;
+//                    log(i,j); continue;
 
-                    print(Fmt(
+                    log(Fmt(
                         "flat[{0}] == flat[{1}] yields {2} but __loose_eq(flat[{0}], flat[{1}]) yields {3}",
                         i, j, val_a, val_b));
                     inspect(flat[i]);
                     inspect(flat[j]);
-                    print();
+                    log();
 //                    assertEquals(true, false);
                 }
             }
@@ -480,14 +480,14 @@ function inspect(v) {
         val = v.toString();
         str += Fmt(" toString: {0} ({1})", val, __verbosetypeof(val));
     }
-    print(str);
+    log(str);
 }
 function assertEquals(l, r) {
     if (l === r) {
-//        print("PASS "+ l);
+//        log("PASS "+ l);
     }
     else {
-        print("FAIL "+ l +" !== "+ r);
+        log("FAIL "+ l +" !== "+ r);
         throw new Error("assertion failed");
     }
 }
@@ -496,10 +496,10 @@ function assertThrows(fn) {
         fn();
     }
     catch (e) {
-        //print("PASS "+ e);
+        //log("PASS "+ e);
         return;
     }
-    print("FAIL no exception thrown");
+    log("FAIL no exception thrown");
     throw new Error("assertion failed");
 }
 
@@ -507,4 +507,4 @@ Array.isArray = Array.isArray || function(o) {
     return Object.prototype.toString.call(o) === "[object Array]";
 };
 
-print("ecma-ops.js done");
+log("ecma-ops.js done");

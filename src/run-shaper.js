@@ -2,15 +2,16 @@
 var load, require = require || function(f) { load(f); };
 var args = (typeof process !== "undefined" && process.argv !== undefined) ?
     process.argv.slice(2) : arguments;
+var log = (typeof console !== "undefined") && console.log || print;
 
 if (args.length > 0 && args[0] === "--") {
     args.shift();
 }
 if (args.length <= 0) {
-    print("run-shaper: [shape1 .. shapeN] filename");
-    quit();
+    log("run-shaper: filename [shape1 .. shapeN]");
+    (typeof quit === "undefined" ? process.exit : quit)(0);
 }
-var filename = args.pop();
+var filename = args.shift();
 
 var Shaper = Shaper || require("./shaper.js") || Shaper;
 

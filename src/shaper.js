@@ -4,14 +4,14 @@
 var Fmt = Fmt || require("./fmt.js") || Fmt;
 var Ref = Ref || require("./ref.js") || Ref;
 var Comments = Comments || require("./comments.js") || Comments;
-var print = print || console.log;
+var log = (typeof console !== "undefined") && console.log || print;
 
 var Shaper = (function() {
     Array.isArray = Array.isArray || function(o) {
         return Object.prototype.toString.call(o) === "[object Array]";
     };
     function error(node, msg) {
-        print(Fmt("{0}:{1} error: {2}", node.tokenizer.filename, node.lineno, msg));
+        log(Fmt("{0}:{1} error: {2}", node.tokenizer.filename, node.lineno, msg));
         (typeof quit === "undefined" ? process.exit : quit)(-1);
     }
 
@@ -209,7 +209,7 @@ var Shaper = (function() {
         var level = 0;
         traverseTree(this, {
             pre: function(node, ref) {
-                print(Fmt("{0}{1}: <{2}>", Fmt.repeat(" ", level * 2), node, ref.prop[0] || "root"));
+                log(Fmt("{0}{1}: <{2}>", Fmt.repeat(" ", level * 2), node, ref.prop[0] || "root"));
                 ++level;
             },
             post: function(node, ref) {
@@ -221,7 +221,7 @@ var Shaper = (function() {
         root.printTree();
     }
     function printSource(root) {
-        print(root.getSrc());
+        log(root.getSrc());
     }
 
     //// parse and adjust
