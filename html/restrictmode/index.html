@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>Restrict Mode</title>
+  <script type="text/javascript" charset="utf-8"
+          src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+        $("div").hide();
+        $("#a0").click(function() { $("#div0").toggle(); });
+        $("#a1").click(function() { $("#div1").toggle(); });
+        $("#a2").click(function() { $("#div2").toggle(); });
+        $("#a3").click(function() { $("#div3").toggle(); });
+        $("#a4").click(function() { $("#div4").toggle(); });
+        $("#a5").click(function() { $("#div5").toggle(); });
+    });
+  </script>
+  <style type="text/css">
+    div { max-width: 500px; margin: 5px; }
+    body { max-width: 900px; font-family: Georgia, "Times New Roman", Times, serif; font-size: 100%; }
+    h1 { font-family: Monospace, "Courier New"; font-size: 200%; color: #888888; }
+    h2 { margin: 5px; font-size: 125%; color: #888888; }
+    code { font-family: Monospace, "Courier New"; font-size: 100%; color: #888888; }
+    a:link { color: #cc6600; }
+    a:visited { color: #5588aa; }
+    a:hover { color: #000000; }
+  </style>
+</head>
+<body>
+  <h1>"use restrict"; // restrict mode for JavaScript</h1>
+<p>
+Restrict mode for JavaScript (ECMAScript) is a proper subset of the
+  language. Conform to it and enjoy more robust programs:
+
+<ol start="0">
+<li> <code>===</code> and <code>!==</code> are already strict by
+  default in JS, with identical semantics in restrict mode. Use them!
+<a id="a0" href="#">why?</a><div id="div0">Because <code>===</code>
+    and <code>!==</code> are consistent, you'll remember their
+    semantics, and most of the time they're exactly what you
+    wanted. The loose <code>==</code> and <code>!=</code> operators
+    are quite complex and their semantics are not very consistent. The
+    use of the built-in strict operators seem to be common practice
+    today. It's a pity there's just two of them. But we're fixing that
+    now.</div><br>
+
+<li> <code>==</code> and <code>!=</code> are not allowed to type coerce, except:<br>
+    <code>undefined == null</code> (true) and <code>undefined != null</code> (false)
+<a id="a1" href="#">why?</a><div id="div1">Becase many otherwise
+    well-written programs rely on the behaviour that a declared but
+    not initialized variable (or a non-existing property) <code>==
+    null</code>. You are strongly encouraged to avoid the use
+    of <code>==</code> and
+    <code>!=</code>. Initialize to <code>null</code> or
+    compare using <code>=== undefined</code> instead. Restrict
+    <i>pedantic</i> mode disallows <code>==</code> and <code>!=</code>
+    entirely, except when @loose-annotated.
+</div><br>
+
+<li> <code>+ < <= >= ></code> are restricted to primitive <code>strings</code> or <code>numbers</code> (but never a mix)
+<a id="a2" href="#">why?</a><div id="div2">Because type coercion
+    for <code>+</code> is such a common source of bugs. <code>a + b</code> either adds
+    <code>numbers</code> or concatenates <code>strings</code>. Use the <code>String()</code> or <code>Number()</code>
+    functions (without <code>new</code>) to type-convert explicitly, when you must. For <code>string</code>
+    formatting, you're often better off using <code>Fmt()</code> or something similar.
+
+    Because <code>< >= >= ></code> either compares <code>numbers</code> or <code>strings</code>
+    (lexically). Mixing these types yields unrobust programs. Relying
+    on automatic coersion from other types may surprise you.<br><br>
+    <ul>
+      <li>Most languages that support comparing of arrays does so
+        element-wise. JS coerces into strings, which often is
+        not what you want. <code>[1] < [2]</code>, <code>[1,2] < [1,3]</code>, but <code>[10]
+        < [2]</code> (coerced into <code>"10" < "2"</code>)
+      <li>JS has primitive and boxed types, with inconsistent
+        semantics. <br><code>var x = new Number(3), y = new Number(3); x
+        <= y, x >= y, 3 == x, 3 == y, but x != y</code>. The first comparisions coerces
+      to primitives, the last compares object identity.
+      <li><code>Date</code> is not funny: <code>(new Date()) + 1 === "Tue Dec 28 2010 23:59:53 GMT+0100 (CET)1"</code> but
+        <code>(new Date()) - 1 === 1293577193075</code>. It coerces
+        to <code>string</code> or <code>number</code> depending on
+        operator. When a timestamp suffers, <code>Date.now()</code>
+        should be used.
+      <li>Since JS coerces <code>strings</code>
+        into <code>numbers</code>, you get away with mistakenly
+        mixing them. Robustness, performance and
+        readability suffers. Combined with the design of
+        the <code>+</code> operator, it's even
+        worse. <code>"01" - 1 === 0, "01" - "1" === 0</code> but <code>"01" + "1" === "011", "01" + 1 === "011", </code>
+      <li><code>< <= >= ></code> is custom too: <code>01 < 1 ===
+      false, "01" < 1 === false</code> but <code>"01" < "1" ===
+      true</code>. The first two compare (coerced) numbers, the last
+      strings (lexically).
+    </ul>
+    <br>The same rule applies for <code>+=</code>.
+</div><br>
+
+<li> <code>- * / % & | ^ ~v << >> >>> -v ++v v++ --v v--</code> are restricted to
+  primitive <code>numbers</code>
+<a id="a3" href="#">why?</a><div id="div3">Because they only
+    operate on <code>numbers</code>, per definition. Relying on automatic
+    coersion from other types may surprise you. Use the
+    <code>Number()</code> function to type-convert explicitly, when
+    you must.
+    <br>Loose JS examples:
+    <ul>
+      <li><code>null * 2 === 0</code> but <code>undefined * 2 ===
+        NaN</code>. Both cases are common sources of bugs. That they
+        yield different results is interesting in itself since JS
+        defines <code>null == undefined</code>.
+      <li>All JS objects can have <code>valueOf</code>
+      and <code>toString</code> functions. Both must return primitive
+      values (but not necessarily <code>number</code>
+      or <code>string</code>). The order of how these are invoked is
+      not obvious: <code>"o: " + {valueOf: function() { return 3; },
+      toString: function() { return "4"; }} === "o: 3"</code>. In
+      practice, <code>valueOf</code> isn't used much other than for
+      automatic unboxing
+      of <code>Booleans</code>, <code>Numbers</code>
+      and <code>Strings</code>. For the rare times when you use boxed
+      types you can easily convert them to primitives explicitly. It's
+      crucial that you know when you use boxed values (and limit their
+      usage), since their semantics are sometimes surprising. It's
+      true: <code>Boolean(new Boolean(false)) === true</code>.
+    </ul>
+    <br>The same rule applies for <code>-= *= /= %= &= |= ^= ~=
+    <<= >>= >>>=</code>.
+</div><br>
+
+<li> That's it! <code>+v !v && || ?: o[k]</code> and all other operators remain the
+  same
+<a id="a4" href="#">why?</a><div id="div4">Because I believe they are well
+    defined. <code>+v</code> (unary plus) is defined to type-convert into <code>number</code>,
+    but you should consider using <code>Number(v)</code> instead. <code>!v</code> is defined to
+    type-convert into <code>boolean</code>, and then inverts it. <code>&& ||
+    ?:</code> compares against falsy values (so does the <code>if</code>-statement and
+    others). <code>o[k]</code> (index) converts its key
+    to <code>string</code>. And so on. I could have missed out on
+    something that should be restricted, please let me know in that case.
+    <ul>
+      <li>I am considering restricting <code>typeof</code>, such
+      that <code>typeof null</code> is disallowed. Let me know if you
+      have an opinion on that.
+    </ul>
+</div><br>
+</ol>
+</p>
+<p>Get started with restrict mode by
+downloading <a href="https://github.com/olov/jsshaper">JSShaper</a>,
+a JS/ES source transforming framework. It includes
+the <code>restricter</code> plugin, which adds checking to your
+program without destroying your formatting. Run your tests on the
+output of <code>restricter</code>. Since restrict mode is a proper
+subset of JS, and conversely JS is a proper superset of restrict mode,
+your restrict mode conforming programs works fine in any JS
+engine. Only that by running your program
+through <code>restricter</code> now and then, it becomes more robust.
+<a id="a5" href="#">how?</a><div id="div5">
+  <code>
+    git clone git://github.com/olov/jsshaper.git<br>
+    git submodule init<br>
+    git submodule update<br>
+    cd jsshaper/src<br>
+    d8 run-restricter.js -- myfile.js # or js/node<br>
+    <br>
+    # then include myfile-restrict.js in your project<br>
+    <br>
+  </code>
+</div>
+</p>
+<p>Like ES5 strict mode, restrict mode is opt-in. Similarly, you enable
+it by placing <code>"use restrict";</code> first in your program or
+function. There's always the option to bail out: <code>(/*@loose*/ "1"+2+3)</code>.
+</p>
+<p>In fact, chances are that you are already mostly conforming to
+restrict mode, except that you may use <code>str + num</code> to
+perform string conversion and concatenation at the same time. You may
+find that replacing that with <code>Fmt()</code>
+or <code>String()</code> calls here and there is easy. You may also
+find that restrict mode conforming programs are easier to read and
+reason about.
+</p>
+<p>You're encouraged to <code>"use strict"; "use restrict";</code>
+</p>
+<h2>"I know my JS, why would I need this?"</h2>
+<p>This isn't about fixing you, it's about fixing the language. Even
+<a href="http://code.google.com/p/v8/issues/detail?id=690">the</a> <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=599914">best</a>
+make mistakes due to loose semantics. If you're not convinced yet about
+loose operator complexity, take a look at this implementation
+of <a href="https://github.com/olov/jsshaper/blob/master/src/ecma-ops/ecma-ops.js">EcmaScript
+operators in EcmaScript</a>. Also note that SpiderMonkey, JSC and V8
+does not implement identical semantics. Since restrict mode is opt-it,
+you may consider adding it just to a part of your program.
+</p>
+<h2>About</h2>
+<p>Restrict mode was created by <a href="http://lassus.se">Olov
+ Lassus</a> and isn't related to the work by the ECMA committee. ES5
+ strict mode was important in that it started improving the language
+ by reducing it, not just adding to it. Harmony seems very focused on
+ new features but will hopefully continue that tradition,
+ too. Restrict mode, just like ES5 strict mode, is something you can
+ start using today thanks to
+ <a href="https://github.com/olov/jsshaper">JSShaper</a>. It's
+ technically possible, but not very likely, that a JS engine could
+ add built-in support for restrict mode in the future. It
+ doesn't really matter.
+</p>
+<p>Restrict mode is a moving target and details are likely to change
+based on your <a href="http://lassus.se">feedback</a>. Thanks for
+trying it out!
+</p>
+</body>
+</html>
