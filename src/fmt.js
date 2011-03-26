@@ -1,20 +1,29 @@
 "use strict"; "use restrict";
 
 var Fmt = (function() {
+    // String formatting
+    // Call Fmt directly instead of Fmt.fmt
+    // example: Fmt("Name: {0}, Age: {1}", "shaper", 0)
+    //          Fmt("Name: {0}", {toString: function() { return "shaper"; }})
     function fmt(str, var_args) {
         var args = Array.prototype.slice.call(arguments, 1);
         return str.replace(/\{(\d+)\}/g, function(s, match) {
             return (match in args ? args[match] : s);
         });
     }
-    function fmtobj(str, obj) {
-        return str.replace(/\{([_$a-zA-Z][_$a-zA-Z0-9]*)\}/g, function(s, match) {
+    // String formatting
+    // example: Fmt.obj("Name: {name}, Age: {age}", {name: "shaper", age: 0})
+    //          Fmt.obj("Name: {0}, Age: {1}", ["shaper", 0])
+    function obj(str, obj) {
+        return str.replace(/\{([_$a-zA-Z0-9][_$a-zA-Z0-9]*)\}/g, function(s, match) {
             return (match in obj ? obj[match] : s);
         });
     }
+    // concat multiple strings
     function cat(var_args) {
         return String.prototype.concat.apply(String.prototype, arguments);
     }
+    // abbreviate string into max characters
     function abbrev(str, max) {
         max = Math.max(Number(max) || 0, 0);
         if (str.length <= max) {
@@ -27,12 +36,13 @@ var Fmt = (function() {
         var r = Math.floor((max - 3) / 2);
         return cat(str.slice(0, l), "...", str.slice(str.length - r, str.length));
     }
+    // repeat string n times
     function repeat(str, n) {
         return (new Array(n + 1)).join(str);
     }
 
     fmt.fmt = fmt;
-    fmt.fmtobj = fmtobj;
+    fmt.obj = obj;
     fmt.cat = cat;
     fmt.abbrev = abbrev;
     fmt.repeat = repeat;

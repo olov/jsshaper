@@ -22,13 +22,11 @@ It also comes with a few small and simple examples.
 Its web site is at <http://lassus.se/jsshaper>.
 
 JSShaper is young, not very documented, and may crash with horrible
-error messages. It will become rock solid with extensive
-documentation. Thanks for being an early adopter and reporting bugs or
+error messages. Thanks for being an early adopter and reporting bugs or
 annoyances. Contributors are welcome!
 
-JSShaper is designed to run from the command line.
-
-It should be possible to use with the following JS shells:
+JSShaper is designed to run from the command line. It should be
+possible to use with the following JS shells:
   js: recent versions of Mozilla SpiderMonkey/TraceMonkey
   d8: Google V8 debug shell
   node: Embedded V8 with lots more
