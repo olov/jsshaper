@@ -36,7 +36,7 @@ Restrict mode for JavaScript (ECMAScript) is a proper subset of the
 <ol start="0">
 <li> <code>===</code> and <code>!==</code> are already strict by
   default in JS, with identical semantics in restrict mode. Use them!
-<a id="a0" href="#">why?</a><div id="div0">Because <code>===</code>
+<a id="a0" href="#a">why?</a><div id="div0">Because <code>===</code>
     and <code>!==</code> are consistent, you'll remember their
     semantics, and most of the time they're exactly what you
     wanted. The loose <code>==</code> and <code>!=</code> operators
@@ -47,7 +47,7 @@ Restrict mode for JavaScript (ECMAScript) is a proper subset of the
 
 <li> <code>==</code> and <code>!=</code> are not allowed to type coerce, except:<br>
     <code>undefined == null</code> (true) and <code>undefined != null</code> (false)
-<a id="a1" href="#">why?</a><div id="div1">Becase many otherwise
+<a id="a1" href="#a">why?</a><div id="div1">Becase many otherwise
     well-written programs rely on the behaviour that a declared but
     not initialized variable (or a non-existing property) <code>==
     null</code>. You are strongly encouraged to avoid the use
@@ -59,7 +59,7 @@ Restrict mode for JavaScript (ECMAScript) is a proper subset of the
 </div><br>
 
 <li> <code>+ < <= >= ></code> are restricted to primitive <code>strings</code> or <code>numbers</code> (but never a mix)
-<a id="a2" href="#">why?</a><div id="div2">Because type coercion
+<a id="a2" href="#a">why?</a><div id="div2">Because type coercion
     for <code>+</code> is such a common source of bugs. <code>a + b</code> either adds
     <code>numbers</code> or concatenates <code>strings</code>. Use the <code>String()</code> or <code>Number()</code>
     functions (without <code>new</code>) to type-convert explicitly, when you must. For <code>string</code>
@@ -98,7 +98,7 @@ Restrict mode for JavaScript (ECMAScript) is a proper subset of the
 
 <li> <code>- * / % & | ^ ~v << >> >>> -v ++v v++ --v v--</code> are restricted to
   primitive <code>numbers</code>
-<a id="a3" href="#">why?</a><div id="div3">Because they only
+<a id="a3" href="#a">why?</a><div id="div3">Because they only
     operate on <code>numbers</code>, per definition. Relying on automatic
     coersion from other types may surprise you. Use the
     <code>Number()</code> function to type-convert explicitly, when
@@ -130,7 +130,7 @@ Restrict mode for JavaScript (ECMAScript) is a proper subset of the
 
 <li> That's it! <code>+v !v && || ?: o[k]</code> and all other operators remain the
   same
-<a id="a4" href="#">why?</a><div id="div4">Because I believe they are well
+<a id="a4" href="#a">why?</a><div id="div4">Because I believe they are well
     defined. <code>+v</code> (unary plus) is defined to type-convert into <code>number</code>,
     but you should consider using <code>Number(v)</code> instead. <code>!v</code> is defined to
     type-convert into <code>boolean</code>, and then inverts it. <code>&& ||
@@ -156,7 +156,7 @@ subset of JS, and conversely JS is a proper superset of restrict mode,
 your restrict mode conforming programs works fine in any JS
 engine. Only that by running your program
 through <code>restricter</code> now and then, it becomes more robust.
-<a id="a5" href="#">how?</a><div id="div5">
+<a id="a5" href="#a">how?</a><div id="div5">
   <code>
     git clone git://github.com/olov/jsshaper.git<br>
     git submodule init<br>
