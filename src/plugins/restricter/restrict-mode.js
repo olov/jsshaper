@@ -1,5 +1,7 @@
 "use strict"; "use restrict";
 
+var __pedantic = false;
+
 function __verbosetypeof(v) {
     var t = typeof v;
     var m;
@@ -37,8 +39,11 @@ function __assert_numbers(opname, x, y) {
     __throw_typeerror(opname, x, y);
 }
 function __eq(x, y) {
+    if (__pedantic) {
+        throw new Error("restrict pedantic mode disallows the == operator, use === or /*@loose*/ annotate instead");
+    }
     var eq_strict = (x === y);
-    var eq_loose = /*loose*/(x == y);
+    var eq_loose = /*@loose*/(x == y);
     if (eq_strict === eq_loose ||
         (x === undefined && y === null || x === null && y === undefined)) {
         return eq_loose;
@@ -46,8 +51,11 @@ function __eq(x, y) {
     __throw_typeerror("==", x, y);
 }
 function __ne(x, y) {
+    if (__pedantic) {
+        throw new Error("restrict pedantic mode disallows the != operator, use !== or /*@loose*/ annotate instead");
+    }
     var ne_strict = (x !== y);
-    var ne_loose = /*loose*/(x != y);
+    var ne_loose = /*@loose*/(x != y);
     if (ne_strict === ne_loose ||
         (x === undefined && y === null || x === null && y === undefined)) {
         return ne_loose;
@@ -60,7 +68,7 @@ function __lt(x, y) {
 
     if (xtype === ytype) {
         if ((xtype === "string" || xtype === "number")) {
-            return /*loose*/(x < y);
+            return /*@loose*/(x < y);
         }
     }
     __throw_typeerror("<", x, y);
@@ -71,7 +79,7 @@ function __gt(x, y) {
 
     if (xtype === ytype) {
         if ((xtype === "string" || xtype === "number")) {
-            return /*loose*/(x > y);
+            return /*@loose*/(x > y);
         }
     }
     __throw_typeerror(">", x, y);
@@ -82,7 +90,7 @@ function __le(x, y) {
 
     if (xtype === ytype) {
         if ((xtype === "string" || xtype === "number")) {
-            return /*loose*/(x <= y);
+            return /*@loose*/(x <= y);
         }
     }
     __throw_typeerror("<=", x, y);
@@ -93,17 +101,17 @@ function __ge(x, y) {
 
     if (xtype === ytype) {
         if ((xtype === "string" || xtype === "number")) {
-            return /*loose*/(x >= y);
+            return /*@loose*/(x >= y);
         }
     }
     __throw_typeerror(">=", x, y);
 }
 function __uplus(v) {
-    return /*loose*/(+v);
+    return /*@loose*/(+v);
 }
 function __neg(v) {
     __assert_number("unary -", v);
-    return /*loose*/(-v);
+    return /*@loose*/(-v);
 }
 function __add(x, y) {
     var xtype = typeof x;
@@ -113,62 +121,62 @@ function __add(x, y) {
             return String.prototype.concat.call(x, y);
         }
         if (xtype === "number") {
-            return /*loose*/(x + y);
+            return /*@loose*/(x + y);
         }
     }
     __throw_typeerror("+", x, y);
 }
 function __sub(x, y) {
     __assert_numbers("-", x, y);
-    return /*loose*/(x - y);
+    return /*@loose*/(x - y);
 }
 function __mul(x, y) {
     __assert_numbers("*", x, y);
-    return /*loose*/(x * y);
+    return /*@loose*/(x * y);
 }
 function __div(x, y) {
     __assert_numbers("/", x, y);
-    return /*loose*/(x / y);
+    return /*@loose*/(x / y);
 }
 function __mod(x, y) {
     __assert_numbers("%", x, y);
-    return /*loose*/(x % y);
+    return /*@loose*/(x % y);
 }
 function __bitand(x, y) {
     __assert_numbers("&", x, y);
-    return /*loose*/(x & y);
+    return /*@loose*/(x & y);
 }
 function __bitor(x, y) {
     __assert_numbers("|", x, y);
-    return /*loose*/(x | y);
+    return /*@loose*/(x | y);
 }
 function __bitxor(x, y) {
     __assert_numbers("^", x, y);
-    return /*loose*/(x ^ y);
+    return /*@loose*/(x ^ y);
 }
 function __bitasl(x, y) {
     __assert_numbers("<<", x, y);
-    return /*loose*/(x << y);
+    return /*@loose*/(x << y);
 }
 function __bitasr(x, y) {
     __assert_numbers(">>", x, y);
-    return /*loose*/(x >> y);
+    return /*@loose*/(x >> y);
 }
 function __bitlsr(x, y) {
     __assert_numbers(">>>", x, y);
-    return /*loose*/(x >>> y);
+    return /*@loose*/(x >>> y);
 }
 function __bitnot(v) {
     __assert_number("~", v);
-    return /*loose*/(~v);
+    return /*@loose*/(~v);
 }
 function __inc(v) {
     __assert_number("++", v);
-    return /*loose*/(v + 1);
+    return /*@loose*/(v + 1);
 }
 function __dec(v) {
     __assert_number("--", v);
-    return /*loose*/(v - 1);
+    return /*@loose*/(v - 1);
 }
 function __arg0(x) {
     return x;

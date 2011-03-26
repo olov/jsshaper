@@ -40,7 +40,7 @@ Shaper("restricter", function(root) {
         }
     }
     function checkerPre(node, ref) {
-        // don't alter /*loose*/ annotated nodes or children
+        // don't alter @loose annotated nodes or children
         if (node.loose) {
             return "break";
         }
@@ -161,11 +161,11 @@ Shaper("restricter", function(root) {
             }
         }
 //         else if (node.type === tkn.EQ) {
-//             error(node, "== used without /**loose*/ annotation, did you mean === ?\n  Replace with === for strict equal or add annotation if loose equal with type-coercion was intended.");
+//             error(node, "== used without /*@loose*/ annotation, did you mean === ?\n  Replace with === for strict equal or add annotation if loose equal with type-coercion was intended.");
 //             return undefined;
 //         }
 //         else if (node.type === tkn.NE) {
-//             error(node, "!= used without /**loose*/ annotation, did you mean !== ?\n  Replace with !== for strict not-equal or add annotation if loose not-equal with type-coercion was intended.");
+//             error(node, "!= used without /*@loose*/ annotation, did you mean !== ?\n  Replace with !== for strict not-equal or add annotation if loose not-equal with type-coercion was intended.");
 //             return undefined;
 //         }
         else {
@@ -178,6 +178,6 @@ Shaper("restricter", function(root) {
     return Shaper.traverseTree(root, {pre: checkerPre, post: checkerPost});
 });
 
-Annotater(/\/\*+\s*loose\s*\*+\//, function(node, match) {
+Annotater(/\/\*+\s*@loose\s*\*+\//, function(node, match) {
     node.loose = true;
 });

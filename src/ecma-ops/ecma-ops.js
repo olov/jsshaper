@@ -245,11 +245,11 @@ function __loose_add(x, y) { // ecma 11.6.1
     }
     // ecma 8-11
     // re-use built-in + operator for number addition
-    return /*loose*/(__toNumber(x) + __toNumber(y));
+    return /*@loose*/(__toNumber(x) + __toNumber(y));
 }
 function __loose_sub(x, y) { // ecma 11.6.2
     // re-use built-in - operator for number subtraction
-    return /*loose*/(__toNumber(x) - __toNumber(y));
+    return /*@loose*/(__toNumber(x) - __toNumber(y));
 }
 function __loose_internal_compare(x, y, op) { // ecma 11.8.1
     // ecma 11.8.5
@@ -262,18 +262,18 @@ function __loose_internal_compare(x, y, op) { // ecma 11.8.1
     // ecma 3, 16-21
     if (xtype === "string" && ytype === "string") {
         // re-use built-in operators for lexical string comparision
-        if (op === 0) return /*loose*/(x < y);
-        if (op === 1) return /*loose*/(x <= y);
-        if (op === 2) return /*loose*/(x > y);
-        if (op === 3) return /*loose*/(x >= y);
+        if (op === 0) return /*@loose*/(x < y);
+        if (op === 1) return /*@loose*/(x <= y);
+        if (op === 2) return /*@loose*/(x > y);
+        if (op === 3) return /*@loose*/(x >= y);
     }
     // ecma 4-15
     else {
         // re-use built-in operators for IEEE-754 floating point comparision
-        if (op === 0) return /*loose*/(__toNumber(x) < __toNumber(y));
-        if (op === 1) return /*loose*/(__toNumber(x) <= __toNumber(y));
-        if (op === 2) return /*loose*/(__toNumber(x) > __toNumber(y));
-        if (op === 3) return /*loose*/(__toNumber(x) >= __toNumber(y));
+        if (op === 0) return /*@loose*/(__toNumber(x) < __toNumber(y));
+        if (op === 1) return /*@loose*/(__toNumber(x) <= __toNumber(y));
+        if (op === 2) return /*@loose*/(__toNumber(x) > __toNumber(y));
+        if (op === 3) return /*@loose*/(__toNumber(x) >= __toNumber(y));
     }
     throw new Error("__loose_internal_compare invalid op");
 }
@@ -426,7 +426,7 @@ function test_binary_operator() {
         for (j = 0; j < flat.length; j++) {
             var exc_a = false, exc_b = false;
             var val_a, val_b;
-            try { val_a = /*loose*/(flat[i] == flat[j]); }
+            try { val_a = /*@loose*/(flat[i] == flat[j]); }
             catch (e) { exc_a = e; }
 
             try { val_b = __loose_eq(flat[i], flat[j]); }
@@ -458,14 +458,14 @@ function test_jsvm_differences(vmstr) {
               jsc: vmstr === "jsc", ecma: vmstr === "ecma"};
 
     // js, v8, jsc yield true, ecma (my interpretation) yields false
-    assertEquals(/*loose*/(false == {valueOf: function() { return null; }}), !vm.ecma);
+    assertEquals(/*@loose*/(false == {valueOf: function() { return null; }}), !vm.ecma);
 
-    assertEquals(/*loose*/("" == {valueOf: function() { return null; }}), vm.js);
+    assertEquals(/*@loose*/("" == {valueOf: function() { return null; }}), vm.js);
 
-    assertEquals(/*loose*/(false == new Date(0)), !vm.js);
-    assertEquals(/*loose*/(0 == new Date(0)), !vm.js);
-    assertEquals(/*loose*/(316998000000 == new Date(1980, 1-1, 18)), !vm.js);
-    assertEquals(/*loose*/(1282600800000 == new Date(2010, 8-1, 24)), !vm.js);
+    assertEquals(/*@loose*/(false == new Date(0)), !vm.js);
+    assertEquals(/*@loose*/(0 == new Date(0)), !vm.js);
+    assertEquals(/*@loose*/(316998000000 == new Date(1980, 1-1, 18)), !vm.js);
+    assertEquals(/*@loose*/(1282600800000 == new Date(2010, 8-1, 24)), !vm.js);
 }
 //test_jsvm_differences("v8");
 
