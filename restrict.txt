@@ -1,5 +1,5 @@
-Javascript restrict mode design decisions:
-------------------------------------------
+JavaScript restrict mode
+------------------------
 Restrict mode reduces the amount of type coercion by providing strict
 versions of built-in loose operators, similar to how === is already a
 strict version of the loose == operator.
@@ -8,19 +8,14 @@ Restrict mode adds functions but no new syntax. There's a translator
 that automatically converts loose operators into their restrict mode
 equivalent, such as a < b into __lt(a, b). The translator preserves as
 much of the original source and formatting as possible, and tries to
-produce as readable output as possible. Reverse-translation should be
-possible and generate output identical to the original
-file. (devnotes: do this automatically each translation to catch bugs?
-mark the output with a version-number to be backwards-compatible? the
-output should remain the same even if translated twice [i.e. proper
-annotations everywhere])
+produce as readable output as possible.
 
 Restrict mode is enabled similar to ECMAScript 5 strict mode. Include
 the statement "use restrict"; at the top of your script or inside a
 function. It is encouraged to combine the two:
 "use strict"; "use restrict";
 
-Since restrict mode is a subset of Javascript, all valid restrict mode
+Since restrict mode is a subset of JavaScript, all valid restrict mode
 programs will produce equivalent results whether compiled or not. The
 opposite is not true, since restrict mode throws errors in cases where
 type coercions would normally occur. One use-case is to use the
@@ -28,57 +23,15 @@ translated version when executing the unit-tests and the original
 version for rapid iterative development and deployment.
 
 It is possible to force the use of a loose operator even in restrict
-mode. Some options for this (TBD):
-      a /*loose*/ < b + 1    annotation left of operator
-      /*loose*/ a < b + 1    annotation prepended to expression
-                             works on lowest priority operator
-                             or entire expression (TBD)
+mode.
+    /*@loose*/ a < b + 1     annotation prepended to expression
+                             or statement. Annotation has lowest
+                             priority.
 
 If a function is loose-annotated, restrict checking is disabled for
 the whole body of that function:
-/*loose*/ function min(a, b) { return a < b ? a : b }
-var min = /*loose*/ function(a, b) { return a < b ? a : b }
-
-String annotation alternative:
-      "no restrict", a < b + 1
-      the comma operator with specific string literal disables
-          restrict mode for the entire expression to the right of the
-          comma
-      "no restrict", expr1, expr2 [same as (("no restrict", expr1), expr2)]
-          disables restrict for expr1 but not expr2
-      in a function call, use extra parens:
-          f(("no restrict", expr1), expr2)
-      works for function literals:
-          [1,2,3].map(("no restrict", function(v) { return v + 1; }))
-      but not regular function definitions:
-          "no restrict", function min(a, b) { return a < b ? a : b }
-          since they become expressions (min is not bound afterwards)
-
-Function annotation alternative:
-      __loose(a < b + 1)
-      disables restrict mode for the entire function argument
-      expression
-      requires function __loose(e) { return e; } definition in source file
-
-
-Restrict mode...
-----------------
-is a contract
-allows operands of the same type only
-disallows most type coercion
-is a safe and intuitive subset of JS
-is the same syntax but slightly different operator semantics
-is opt-in, and you can easily bail out
-favors predictability over flexibility
-can be checked at runtime, but doesn't have to be
-throws an error at runtime if you break the contract, when checked
-is allowed to run slower when checked
-doesn't change the semantics of your compliant program, checked or not
-works with most JavaScript/ECMAScript versions
-shouldn't get in your way
-is consistent and easy to learn by heart
-should never surprise you
-is your perfect unit test companion
+/*@loose*/ function min(a, b) { return a < b ? a : b }
+var min = /*@loose*/ function(a, b) { return a < b ? a : b }
 
 Restrict mode semantics
 -----------------------
@@ -92,42 +45,18 @@ A run-time exception is thrown if the restrictions are broken.
     -= *= /= %= &= |= ^= <<= >>= >>>= are restricted to numbers
 (4) That's it! (+v !v && || ?: and all other operators remain the same)
 
-Examples of issues with loose comparisions:
--------------------------------------------
-[1] < [2] and [1,2] < [1,3] but [10] < [2] (coerced into "10" < "2")
-1 + [[[2]]] === "12"
-1 < true
-n1 = new Number(3), n2 = Number(3)
-   n1 <= n2, n2 >= n1 but n1 != n2
-null <= [], null >= [] but null != []
-
-Date is special-case:
----------------------
-(new Date()) + 1 === "Tue Dec 28 2010 23:59:53 GMT+0100 (CET)1" but
-(new Date()) - 1 === 1293577193075
-
-Falsy and truthy values:
-------------------------
-new Boolean(false) is truthy (object and not null)
-
-Converting to primitive types:
-------------------------------
-To string: ""+ 101 or String(101)
-To number: +"101" or Number("101")
-To boolean: !!101 or Boolean(101)
-
 String formatting:
 ------------------
 Alternatives to string concatenation via + operator
 log("player " + name + " scored " + points " points ");
 
-log(String.fmt("player {0} scored {1} points", name, points));
-log(String.str("player ", name, " scored ", points, " points "));
+log(Fmt("player {0} scored {1} points", name, points));
+log(Fmt.cat("player ", name, " scored ", points, " points "));
 
 Operators:
 ----------
 Operators without restrict equivalents, untranslated
-  (mustn't be /*loose*/ annotated in general):
+  (mustn't be /*@loose*/ annotated in general):
 ===  strict by default
 !==  strict by default
 =    strict by default (doesn't coerce)
@@ -178,5 +107,4 @@ Bitwise arithmetic (number):
 Restrict pedantic mode:
 In restrict pedantic mode, the use of the loose == and != operators is
 only valid when loose-annotated. For strict versions, use the built-in
-=== and !== operators instead. + < > <= and >= are only valid with
-numbers. unary + is disallowed.
+=== and !== operators instead.
