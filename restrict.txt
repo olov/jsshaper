@@ -82,10 +82,15 @@ is your perfect unit test companion
 
 Restrict mode semantics
 -----------------------
-(1) + < <= >= > are restricted to strings or numbers (never a mix)
-(2) - * / % & | ^ ~v << >> >>> -v
-    += -= *= /= %= &= |= ^= <<= >>= >>>= are restricted to numbers
-(3) That's it! (+v !v && || ?: and all other operators remain the same)
+A run-time exception is thrown if the restrictions are broken.
+
+(0) === and !== are already strict by default. Use them!
+(1) == and != are not allowed to type coerce, with one exception:
+    undefined == null (true) and undefined != null (false)
+(2) + += < <= >= > are restricted to strings or numbers (but never a mix)
+(3) - * / % & | ^ ~v << >> >>> -v
+    -= *= /= %= &= |= ^= <<= >>= >>>= are restricted to numbers
+(4) That's it! (+v !v && || ?: and all other operators remain the same)
 
 Examples of issues with loose comparisions:
 -------------------------------------------

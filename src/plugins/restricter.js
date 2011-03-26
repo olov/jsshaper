@@ -1,5 +1,6 @@
 "use strict"; "use restrict";
 
+var Fmt = Fmt || require("../fmt.js") || Fmt;
 var Shaper = Shaper || require("../shaper.js") || Shaper;
 var Annotater = Annotater || require("../annotater.js") || Annotater;
 

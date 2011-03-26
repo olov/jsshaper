@@ -1,5 +1,3 @@
-"use strict"; "use restrict";
-
 // ECMAScript3 versions of ECMAScript5 constructs used in Narcissus parser
 // All properties will be writable, configurable and enumerable, no matter
 // the descriptor. Descriptor get/set is also ignored.

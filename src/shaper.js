@@ -1,6 +1,6 @@
 "use strict"; "use restrict";
 
-/* global Narcissus, tkn */ require("./narcissus.js");
+/* global Narcissus, tkn */ (typeof Narcissus === "undefined") && require("./narcissus.js");
 var Fmt = Fmt || require("./fmt.js") || Fmt;
 var Ref = Ref || require("./ref.js") || Ref;
 var Comments = Comments || require("./comments.js") || Comments;
