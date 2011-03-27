@@ -5,7 +5,7 @@ jQuery(document).ready(function() {
         return false;
     });
     // act on keystrokes in editor
-    jQuery("#code").keydown(function(e) {
+    jQuery("#sourceedit").keydown(function(e) {
         // code borrowed from John Resig
         if (this.setSelectionRange) {
             var start = this.selectionStart;
@@ -35,16 +35,16 @@ jQuery(document).ready(function() {
                 return false;
             }
             else if (e.keyCode == 27) { // ESC
-                var source = jQuery("#code").val();
-                jQuery("#pre").html(source).chili().show();
+                var source = jQuery("#sourceedit").val();
+                jQuery("#sourceview").html(source).chili().show();
                 return false;
             }
         }
     });
 
     // hide highlighter, show editor
-    jQuery("#pre").dblclick(function(){
-        jQuery("#pre").hide();
-        jQuery("#code").focus();
+    jQuery("#sourceview").dblclick(function(){
+        jQuery("#sourceview").hide();
+        jQuery("#sourceedit").focus();
     });
 });
