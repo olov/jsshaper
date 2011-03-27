@@ -15,11 +15,12 @@ JSShaper comes with the following plugins:
   stringconverter: detects the ""+expr pattern and turns it into String(expr)
   restricter: adds run-time checking for restrict mode programs by
   converting operators into function calls in a compatible way. it
-  comes with a small run-time library.
+  comes with a small run-time library. <http://restrictmode.org>
 
 It also comes with a few small and simple examples.
 
-Its web site is at <https://github.com/olov/jsshaper> for now.
+Its web site is at <https://github.com/olov/jsshaper> for now. Contact
+me on <http://twitter.com/olov> or <http://lassus.se>.
 
 Get the source code from <https://github.com/olov/jsshaper>:
 git clone git://github.com/olov/jsshaper.git
