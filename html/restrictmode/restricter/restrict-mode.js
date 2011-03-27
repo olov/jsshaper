@@ -1,0 +1,1 @@
+../../../src/plugins/restricter/restrict-mode.js

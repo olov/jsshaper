@@ -9,7 +9,7 @@ area
   container
     sourceedit (textarea)
   checkedview
-    #checkedview { position: absolute; top: 30px; width: 48%, right: 100%}
+  output
 -->
   <style type="text/css">
     body { background: #222; color: #FFF; font-family: Helvetica, Arial; font-size: 16px; }
@@ -18,6 +18,8 @@ area
     textarea { width: 100%; font-size: 20px; height: 425px; font-family: Monaco, Courier New; background: #000; color: #FFF; overflow: auto; margin: 0; border: 0; padding: 0 0 0 5px; }
 
     #sourceview { position: absolute; top: 30px; width: 48%; font-size: 20px; height: 425px; font-family: Monaco, Courier New; background: #000; color: #FFF; overflow: auto; margin: 0; border: 0; padding: 0 0 0 5px; }
+    #checkedview { position: absolute; top: 30px; left: 50%; width: 48%; font-size: 20px; height: 425px; font-family: Monaco, Courier New; background: #000; color: #FFF; overflow: auto; margin: 0; border: 0; padding: 0 0 0 5px; }
+    #output { position: absolute; top: 470px; width: 98%; font-size: 12px; height: 100px; font-family: Monaco, Courier New; background: #000; color: #FFF; overflow: auto; margin: 0; border: 0; padding: 0 0 0 5px; }
 
     textarea { z-index: 1; }
     #sourceview { z-index: 2; }
@@ -33,9 +35,12 @@ area
   <script type="text/javascript" src="jquery-chili/jquery.chili.js"></script>
   <script type="text/javascript" src="jquery-chili/recipes.js"></script>
   <script type="text/javascript" src="try-restrictmode.js"></script>
+  <script type="text/javascript" src="../restricter/all-narcissus.js"></script>
+  <script type="text/javascript" src="../restricter/all-restricter.js"></script>
+  <script type="text/javascript" src="../restricter/restrict-mode.js"></script>
 </head>
 <body>
-  <h3>Try restrict mode</h3>
+  <h3>Try restrict mode: edit left, restricter output on right</h3>
   <div id="area">
     <!-- navigation -->
     <form id="form">
@@ -45,13 +50,16 @@ area
     </form>
 
     <!-- sourceview -->
-    <pre id="sourceview" class="javascript">// double-click to edit</pre>
+    <pre id="sourceview" class="javascript"></pre>
 
     <!-- sourceedit -->
     <div id="container"><textarea id="sourceedit" wrap="off"></textarea></div>
 
     <!-- checkedview -->
-    <!-- pre id="checkedview" class="javascript">checked source code</pre -->
+    <pre id="checkedview" class="javascript"></pre>
+
+    <!-- output -->
+    <pre id="output" class="javascript">Program output here</pre>
   </div>
 </body>
 </html>

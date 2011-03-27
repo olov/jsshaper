@@ -1,7 +1,38 @@
 jQuery(document).ready(function() {
+    function viewSource() {
+        var source = jQuery("#sourceedit").val();
+        jQuery("#sourceview").html(source).chili().show();
+        return source;
+    }
+
     // run restricter
     jQuery("form").submit(function() {
-        jQuery("#results").empty();
+        var src = viewSource();
+        try {
+            var root = Shaper.parseScript(src, "<filename>");
+            root = Shaper.run(root, ["annotater", "restricter"]);
+            var checked = root.getSrc();
+            jQuery("#checkedview").html(checked).chili().show();
+        }
+        catch (e) {
+            var reason = String(e);
+            if (e.stack) {
+                reason = e.stack;
+            }
+            jQuery("#checkedview").html(reason).show();
+        }
+
+        try {
+            var fn = new Function(checked);
+            fn();
+        }
+        catch (e) {
+            var reason = String(e);
+            if (e.stack) {
+                reason = e.stack;
+            }
+            jQuery("#output").html(reason).show();
+        }
         return false;
     });
     // act on keystrokes in editor
@@ -34,9 +65,8 @@ jQuery(document).ready(function() {
                 this.focus();
                 return false;
             }
-            else if (e.keyCode == 27) { // ESC
-                var source = jQuery("#sourceedit").val();
-                jQuery("#sourceview").html(source).chili().show();
+            else if (e.keyCode === 27) { // ESC
+                viewSource();
                 return false;
             }
         }
@@ -47,4 +77,9 @@ jQuery(document).ready(function() {
         jQuery("#sourceview").hide();
         jQuery("#sourceedit").focus();
     });
+
+    var sourceedit = '"use restrict";\n\nvar x = 1 + "2";';
+    jQuery("#sourceedit").html(sourceedit);
+    viewSource();
+    jQuery("#checkedview").html("// press run restricter for\n// restricter output here").chili().show();
 });
