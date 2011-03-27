@@ -18,7 +18,7 @@ jQuery(document).ready(function() {
         catch (e) {
             var reason = String(e);
             if (e.stack) {
-                reason = e.stack;
+                reason += "\n\n"+ e.stack;
             }
             jQuery("#output").html(reason).show();
         }
@@ -34,7 +34,7 @@ jQuery(document).ready(function() {
         catch (e) {
             var reason = String(e);
             if (e.stack) {
-                reason = e.stack;
+                reason += "\n\n"+ e.stack;
             }
             jQuery("#output").html(reason).show();
         }
@@ -90,7 +90,7 @@ jQuery(document).ready(function() {
         jQuery("#sourceedit").focus();
     });
 
-    var sourceedit = '"use restrict";\n\nvar x = 1 + "2";';
+    var sourceedit = '"use restrict";\n\n// double-click to edit\nvar x = 1 + "2";';
     jQuery("#sourceedit").html(sourceedit);
     showSourceview();
     jQuery("#checkedview").html("// press run restricter for\n// restricter output here").chili().show();
