@@ -1,30 +1,19 @@
 jQuery(document).ready(function() {
-    function viewSource() {
-        var source = jQuery("#sourceedit").val();
+    var source;
+    var checked;
+    function showSourceview() {
+        source = jQuery("#sourceedit").val();
         jQuery("#sourceview").html(source).chili().show();
-        return source;
     }
 
     // run restricter
     jQuery("form").submit(function() {
-        var src = viewSource();
+        showSourceview();
         try {
-            var root = Shaper.parseScript(src, "<filename>");
+            var root = Shaper.parseScript(source, "<filename>");
             root = Shaper.run(root, ["annotater", "restricter"]);
-            var checked = root.getSrc();
+            checked = root.getSrc();
             jQuery("#checkedview").html(checked).chili().show();
-        }
-        catch (e) {
-            var reason = String(e);
-            if (e.stack) {
-                reason = e.stack;
-            }
-            jQuery("#checkedview").html(reason).show();
-        }
-
-        try {
-            var fn = new Function(checked);
-            fn();
         }
         catch (e) {
             var reason = String(e);
@@ -33,8 +22,31 @@ jQuery(document).ready(function() {
             }
             jQuery("#output").html(reason).show();
         }
+
         return false;
     });
+    function exec(src) {
+        try {
+            var fn = new Function(src);
+            fn();
+            jQuery("#output").html("No exception thrown").show();
+        }
+        catch (e) {
+            var reason = String(e);
+            if (e.stack) {
+                reason = e.stack;
+            }
+            jQuery("#output").html(reason).show();
+        }
+    }
+    jQuery("#execleft").click(function() {
+        exec(source);
+    });
+    jQuery("#execright").click(function() {
+        exec(checked);
+    });
+
+
     // act on keystrokes in editor
     jQuery("#sourceedit").keydown(function(e) {
         // code borrowed from John Resig
@@ -66,7 +78,7 @@ jQuery(document).ready(function() {
                 return false;
             }
             else if (e.keyCode === 27) { // ESC
-                viewSource();
+                showSourceview();
                 return false;
             }
         }
@@ -80,6 +92,6 @@ jQuery(document).ready(function() {
 
     var sourceedit = '"use restrict";\n\nvar x = 1 + "2";';
     jQuery("#sourceedit").html(sourceedit);
-    viewSource();
+    showSourceview();
     jQuery("#checkedview").html("// press run restricter for\n// restricter output here").chili().show();
 });
