@@ -1,6 +1,9 @@
 JSShaper is an extensible framework for JavaScript syntax tree
 shaping, created by Olov Lassus <olov.lassus@gmail.com>.
 
+There's a google group at <http://groups.google.com/group/jsshaper>
+Follow me on <http://twitter.com/olov> or visit me at <http://lassus.se>.
+
 JSShaper and its plugins are implemented in JavaScript. Syntax tree
 shaping means performing complex manipulations to a syntax tree
 representation of your textual source code, and then turning it back
@@ -19,11 +22,9 @@ JSShaper comes with the following plugins:
 
 It also comes with a few small and simple examples.
 
-Its web site is at <https://github.com/olov/jsshaper> for now. Contact
-me on <http://twitter.com/olov> or <http://lassus.se>.
-
 Get the source code from <https://github.com/olov/jsshaper>:
 git clone git://github.com/olov/jsshaper.git
+cd jsshaper
 git submodule init
 git submodule update
 
