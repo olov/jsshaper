@@ -90,7 +90,7 @@ jQuery(document).ready(function() {
         jQuery("#sourceedit").focus();
     });
 
-    var sourceedit = '"use restrict";\n\n// double-click to edit\nvar x = 1 + "2";';
+    var sourceedit = '"use restrict";\n\n// double-click to edit, ESC to leave\nvar x = 1 + "2";';
     jQuery("#sourceedit").html(sourceedit);
     showSourceview();
     jQuery("#checkedview").html("// press run restricter for\n// restricter output here").chili().show();
