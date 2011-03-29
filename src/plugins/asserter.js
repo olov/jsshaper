@@ -16,17 +16,16 @@ Shaper("asserter", function(root) {
             var fn = node.children[0];
             var params = node.children[1].children;
             if (fn.type === tkn.IDENTIFIER && (fn.value === "assert")) {
-                var str = Fmt("{0}, function {1}, file {2}, line {3}",
+                var str = Fmt('"{0}, function {1}, file {2}, line {3}"',
                               params[0].getSrc().replace(/"/g, '\\"'),
                               fns.length === 0 ? "<script>" :
                               fns[fns.length - 1].name || "<anonymous>",
                               node.tokenizer.filename,
                               node.lineno);
 
-                var assert = Shaper.parseExpression(Fmt('assert($, "{0}")', str));
-                Shaper.replace(assert, params[0]);
-                assert.srcs[0] = node.srcs[0];
-                return ref.set(assert);
+                params.push(Shaper.parseExpression(str));
+                var list = node.children[1];
+                list.srcs.splice(1, 0, ", ");
             }
         },
         post: function(node, ref) {
