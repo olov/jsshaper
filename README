@@ -11,14 +11,22 @@ into source code again. JSShaper goes very far to keep all your source
 code formatting, intendation, whitespace and comments.
 
 JSShaper comes with the following plugins:
-  annotation-printer: prints /* @annotations */
-  bitwiser: static analysis. requires @bitwise annotation for the
-  bitwise operators | (or), & (and), to detect misspelling of the
-  logical operators ||, &&.
-  stringconverter: detects the ""+expr pattern and turns it into String(expr)
-  restricter: adds run-time checking for restrict mode programs by
-  converting operators into function calls in a compatible way. it
-  comes with a small run-time library. <http://restrictmode.org>
+  annotation-printer:
+    prints /* @annotations */
+  asserter:
+    provides c-style assertions by shaping
+    assert(f(x) === 3) into
+    assert(f(x) === 3, "f(x) === 3, function myfn, file myfilename.js, line 14")
+  bitwiser:
+    static analysis. requires @bitwise annotation for the
+    bitwise operators | (or), & (and), to detect misspelling of the
+    logical operators ||, &&.
+  stringconverter:
+    detects the ""+expr pattern and turns it into String(expr)
+  restricter:
+    adds run-time checking for restrict mode programs by
+    converting operators into function calls in a compatible way. it
+    comes with a small run-time library. <http://restrictmode.org>
 
 It also comes with a few small and simple examples.
 
