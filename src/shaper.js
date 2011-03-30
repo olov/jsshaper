@@ -1,5 +1,6 @@
 "use strict"; "use restrict";
 
+var load, require = require || function(f) { load(f); };
 /* global Narcissus, tkn */ (typeof Narcissus === "undefined") && require("./narcissus.js");
 var Fmt = Fmt || require("./fmt.js") || Fmt;
 var Ref = Ref || require("./ref.js") || Ref;
