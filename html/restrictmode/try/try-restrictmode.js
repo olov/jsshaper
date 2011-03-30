@@ -90,8 +90,28 @@ jQuery(document).ready(function() {
         jQuery("#sourceedit").focus();
     });
 
-    var sourceedit = '"use restrict";\n\n// double-click to edit, ESC to leave\nvar x = 1 + "2";';
+    var sourceedit = [
+        '// double-click to edit, ESC to leave',
+        '"use restrict";',
+        '',
+        'function average(x, y) {',
+        '  return (x + y) / 2;',
+        '}',
+        '// 1.5, as expected',
+        'alert(average(1, 2));',
+        '',
+        '// 6 (since 1+"2" === "12" and "12"/2 === 6)',
+        '// in restrict mode this throws an exception',
+        '// which helps you spot the defect',
+        'alert(average(1, "2"));'
+    ].join("\n");
+
+    var checkedview = [
+        '// press run restricter for',
+        '// restricter output here'
+    ].join("\n");
+
     jQuery("#sourceedit").html(sourceedit);
     showSourceview();
-    jQuery("#checkedview").html("// press run restricter for\n// restricter output here").chili().show();
+    jQuery("#checkedview").html(checkedview).chili().show();
 });
