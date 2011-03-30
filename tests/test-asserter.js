@@ -8,7 +8,7 @@ function assert(condition, str) {
 }
 
 function f1(x) {
-    assert(x !== "qwerty");
+    assert(/*test if they are equal*/ x !== "qwerty");
 }
 var f2 = function(x) {
     assert(x === 0);
