@@ -8,18 +8,16 @@
   <style type="text/css">
     div { max-width: 900px; margin: 5px; }
     body { margin-left: auto; margin-right: auto; max-width: 900px; font-family: Georgia, "Times New Roman", Times, serif; font-size: 100%; }
-    h1 { font-size: 300%; color: #800000; }
-    h2 { margin: 5px; font-size: 150%; color: #800000; }
+    h1 { font-size: 300%; color: #080; }
+    h2 { margin-top: 0px; margin-bottom: 0px; font-size: 150%; color: #080; }
     code { font-family: Monospace, "Courier New"; font-size: 100%; color: #808080; }
-    .name { font-family: Monospace, "Courier New"; font-size: 125%; color: #800000; }
-    a:link { color: #cc6600; }
-    a:visited { color: #5588aa; }
+    .name { font-family: Monospace, "Courier New"; font-size: 125%; color: #080; }
+    a:link { color: #080; /*#cc6600*/ }
+    a:visited { color: #cc6600; /*#5588aa*/ }
     a:hover { color: #000000; }
 
     #plugins { width: 900px; }
     #plugins p { float: left; width: 450px; }
-
-    /* in addition to the above CSS */
     .clear { clear: both; height: 0; }
 </style>
 </head>
@@ -36,7 +34,7 @@
   license</a>) at
   <a href="https://github.com/olov/jsshaper">GitHub</a>. Check out the
   <a href="https://github.com/olov/jsshaper/blob/master/README">README</a>
-  for more info. Clone it and hack it!
+  for more info. Clone it and use it. Hack it and create your own plugins!
 </p>
 <p><code>d8 run-shaper.js -- filename [plugin1 .. pluginN]</code>
   <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where the plugins (or builtins) forms a syntax tree shaping pipeline 
@@ -44,37 +42,43 @@
 <p>Example: <code>d8 run-shaper.js -- myfile.js plugins/annotater.js
     plugins/bitwiser.js --source</code>
 </p>
-<p>Replace d8 with your preferred JavaScript command-line shell</p>
+<p>Replace <code>d8</code> (v8) with your preferred JavaScript command-line
+  shell. <code>js</code> (TraceMonkey) and <code>node</code> are both
+  supported
+</p>
 <br>
 
 <h2>PLUGINS</h2>
+<p>It's really easy to create new plugins. Here are the existing ones (click to view
+  JavaScript source)
+</p>
 <div id="plugins">
-  <p><span class="name">restricter</span><br>
+  <p><a class="name" href="https://github.com/olov/jsshaper/blob/master/src/plugins/restricter.js">restricter</a><br>
     Adds <a href="http://restrictmode.org">restrict mode</a> checking
     to your program by rewriting operators into function-calls
   </p>
 
-  <p><span class="name">asserter</span><br>
+  <p><a class="name" href="https://github.com/olov/jsshaper/blob/master/src/plugins/asserter.js">asserter</a><br>
     C-style assertions with great error output<br>
     <code>assert(f(x) === 3)</code>
   </p>
 
   <div class="clear"></div>
 
-  <p><span class="name">bitwiser</span><br>
+  <p><a class="name" href="https://github.com/olov/jsshaper/blob/master/src/plugins/bitwiser.js">bitwiser</a><br>
     requires annotation for bitwise operators <code>|</code>
     and <code>&</code> to avoid mistakenly using them instead of <code>||</code>
     and <code>&&</code>
     <br><code>var y = (/*@bitwise*/ x | 3);</code>
   </p>
 
-  <p><span class="name">stringconverter</span><br>
+  <p><a class="name" href="https://github.com/olov/jsshaper/blob/master/src/plugins/stringconverter.js">stringconverter</a><br>
     Converts <code>"" + expr</code> and <code>expr + ""</code> into <code>String(expr)</code>
   </p>
 
   <div class="clear"></div>
 
-  <p><span class="name">annotater</span><br>
+  <p><a class="name" href="https://github.com/olov/jsshaper/blob/master/src/plugins/annotater.js">annotater</a><br>
     Internal plugin used by other plugins. Lets you match annotations
     and execute code with no effort
     <code>Annotater(/\/\*+\s*@loose\s*\*+\//, <br>
@@ -85,7 +89,7 @@
     </code>
   </p>
 
-  <p><span class="name">annotation-printer</span><br>
+  <p><a class="name" href="https://github.com/olov/jsshaper/blob/master/src/plugins/annotation-printer.js">annotation-printer</a><br>
     dumps all your <code>/* @annotations */</code>
   </p>
 
@@ -95,13 +99,13 @@
 
 <h2>BUILTINS</h2>
 <div id="plugins">
-  <p><span class="name">--tree (built-in)</span><br>
-    dumps the syntax tree in an easy to read format, used
+  <p><span class="name">--tree</span><br>
+    Dumps the syntax tree in an easy to read format, used
     when developing plugins
   </p>
 
-  <p><span class="name">--print (built-in)</span><br>
-    prints the shaped source code. This is often the final plugin used
+  <p><span class="name">--print</span><br>
+    Prints the shaped source code. This is often the final plugin/builtin used
     in a pipeline
   </p>
 
