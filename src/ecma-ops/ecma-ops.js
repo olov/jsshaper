@@ -1,6 +1,6 @@
 "use strict"; "use restrict";
 
-var load, require = require || function(f) { load(f); };
+var require = require || function(f) { load(f); };
 var Fmt = Fmt || require("../fmt.js") || Fmt;
 var log = (typeof console !== "undefined") && console.log || print;
 
