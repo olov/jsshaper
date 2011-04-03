@@ -44,7 +44,7 @@
   license</a>) at
   <a href="https://github.com/olov/jsshaper">GitHub</a>. Check out the
   <a href="https://github.com/olov/jsshaper/blob/master/README">README</a>
-  for more info. Clone it and use it. Hack it and create your own plugins!
+  for more info. Clone it and use it or hack it and create your own plugins!
 </p>
 <p><code>d8 run-shaper.js -- filename [plugin1 .. pluginN]</code>
   <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where the plugins (or builtins) forms a syntax tree shaping pipeline 
@@ -76,7 +76,7 @@
   <div class="clear"></div>
 
   <p><a class="name" href="https://github.com/olov/jsshaper/blob/master/src/plugins/bitwiser.js">bitwiser</a><br>
-    requires annotation for bitwise operators <code>|</code>
+    Requires annotation for bitwise operators <code>|</code>
     and <code>&</code> to avoid mistakenly using them instead of <code>||</code>
     and <code>&&</code>
     <br><code>var y = (/*@bitwise*/ x | 3);</code>
@@ -100,7 +100,7 @@
   </p>
 
   <p><a class="name" href="https://github.com/olov/jsshaper/blob/master/src/plugins/annotation-printer.js">annotation-printer</a><br>
-    dumps all your <code>/* @annotations */</code>
+    Dumps all your <code>/* @annotations */</code>
   </p>
 
   <div class="clear"></div>
