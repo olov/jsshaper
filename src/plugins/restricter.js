@@ -63,7 +63,7 @@ Shaper("restricter", function(root) {
         }
 
         // don't alter node if we're not in restrict mode (but continue traversal)
-        if (false && useRestrictStack.top() === false) {
+        if (useRestrictStack.top() === false) {
             return undefined;
         }
 
