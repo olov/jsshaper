@@ -14,7 +14,7 @@ Shaper("asserter", function(root) {
                 return;
             }
             var callexpr = node.children[0];
-            if (callexpr.type === tkn.IDENTIFIER && (callexpr.value === "assert")) {
+            if (callexpr.type === tkn.IDENTIFIER && (callexpr.value.toLowerCase() === "assert")) {
                 var params = node.children[1].children;
                 var str = Fmt('"{0}, function {1}, file {2}, line {3}"',
                               params[0].getSrc().replace(/"/g, '\\"'),

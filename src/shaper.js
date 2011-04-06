@@ -4,6 +4,7 @@ var require = require || function(f) { load(f); };
 /* global Narcissus, tkn */ (typeof Narcissus === "undefined") && require("./narcissus.js");
 var Fmt = Fmt || require("./fmt.js") || Fmt;
 var Ref = Ref || require("./ref.js") || Ref;
+var Assert = Assert || require("./assert.js") || Assert;
 var Comments = Comments || require("./comments.js") || Comments;
 var log = (typeof console !== "undefined") && console.log || print;
 
@@ -138,7 +139,7 @@ var Shaper = (function() {
         }
     }
     function renameIdentifier(node, name) {
-        //Assert(node.type === tkn.IDENTIFIER);
+        Assert(node.type === tkn.IDENTIFIER);
         var oldValue = node.value;
         node.value = name;
 
@@ -152,14 +153,14 @@ var Shaper = (function() {
         node.srcs[0] = comments.join("");
     }
     function insertArgument(call, arg, pos) {
-        //Assert(call.type === tkn.CALL);
+        Assert(call.type === tkn.CALL);
         var list = call.children[1];
         var srcs = list.srcs;
         var args = list.children;
         if (pos === -1) {
             pos = args.length;
         }
-        //Assert(pos >= 0 && pos <= args.length);
+        Assert(pos >= 0 && pos <= args.length);
 
         // no arguments thus srcs is in style "(/*comments, whitespace*/ )"
         if (args.length === 0) {
