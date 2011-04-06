@@ -138,9 +138,7 @@ var Shaper = (function() {
         }
     }
     function renameIdentifier(node, name) {
-        if (node.type !== tkn.IDENTIFIER) {
-            throw new Error(Fmt("renameIdentifier: got {0}", node));
-        }
+        //Assert(node.type === tkn.IDENTIFIER);
         var oldValue = node.value;
         node.value = name;
 
@@ -153,6 +151,30 @@ var Shaper = (function() {
         }
         node.srcs[0] = comments.join("");
     }
+    function insertArgument(call, arg, pos) {
+        //Assert(call.type === tkn.CALL);
+        if (pos === -1) {
+            pos = args.length;
+        }
+        //Assert(pos >= 0 && pos <= args.length);
+
+        var list = call.children[1];
+        var srcs = list.srcs;
+        var args = list.children;
+
+        // no arguments thus srcs is in style "(/*comments, whitespace*/ )"
+        if (args.length === 0) {
+            var parens = srcs.pop();
+            var split = parens.lastIndexOf(")");
+            srcs.push(parens.slice(0, split), parens.slice(split));
+            args.push(arg);
+        }
+        else {
+            srcs.splice(pos === args.length ? pos : pos + 1, 0, ", ");
+            args.splice(pos, 0, arg);
+        }
+    }
+
 
     //// printers
     var Node = Narcissus.parser.Node;
@@ -357,16 +379,15 @@ var Shaper = (function() {
     shaper("tree", printTree);
     shaper("source", printSource);
 
-    Object.defineProperties(shaper, {
-        error: {value: error},
-        traverseTree: {value: traverseTree},
-        replace: {value: replace},
-        renameIdentifier: {value: renameIdentifier},
-        parseScript: {value: parseScript},
-        parseExpression: {value: parseExpression},
-        get: {value: get},
-        run: {value: run}
-    });
+    shaper.error = error;
+    shaper.traverseTree = traverseTree;
+    shaper.replace = replace;
+    shaper.renameIdentifier = renameIdentifier;
+    shaper.insertArgument = insertArgument;
+    shaper.parseScript = parseScript;
+    shaper.parseExpression = parseExpression;
+    shaper.get = get;
+    shaper.run = run;
     return shaper;
 })();
 
