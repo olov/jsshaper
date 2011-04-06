@@ -153,14 +153,13 @@ var Shaper = (function() {
     }
     function insertArgument(call, arg, pos) {
         //Assert(call.type === tkn.CALL);
+        var list = call.children[1];
+        var srcs = list.srcs;
+        var args = list.children;
         if (pos === -1) {
             pos = args.length;
         }
         //Assert(pos >= 0 && pos <= args.length);
-
-        var list = call.children[1];
-        var srcs = list.srcs;
-        var args = list.children;
 
         // no arguments thus srcs is in style "(/*comments, whitespace*/ )"
         if (args.length === 0) {

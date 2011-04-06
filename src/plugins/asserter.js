@@ -13,9 +13,9 @@ Shaper("asserter", function(root) {
             if (node.type !== tkn.CALL) {
                 return;
             }
-            var fn = node.children[0];
-            var params = node.children[1].children;
-            if (fn.type === tkn.IDENTIFIER && (fn.value === "assert")) {
+            var callexpr = node.children[0];
+            if (callexpr.type === tkn.IDENTIFIER && (callexpr.value === "assert")) {
+                var params = node.children[1].children;
                 var str = Fmt('"{0}, function {1}, file {2}, line {3}"',
                               params[0].getSrc().replace(/"/g, '\\"'),
                               fns.length === 0 ? "<script>" :
@@ -23,9 +23,7 @@ Shaper("asserter", function(root) {
                               node.tokenizer.filename,
                               node.lineno);
 
-                params.push(Shaper.parseExpression(str));
-                var list = node.children[1];
-                list.srcs.splice(1, 0, ", ");
+                Shaper.insertArgument(node, Shaper.parseExpression(str), -1);
             }
         },
         post: function(node, ref) {
