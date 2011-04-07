@@ -19,3 +19,7 @@ expr1[expr2]--;
 id += v;
 expr.id += v;
 expr1[expr2] += v;
+
+id = v;
+expr.id = v;
+expr1[expr2] = v;
