@@ -15,6 +15,20 @@ var Assert = (function() {
         printfn("Assertion failed: "+ str);
         quitfn(-1);
     };
+    assert.throwsException = function(fn, var_args) {
+        var res = false;
+        try {
+            fn();
+        }
+        catch (e) {
+            res = true;
+        }
+
+        var args = Array.prototype.slice.call(arguments, 0);
+        args.splice(1, 0, "should throw an exception");
+
+        res ? assert.pass(args) : assert.fail(args);
+    };
 
     return assert;
 })();
