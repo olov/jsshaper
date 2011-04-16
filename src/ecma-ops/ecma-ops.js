@@ -314,7 +314,6 @@ function test_loose() {
     Assert(__lt(1, 2));
     Assert(__lt("abc", "bac"));
     Assert(__lt("abc", "abc") === false);
-    Assert.throwsException(function() {});
     Assert.throwsException(function() { __lt([1,2,3], [2,3,4]); });
     Assert.throwsException(function() { __lt([10], [2]); } );
     Assert.throwsException(function() { __lt([[2]], [["1"]]); } );
