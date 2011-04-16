@@ -3,6 +3,7 @@
 var require = require || function(f) { load(f); };
 var Fmt = Fmt || require("../fmt.js") || Fmt;
 var log = (typeof console !== "undefined") && console.log || print;
+var Assert = Assert || require("../assert.js") || Assert;
 
 // we want to load restrict-prelude into the global namespace
 var restrict_mode = "../plugins/restricter/restrict-mode.js";
@@ -296,29 +297,30 @@ function __loose_ge(x, y) { // ecma 11.8.4
 
 function test_loose() {
     function f() {}
-    assert(__loose_eq(1, "1"));
-    assert(__loose_eq(2, new String("2")));
-    assert(__loose_eq(2, {valueOf: function() { return 2; }}));
-    assert(__loose_eq(2, new Number(2)));
-    assert(__loose_lt(2, new Number(3)));
-    assert(__loose_le(2, new Number(3)));
-    assert(__loose_gt(2, new Number(3)) === false);
-    assert(__loose_gt(2, new String("3")) === false);
-    assert(typeof __toNumber(f) === "number"); // NaN
-    assert(__toNumber(f).toString() === "NaN"); // NaN
-    assert(typeof __toPrimitive(f) === "string"); // "function f..."
-    assert(typeof __toString(f) === "string"); // "function f..."
-    assert(typeof __defaultValue(f) === "string"); // "function f..."
+    Assert(__loose_eq(1, "1"));
+    Assert(__loose_eq(2, new String("2")));
+    Assert(__loose_eq(2, {valueOf: function() { return 2; }}));
+    Assert(__loose_eq(2, new Number(2)));
+    Assert(__loose_lt(2, new Number(3)));
+    Assert(__loose_le(2, new Number(3)));
+    Assert(__loose_gt(2, new Number(3)) === false);
+    Assert(__loose_gt(2, new String("3")) === false);
+    Assert(typeof __toNumber(f) === "number"); // NaN
+    Assert(__toNumber(f).toString() === "NaN"); // NaN
+    Assert(typeof __toPrimitive(f) === "string"); // "function f..."
+    Assert(typeof __toString(f) === "string"); // "function f..."
+    Assert(typeof __defaultValue(f) === "string"); // "function f..."
 
-    assert(__lt(1, 2));
-    assert(__lt("abc", "bac"));
-    assert(__lt("abc", "abc") === false);
-    assertThrows(function() { __lt([1,2,3], [2,3,4]); });
-    assertThrows(function() { __lt([10], [2]); } );
-    assertThrows(function() { __lt([[2]], [["1"]]); } );
-    assertThrows(function() { __lt(new Number(1), 2); });
-    assert(__sub(1,2) === -1);
-    assertThrows(function() { __sub("1", 0); });
+    Assert(__lt(1, 2));
+    Assert(__lt("abc", "bac"));
+    Assert(__lt("abc", "abc") === false);
+    Assert.throwsException(function() {});
+    Assert.throwsException(function() { __lt([1,2,3], [2,3,4]); });
+    Assert.throwsException(function() { __lt([10], [2]); } );
+    Assert.throwsException(function() { __lt([[2]], [["1"]]); } );
+    Assert.throwsException(function() { __lt(new Number(1), 2); });
+    Assert(__sub(1,2) === -1);
+    Assert.throwsException(function() { __sub("1", 0); });
 }
 test_loose();
 
@@ -434,7 +436,7 @@ function test_binary_operator() {
             catch (e) { exc_b = e; }
 
             if (exc_a || exc_b) {
-                assert(!!exc_a === !!exc_b);
+                Assert(!!exc_a === !!exc_b);
             }
             else {
                 if (val_a !== val_b && !(isNaN(val_a) && isNaN(val_b))) {
@@ -446,7 +448,7 @@ function test_binary_operator() {
                     inspect(flat[i]);
                     inspect(flat[j]);
                     log();
-//                    assert(false);
+//                    Assert(false);
                 }
             }
         }
@@ -459,14 +461,14 @@ function test_jsvm_differences(vmstr) {
               jsc: vmstr === "jsc", ecma: vmstr === "ecma"};
 
     // js, v8, jsc yield true, ecma (my interpretation) yields false
-    assert(/*@loose*/(false == {valueOf: function() { return null; }}) === !vm.ecma);
+    Assert(/*@loose*/(false == {valueOf: function() { return null; }}) === !vm.ecma);
 
-    assert(/*@loose*/("" == {valueOf: function() { return null; }}) === vm.js);
+    Assert(/*@loose*/("" == {valueOf: function() { return null; }}) === vm.js);
 
-    assert(/*@loose*/(false == new Date(0)) === !vm.js);
-    assert(/*@loose*/(0 == new Date(0)) === !vm.js);
-    assert(/*@loose*/(316998000000 == new Date(1980, 1-1, 18)) === !vm.js);
-    assert(/*@loose*/(1282600800000 == new Date(2010, 8-1, 24)) === !vm.js);
+    Assert(/*@loose*/(false == new Date(0)) === !vm.js);
+    Assert(/*@loose*/(0 == new Date(0)) === !vm.js);
+    Assert(/*@loose*/(316998000000 == new Date(1980, 1-1, 18)) === !vm.js);
+    Assert(/*@loose*/(1282600800000 == new Date(2010, 8-1, 24)) === !vm.js);
 }
 //test_jsvm_differences("v8");
 
@@ -482,23 +484,6 @@ function inspect(v) {
         str += Fmt(" toString: {0} ({1})", val, __verbosetypeof(val));
     }
     log(str);
-}
-
-function assert(condition, str) {
-    if (!condition) {
-        log("Assertion failed: "+ (str || String(condition)));
-        (typeof quit === "undefined" ? process.exit : quit)(-1);
-    }
-}
-function assertThrows(fn, str) {
-    try {
-        fn();
-    }
-    catch (e) {
-        return;
-    }
-    log("Assertion failed (no exception thrown): "+ (str || ""));
-    (typeof quit === "undefined" ? process.exit : quit)(-1);
 }
 
 Array.isArray = Array.isArray || function(o) {
