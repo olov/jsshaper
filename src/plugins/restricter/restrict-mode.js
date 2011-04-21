@@ -25,6 +25,7 @@
 "use strict"; "use restrict";
 
 var __pedantic = false;
+var __errorfn = null;
 
 function __verbosetypeof(v) {
     var t = typeof v;
@@ -37,7 +38,6 @@ function __verbosetypeof(v) {
         "object (".concat(m[1], ")") :
         "object";
 }
-var __errorfn = null;
 function __throw_typeerror(opname, var_args) {
     var args = Array.prototype.slice.call(arguments, 1, arguments.length);
     var typeofs = args.map(__verbosetypeof).join(" and ");
@@ -68,11 +68,11 @@ function __eq(x, y) {
     }
     var eq_strict = (x === y);
     var eq_loose = /*@loose*/(x == y);
-    if (eq_strict === eq_loose ||
-        (x === undefined && y === null || x === null && y === undefined)) {
-        return eq_loose;
+    if (!(eq_strict === eq_loose ||
+          (x === undefined && y === null || x === null && y === undefined))) {
+        __throw_typeerror("==", x, y);
     }
-    __throw_typeerror("==", x, y);
+    return eq_loose;
 }
 function __ne(x, y) {
     if (__pedantic) {
@@ -80,55 +80,43 @@ function __ne(x, y) {
     }
     var ne_strict = (x !== y);
     var ne_loose = /*@loose*/(x != y);
-    if (ne_strict === ne_loose ||
-        (x === undefined && y === null || x === null && y === undefined)) {
-        return ne_loose;
+    if (!(ne_strict === ne_loose ||
+          (x === undefined && y === null || x === null && y === undefined))) {
+        __throw_typeerror("!=", x, y);
     }
-    __throw_typeerror("!=", x, y);
+    return ne_loose;
 }
 function __lt(x, y) {
     var xtype = typeof x;
     var ytype = typeof y;
-
-    if (xtype === ytype) {
-        if ((xtype === "string" || xtype === "number")) {
-            return /*@loose*/(x < y);
-        }
+    if (!(xtype === ytype && (xtype === "string" || xtype === "number"))) {
+        __throw_typeerror("<", x, y);
     }
-    __throw_typeerror("<", x, y);
+    return /*@loose*/(x < y);
 }
 function __gt(x, y) {
     var xtype = typeof x;
     var ytype = typeof y;
-
-    if (xtype === ytype) {
-        if ((xtype === "string" || xtype === "number")) {
-            return /*@loose*/(x > y);
-        }
+    if (!(xtype === ytype && (xtype === "string" || xtype === "number"))) {
+        __throw_typeerror(">", x, y);
     }
-    __throw_typeerror(">", x, y);
+    return /*@loose*/(x > y);
 }
 function __le(x, y) {
     var xtype = typeof x;
     var ytype = typeof y;
-
-    if (xtype === ytype) {
-        if ((xtype === "string" || xtype === "number")) {
-            return /*@loose*/(x <= y);
-        }
+    if (!(xtype === ytype && (xtype === "string" || xtype === "number"))) {
+        __throw_typeerror("<=", x, y);
     }
-    __throw_typeerror("<=", x, y);
+    return /*@loose*/(x <= y);
 }
 function __ge(x, y) {
     var xtype = typeof x;
     var ytype = typeof y;
-
-    if (xtype === ytype) {
-        if ((xtype === "string" || xtype === "number")) {
-            return /*@loose*/(x >= y);
-        }
+    if (!(xtype === ytype && (xtype === "string" || xtype === "number"))) {
+        __throw_typeerror(">=", x, y);
     }
-    __throw_typeerror(">=", x, y);
+    return /*@loose*/(x >= y);
 }
 function __uplus(v) {
     return /*@loose*/(+v);
@@ -140,15 +128,10 @@ function __neg(v) {
 function __add(x, y) {
     var xtype = typeof x;
     var ytype = typeof y;
-    if (xtype === ytype) {
-        if (xtype === "string") {
-            return String.prototype.concat.call(x, y);
-        }
-        if (xtype === "number") {
-            return /*@loose*/(x + y);
-        }
+    if (!(xtype === ytype && (xtype === "string" || xtype === "number"))) {
+        __throw_typeerror("+", x, y);
     }
-    __throw_typeerror("+", x, y);
+    return /*@loose*/(x + y); // number addition or string concatenation
 }
 function __sub(x, y) {
     __assert_numbers("-", x, y);
