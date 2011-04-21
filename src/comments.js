@@ -111,12 +111,24 @@ var Comments = (function() {
     //     end: 18,
     //     next: 19 // next non-comment non-blank character
     // };
-    function indexArray(src) {
-        var splits = Comments.split(src);
+    function indexArray(src, commentIndices) {
+        var splits = [];
+        var pos = 0;
+        var i;
+        for (i = 0; i < commentIndices.length; i++) {
+            if (commentIndices[i].start !== 0) {
+                splits.push(src.slice(pos, commentIndices[i].start));
+            }
+            splits.push(src.slice(commentIndices[i].start, commentIndices[i].end));
+            pos = commentIndices[i].end;
+        }
+        if (pos < src.length) {
+            splits.push(src.slice(pos, src.length));
+        }
 
         var comments = [];
-        var i = 0;
-        var pos = 0;
+        i = 0;
+        pos = 0;
 
         while (i < splits.length) {
             // skip non-comment (if any)

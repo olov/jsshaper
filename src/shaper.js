@@ -431,7 +431,7 @@ var Shaper = (function() {
         }});
     }
     function adjustComments(root) {
-        var comments = Comments.indexArray(root.tokenizer.source);
+        var comments = Comments.indexArray(root.tokenizer.source, root.tokenizer.comments);
 
         // extend node.start to left to cover leading comment
         // before: /*c*/ x*y+z, after: /*c*/ x*y+z
@@ -483,7 +483,11 @@ var Shaper = (function() {
         return root;
     }
     function srcsify(root) {
-        var tokenizer = {source: "", filename: root.tokenizer.filename};
+        var tokenizer = {
+            source: "",
+            filename: root.tokenizer.filename,
+            comments: root.tokenizer.comments
+        };
 
         return traverseTree(root, {
             pre: function(node, ref) {
