@@ -8,12 +8,12 @@
   <script type="text/javascript">
     $(document).ready(function() {
         $("div").hide();
-        $("#a0").click(function() { $("#div0").toggle(); });
-        $("#a1").click(function() { $("#div1").toggle(); });
-        $("#a2").click(function() { $("#div2").toggle(); });
-        $("#a3").click(function() { $("#div3").toggle(); });
-        $("#a4").click(function() { $("#div4").toggle(); });
-        $("#a5").click(function() { $("#div5").toggle(); });
+        $("#a0").click(function(e) { $("#div0").toggle(); e.preventDefault(); });
+        $("#a1").click(function(e) { $("#div1").toggle(); e.preventDefault(); });
+        $("#a2").click(function(e) { $("#div2").toggle(); e.preventDefault(); });
+        $("#a3").click(function(e) { $("#div3").toggle(); e.preventDefault(); });
+        $("#a4").click(function(e) { $("#div4").toggle(); e.preventDefault(); });
+        $("#a5").click(function(e) { $("#div5").toggle(); e.preventDefault(); });
     });
   </script>
   <style type="text/css">
