@@ -81,7 +81,25 @@ whitespace and comments intact.
 
   <p><a class="name" href="https://github.com/olov/jsshaper/blob/master/src/plugins/asserter.js">asserter</a><br>
     C-style assertions with great error output<br>
-    <code>assert(f(x) === 3)</code>
+    <code>Assert(f(x) === 3)</code>
+  </p>
+
+  <div class="clear"></div>
+
+  <p><a class="name"
+  href="https://github.com/olov/jsshaper/blob/master/src/plugins/logger.js">logger</a><br>
+    Formatted logging with great detail (file, function, line)<br>
+    <code>Log("Formatting via {0}", "Fmt")</code> or just <code>Log()</code>
+  </p>
+
+  <p><a class="name"
+  href="https://github.com/olov/jsshaper/blob/master/src/plugins/watcher.js">watcher</a><br>
+    Trap (watch) object modifications for debugging purposes <br>
+    <code>Watch(o, "age", function() { <br>
+      &nbsp;&nbsp;if (o.age < 0) { <br>
+      &nbsp;&nbsp;&nbsp;&nbsp;throw new Error("age out of range"); <br>
+      &nbsp;&nbsp;} <br>
+    }); </code>
   </p>
 
   <div class="clear"></div>
