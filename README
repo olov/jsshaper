@@ -44,7 +44,7 @@ annoyances. Contributors are welcome!
 
 JSShaper is designed to run from the command line. It should be
 possible to use with the following JS shells:
-  js: recent versions of Mozilla SpiderMonkey/TraceMonkey
+  js: recent versions of Mozilla SpiderMonkey
   d8: Google V8 debug shell
   node: Embedded V8 with lots more
 
