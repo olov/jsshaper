@@ -351,17 +351,18 @@ var Shaper = (function() {
             return res;
         };
     })(Node.prototype.toString);
+    Node.prototype.tknString = function() {
+        var tt = this.type;
+        var defs = Narcissus.definitions;
+        var t = defs.tokens[tt];
+        return /^\W/.test(t) ? defs.opTypeNames[t] : t.toUpperCase();
+    };
     Node.prototype.toString = function() {
-        function tokenString(tt) {
-            var defs = Narcissus.definitions;
-            var t = defs.tokens[tt];
-            return /^\W/.test(t) ? defs.opTypeNames[t] : t.toUpperCase();
-        }
         function strPos(pos) {
             return pos === undefined ? "?" : String(pos);
         }
         var src = this.tokenizer.source;
-        return tokenString(this.type) +
+        return this.tknString() +
             ("srcs" in this ? JSON.stringify(this.srcs) :
              "start" in this && "end" in this ?
              Fmt(" '{0}'", JSON.stringify(Fmt.abbrev(src.slice(this.start, this.end), 30))) :
