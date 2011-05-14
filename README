@@ -48,8 +48,8 @@ possible to use with the following JS shells:
   d8: Google V8 debug shell
   node: Embedded V8 with lots more
 
-It doesn't work with the JavaScriptCore jsc shell since it has no load
-function.
+It doesn't work with the JavaScriptCore jsc shell since it has no
+native read function.
 
 Run it like this (replace d8 with your preferred shell):
 d8 run-shaper.js -- filename [shape1 .. shapeN]
