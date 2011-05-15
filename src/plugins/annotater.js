@@ -7,7 +7,7 @@ Shaper("annotater", function(root) {
     Shaper.traverseTree(root, {pre: function(node, ref) {
         // collect leading comments (whitespace excluded)
         var comments = [];
-        var split = Comments.split(node.srcs[0]);
+        var split = Comments.split(node.leadingComment);
         for (var i = 0; i < split.length; i++) {
             var str = split[i];
             if (Comments.isComment(str)) {

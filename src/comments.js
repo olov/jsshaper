@@ -1,7 +1,11 @@
 "use strict"; "use restrict";
 
 var Comments = (function() {
+    // Comments.split is only used by annotater and can be vastly simplified
     function split(str) {
+        if (str === undefined) {
+            return [];
+        }
         var arr = [];
         function push(begin, end) {
             if (begin < end) {

@@ -17,8 +17,8 @@ Shaper("stringconverter", function(root) {
         }
 
         var call = Shaper.parseExpression("String($)");
-        call.srcs[0] = node.srcs[0];
         Shaper.replace(call, expr);
+        Shaper.cloneComments(call, node);
         return ref.set(call);
     }});
 });

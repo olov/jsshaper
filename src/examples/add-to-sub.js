@@ -7,7 +7,7 @@ Shaper("add-to-sub", function(root) {
         if (node.type === tkn.PLUS) {
             var minus = Shaper.parseExpression("$ - -($)");
             Shaper.replace(minus, node.children[0], node.children[1]);
-            minus.srcs[0] = node.srcs[0]; // keep PLUS comment
+            Shaper.cloneComments(minus, node); // keep PLUS comment
             return ref.set(minus);
         }
         return undefined;

@@ -30,10 +30,9 @@ var Shaper = (function() {
         o[tkn.DO] = [/*stmt*/"body", /*expr*/"condition"];
         o[tkn.FOR] = [/*expr*/"setup", /*expr*/"condition", /*expr*/"update", /*stmt*/"body"];
         o[tkn.FOR_IN] = [/*todo "varDecl",*/ /*IDENTIFIER*/"iterator", /*expr*/"object", /*stmt*/"body"];
-        o[tkn.FUNCTION] = [/*SCRIPT*/"body"];
+        o[tkn.FUNCTION] = [/*IDENTIFIER*/"_name", /*[IDENTIFIER]*/"_params", /*SCRIPT*/"body"];
         o[tkn.GENERATOR] = [/*expr*/"expression", /*COMP_TAIL*/"tail"];
         o[tkn.GETTER] = [/*SCRIPT*/"body"];
-        o[tkn.IDENTIFIER] = [/*expr*/"initializer"];
         o[tkn.IF] = [/*expr*/"condition", /*stmt*/"thenPart", /*stmt*/"elsePart"];
         o[tkn.LABEL] = [/*stmt*/"statement"];
         o[tkn.LET_BLOCK] = [/*LET*/"variables", /*expr*/"expression", /*BLOCK*/"block"];
@@ -300,16 +299,7 @@ var Shaper = (function() {
     function renameIdentifier(node, name) {
         Assert(node.type === tkn.IDENTIFIER);
         var oldValue = node.value;
-        node.value = name;
-
-        var comments = Comments.split(node.srcs[0]);
-        for (var i = 0 ; i < comments.length; i++) {
-            if (Comments.isComment(comments[i])) {
-                continue;
-            }
-            comments[i] = comments[i].replace(oldValue, node.value);
-        }
-        node.srcs[0] = comments.join("");
+        node.value = node.srcs[0] = name;
     }
     function insertArgument(call, arg, pos) {
         Assert(call.type === tkn.CALL);
@@ -331,6 +321,14 @@ var Shaper = (function() {
         else {
             srcs.splice(pos === args.length ? pos : pos + 1, 0, ", ");
             args.splice(pos, 0, arg);
+        }
+    }
+    function cloneComments(dst, src) {
+        if (src.leadingComment !== undefined) {
+            dst.leadingComment = src.leadingComment;
+        }
+        if (src.trailingComment !== undefined) {
+            dst.trailingComment = src.trailingComment;
         }
     }
 
@@ -363,8 +361,8 @@ var Shaper = (function() {
             return pos === undefined ? "?" : String(pos);
         }
         var src = this.tokenizer.source;
-        return this.tknString() +
-            ("srcs" in this ? JSON.stringify(this.srcs) :
+        return this.tknString() +": "+
+            ("srcs" in this ? this.srcs.join("@") :
              "start" in this && "end" in this ?
              Fmt(" '{0}'", JSON.stringify(Fmt.abbrev(src.slice(this.start, this.end), 30))) :
              (this.value !== undefined ? Fmt(" ({0})", this.value) : "")) +
@@ -380,9 +378,15 @@ var Shaper = (function() {
                     srcs.push(parent.srcs[parent.nPushed++]);
                 }
                 node.nPushed = 0;
+                if (node.leadingComment !== undefined) {
+                    srcs.push(node.leadingComment);
+                }
             },
             post: function(node, ref) {
                 srcs.push(node.srcs[node.nPushed++]);
+                if (node.trailingComment !== undefined) {
+                    srcs.push(node.trailingComment);
+                }
                 delete node.nPushed;
             }
         });
@@ -392,7 +396,7 @@ var Shaper = (function() {
         var level = 0;
         traverseTree(this, {
             pre: function(node, ref) {
-                log(Fmt("{0}{1}: <{2}>", Fmt.repeat(" ", level * 2), node, ref.prop[0] || "root"));
+                log(Fmt("{0}{1}  < {2}", Fmt.repeat(" ", level * 2), node, ref.base ? ref.toString(ref.base.tknString()) : "root"));
                 ++level;
             },
             post: function(node, ref) {
@@ -449,6 +453,7 @@ var Shaper = (function() {
                         return undefined;
                     }
                     else if (comments[i].next === node.start) {
+                        node.origStart = node.start;
                         node.start = comments[i].start;
                         comments[i] = null;
                     }
@@ -474,6 +479,7 @@ var Shaper = (function() {
                         return undefined;
                     }
                     if (comments[i].prev === node.end) {
+                        node.origEnd = node.end;
                         node.end = comments[i].end;
                         comments[i] = null;
                     }
@@ -497,24 +503,38 @@ var Shaper = (function() {
                 node.pos = node.start;
                 node.srcs = [];
 
+                var src;
                 if (parent) {
                     if (parent.pos > node.start ||
                        node.start === undefined || node.end === undefined) {
                         throw new Error(Fmt("srcsify: src already covered. parent: {0} {1}:{2}",
                                             parent, ref, node));
                     }
-                    var src = parent.tokenizer.source;
+                    src = parent.tokenizer.source;
                     var frag = src.slice(parent.pos, node.start);
                     parent.srcs.push(frag);
                     parent.pos = node.end;
                 }
+                if (node.origStart !== undefined) { // has leadingComment
+                    src = node.tokenizer.source;
+                    node.leadingComment = src.slice(node.pos, node.origStart);
+                    node.pos = node.origStart;
+                }
             },
             post: function(node, ref) {
                 var src = node.tokenizer.source;
-                node.srcs.push(src.slice(node.pos, node.end));
+                if (node.origEnd !== undefined) { // has trailingComment
+                    node.srcs.push(src.slice(node.pos, node.origEnd));
+                    node.trailingComment = src.slice(node.origEnd, node.end);
+                }
+                else {
+                    node.srcs.push(src.slice(node.pos, node.end));
+                }
                 delete node.pos;
                 delete node.start;
                 delete node.end;
+                delete node.origStart;
+                delete node.origEnd;
                 node.tokenizer = tokenizer;
                 //delete node.tokenizer;
             }
@@ -549,6 +569,7 @@ var Shaper = (function() {
     shaper.replace = replace;
     shaper.renameIdentifier = renameIdentifier;
     shaper.insertArgument = insertArgument;
+    shaper.cloneComments = cloneComments;
     shaper.parseScript = parseScript;
     shaper.parseExpression = parseExpression;
     shaper.get = get;
