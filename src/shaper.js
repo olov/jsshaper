@@ -1,12 +1,13 @@
 "use strict"; "use restrict";
 
 var require = require || function(f) { load(f); };
-/* global Narcissus, tkn */ (typeof Narcissus === "undefined") && require("./narcissus.js");
-var Fmt = Fmt || require("./fmt.js") || Fmt;
-var Ref = Ref || require("./ref.js") || Ref;
-var Log = Log || require("./log.js") || Log;
-var Assert = Assert || require("./assert.js") || Assert;
-var Comments = Comments || require("./comments.js") || Comments;
+require.paths && typeof __dirname !== "undefined" && require.paths.unshift(__dirname);
+/* global Narcissus, tkn */ (typeof Narcissus === "undefined") && require("narcissus.js");
+var Fmt = Fmt || require("fmt.js") || Fmt;
+var Ref = Ref || require("ref.js") || Ref;
+var Log = Log || require("log.js") || Log;
+var Assert = Assert || require("assert.js") || Assert;
+var Comments = Comments || require("comments.js") || Comments;
 var log = (typeof console !== "undefined") && console.log || print;
 
 var Shaper = (function() {

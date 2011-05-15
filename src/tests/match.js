@@ -1,7 +1,7 @@
 var require = require || function(f) { load(f); };
-var Shaper = Shaper || require("./shaper.js") || Shaper;
-var Log = Log || require("./log.js") || Log;
-var Assert = Assert || require("./assert.js") || Assert;
+var Shaper = Shaper || require("shaper.js") || Shaper;
+var Log = Log || require("log.js") || Log;
+var Assert = Assert || require("assert.js") || Assert;
 
 function match(template, node) {
     return Shaper.match(Shaper.parseExpression(template),

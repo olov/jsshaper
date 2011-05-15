@@ -1,6 +1,6 @@
 "use strict"; "use restrict";
 
-var Shaper = Shaper || require("../shaper.js") || Shaper;
+var Shaper = Shaper || require("shaper.js") || Shaper;
 
 Shaper("add-to-sub", function(root) {
     return Shaper.traverseTree(root, {pre: function(node, ref) {

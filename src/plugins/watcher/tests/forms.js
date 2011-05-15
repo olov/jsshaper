@@ -1,8 +1,8 @@
 "use strict"; "use restrict";
 
 var require = require || function(f) { load(f); };
-var Assert = Assert || require("./assert.js") || Assert;
-var Watch = Watch || require("./plugins/watcher/watch.js") || Watch;
+var Assert = Assert || require("assert.js") || Assert;
+var Watch = Watch || require("plugins/watcher/watch.js") || Watch;
 var v = 123;
 var o = {id: v};
 var strid = "id";

@@ -1,5 +1,6 @@
 "use strict"; "use restrict";
 var require = require || function(f) { load(f); };
+require.paths && typeof __dirname !== "undefined" && require.paths.unshift(__dirname);
 var args = (typeof process !== "undefined" && process.argv !== undefined) ?
     process.argv.slice(2) : arguments;
 var log = (typeof console !== "undefined") && console.log || print;
@@ -13,7 +14,7 @@ if (args.length <= 0) {
 }
 var filename = args.shift();
 
-var Shaper = Shaper || require("./shaper.js") || Shaper;
+var Shaper = Shaper || require("shaper.js") || Shaper;
 
 var pipeline = [];
 while (args.length > 0) {
@@ -23,13 +24,14 @@ while (args.length > 0) {
         pipeline.push(shapename.slice(2));
     }
     else { // plugin
-        require("./"+ shapename);
+        require(shapename);
         var slash = shapename.lastIndexOf("/");
         pipeline.push(shapename.slice(slash !== -1 ? slash + 1 : 0, shapename.length - 3));
     }
 }
 
-var read = read || require("fs").readFileSync;
+// read: js/d8/v8 || rhino || node
+var read = read || typeof readFile !== "undefined" && readFile || require("fs").readFileSync;
 var src = read(filename);
 var root = Shaper.parseScript(src, filename);
 root = Shaper.run(root, pipeline);

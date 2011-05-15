@@ -1,6 +1,6 @@
 "use strict"; "use restrict";
 
-var Fmt = Fmt || require("./fmt.js") || Fmt;
+var Fmt = Fmt || require("fmt.js") || Fmt;
 var Ref = (function() {
     // examples:
     // {base: obj, prop: ["property"]}

@@ -1,7 +1,7 @@
 "use strict"; "use restrict";
 
-var Shaper = Shaper || require("../shaper.js") || Shaper;
-var Annotater = Annotater || require("./annotater.js") || Annotater;
+var Shaper = Shaper || require("shaper.js") || Shaper;
+var Annotater = Annotater || require("plugins/annotater.js") || Annotater;
 
 Shaper("bitwiser", function(root) {
     var bitwise_stack = [];

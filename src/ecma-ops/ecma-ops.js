@@ -1,12 +1,12 @@
 "use strict"; "use restrict";
 
 var require = require || function(f) { load(f); };
-var Fmt = Fmt || require("../fmt.js") || Fmt;
+var Fmt = Fmt || require("fmt.js") || Fmt;
 var log = (typeof console !== "undefined") && console.log || print;
-var Assert = Assert || require("../assert.js") || Assert;
+var Assert = Assert || require("assert.js") || Assert;
 
 // we want to load restrict-prelude into the global namespace
-var restrict_mode = "../plugins/restricter/restrict-mode.js";
+var restrict_mode = "plugins/restricter/restrict-mode.js";
 if (typeof process !== "undefined") { // node
     eval(require("fs").readFileSync(restrict_mode).toString());
 }

@@ -1,9 +1,9 @@
 "use strict"; "use restrict";
 
-var Annotater = Annotater || require("../annotater.js") || Annotater;
-var Shaper = Shaper || require("../../shaper.js") || Shaper;
-var Log = Log || require("../../log.js") || Log;
-var Fmt = Fmt || require("../../fmt.js") || Fmt;
+var Shaper = Shaper || require("shaper.js") || Shaper;
+var Log = Log || require("log.js") || Log;
+var Fmt = Fmt || require("fmt.js") || Fmt;
+var Annotater = Annotater || require("plugins/annotater.js") || Annotater;
 
 Shaper("jsdocer", function(root) {
     return Shaper.traverseTree(root, {pre: function(node, ref) {

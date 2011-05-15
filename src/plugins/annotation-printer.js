@@ -1,8 +1,8 @@
 "use strict"; "use restrict";
 
-var Shaper = Shaper || require("../shaper.js") || Shaper;
-var Annotater = Annotater || require("./annotater.js") || Annotater;
-var Fmt = Fmt || require("../fmt.js") || Fmt;
+var Shaper = Shaper || require("shaper.js") || Shaper;
+var Fmt = Fmt || require("fmt.js") || Fmt;
+var Annotater = Annotater || require("plugins/annotater.js") || Annotater;
 var log = (typeof console !== "undefined") && console.log || print;
 
 Annotater(/[\s\*](@[_$a-zA-Z0-9]*)/, function(node, match) {

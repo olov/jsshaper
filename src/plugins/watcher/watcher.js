@@ -1,7 +1,7 @@
 "use strict"; "use restrict";
 
-var Fmt = Fmt || require("../fmt.js") || Fmt;
-var Shaper = Shaper || require("../shaper.js") || Shaper;
+var Shaper = Shaper || require("shaper.js") || Shaper;
+var Fmt = Fmt || require("fmt.js") || Fmt;
 
 // Shapes object property assignments into Watch.set calls
 // handles expr.id, expr1[expr2]

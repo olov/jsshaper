@@ -1,6 +1,6 @@
 "use strict"; "use restrict";
 
-var Shaper = Shaper || require("../shaper.js") || Shaper;
+var Shaper = Shaper || require("shaper.js") || Shaper;
 
 // converts ""+expr or expr+"" to String(expr)
 Shaper("stringconverter", function(root) {
