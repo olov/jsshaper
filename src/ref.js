@@ -26,8 +26,14 @@ var Ref = (function() {
         var ref = this.canonical();
         return ref.base[ref.prop[0]];
     };
-    Ref.prototype.toString = function() {
-        return Fmt('ref["{0}"]', this.prop.join('"]["'));
+    Ref.prototype.toString = function(baseName) {
+        var prop = this.prop.map(function(p) {
+            p = String(p);
+            return /^[0-9]+$/.test(p) ? Fmt("[{0}]", p) :
+                /^[_$a-zA-Z][_$a-zA-Z0-9]*$/.test(p) ? Fmt(".{0}", p) :
+                Fmt('["{0}"]', p);
+        });
+        return (baseName !== undefined ? baseName : "base") + prop.join("");
     };
     return Ref;
 })();
