@@ -191,34 +191,72 @@ var Shaper = (function() {
 
     var MISMATCH = 0;
     var MATCH = 1;
-    var MATCH_REMAINING = 2;
-    function match(t, n, verbose) {
+    var MATCH_REST = 2;
+    function matchCondition(node, cond) {
+        // TODO cond.capture invokes callback or stores in array?
+
+        // cond is a function
+        if (typeof cond === "function") {
+            return cond(node) ? cond : false;
+        }
+        // cond is an object
+        if (typeof cond !== "object") {
+            throw new Error("matchCondition: expected function or object, got "+ typeof cond);
+        }
+        for (var key in cond) {
+            var condVal = cond[key];
+            // special
+            if (key === "rest" && condVal) {
+                continue;
+            }
+            var nodeVal = node[key];
+            //  cond.key is a function
+            if (typeof condVal === "function") {
+                if (!condVal(nodeVal)) {
+                    return false;
+                }
+            }
+            // cond.key is a value
+            else if (!(condVal === nodeVal || isNaN(condVal) && isNaN(nodeVal))) {
+                return false;
+            }
+        }
+        return cond;
+    }
+
+    match.debug = false;
+    function match(t, n, conds) {
+        if (typeof t === "string") {
+            t = Shaper.parseExpression(t);
+        }
+        if (typeof n === "string") {
+            throw new Error("match: expected second argument of type Node, got string");
+        }
+        conds = conds || {$: {}, $$: {rest: true}};
+
         if (t && t.type === tkn.SEMICOLON && t.srcs[1] === "" &&
-            t.expression && t.expression.type === tkn.IDENTIFIER &&
-            (t.expression.value === "$" || t.expression.value === "$$")) {
-            return match(t.expression, n, verbose);
+            n.type !== tkn.SEMICOLON) {
+            // t is invisible (auto-inserted) semicolon while
+            //   n is of some other type so
+            //   try matching t's expression with n instead of MISMATCH
+            return match(t.expression, n, conds);
         }
         if (t && t.type === tkn.IDENTIFIER) {
-            if (t.value === "$") {
-                // ok (template is $ so matches anything)
-                // todo should $ match null/undefined?
-                verbose && Log("match {0} {1}", t, n);
-                return MATCH;
-            }
-            else if (t.value === "$$") {
-                // ok (template is $$ so matches any remaining children)
-                // todo should $$ match null/undefined?
-                verbose && Log("match_remaining {0} {1}", t, n);
-                return MATCH_REMAINING;
+            var cond = conds[t.value];
+            // todo should conds match null/undefined?
+            if (cond !== undefined) {
+                if (matchCondition(n, cond)) {
+                    return cond.rest ? MATCH_REST : MATCH;
+                }
             }
         }
         if (!t || !n) {
-            verbose && Log("{2} {0} {1}", t, n, !t === !n ? "match" : "mismatch");
+            match.debug && Log("{2} {0} {1}", t, n, !t === !n ? "match" : "mismatch");
             return !t === !n ? MATCH : MISMATCH;
         }
         if (t.type !== n.type) {
             // fail (type mismatch)
-            verbose && Log("mismatch {0} {1}", t, n);
+            match.debug && Log("mismatch {0} {1}", t, n);
             return MISMATCH;
         }
         if (t.type === tkn.IDENTIFIER ||
@@ -228,12 +266,12 @@ var Shaper = (function() {
             if (t.value === n.value ||
                 (t.type === tkn.NUMBER && isNaN(t.value) && isNaN(n.value))) {
                 // ok (terminals with matching values)
-                verbose && Log("match {0} {1}", t, n);
+                match.debug && Log("match {0} {1}", t, n);
                 return MATCH;
             }
             else {
                 // fail (terminals with different values)
-                verbose && Log("mismatch {0} {1}", t, n);
+                match.debug && Log("mismatch {0} {1}", t, n);
                 return MISMATCH;
             }
         }
@@ -243,43 +281,50 @@ var Shaper = (function() {
         var res;
         for (var i = 0; i < subprops.length; i++) {
             var prop = subprops[i];
+            // t[prop] is an array, such as BLOCK.children
             if (Array.isArray(t[prop])) {
-                for (var j = 0, k = t[prop].length; j < k; j++) {
-                    res = match(t[prop][j], n[prop][j], verbose);
-                    if (res === MISMATCH) {
-                        verbose && Log("mismatch {0} {1}", t[prop][j], n[prop][j]);
+                var rest = null; // bound to MATCH_REST node, if any
+
+                for (var j = 0, k = Math.max(t[prop].length, n[prop].length);
+                     j < k; j++) {
+                    var tt = rest || t[prop][j];
+                    var nn = n[prop][j];
+                    if (!tt || !nn) { // nodes or template starved (both can't be)
+                        match.debug && Log("mismatch {0} {1}", tt, nn);
                         return MISMATCH;
                     }
-                    else if (res === MATCH_REMAINING) {
-                        verbose && Log("match_remaining {0} {1}", t[prop][j], n[prop][j]);
-                        j = n[prop].length;
-                        break;
+
+                    res = match(tt, nn, conds);
+                    if (res === MISMATCH) {
+                        match.debug && Log("mismatch {0} {1}", tt, nn);
+                        return MISMATCH;
+                    }
+                    else if (res === MATCH_REST) {
+                        rest = tt;
+                        match.debug && Log("match_rest {0} {1}", tt, nn);
                     }
                 }
-                if (j !== n[prop].length) {
-                    verbose && Log("mismatch {0} {1}", t, n);
-                    return MISMATCH;
-                }
             }
+            // t[prop] is a regular node, such as IF.thenPart
             else {
-                res = match(t[prop], n[prop], verbose);
+                res = match(t[prop], n[prop], conds);
                 if (res === MISMATCH) {
-                    verbose && Log("mismatch {0} {1}", t[prop], n[prop]);
+                    match.debug && Log("mismatch {0} {1}", t[prop], n[prop]);
                     return MISMATCH;
                 }
-                else if (res === MATCH_REMAINING) {
-                    // todo verify ok
-                    verbose && Log("match_remaining {0} {1}", t[prop], n[prop]);
-                    break;
-                }
+                // MATCH or MATCH_REST matches this node
             }
         }
-        verbose && Log("match {0} {1}", t, n);
+        match.debug && Log("match {0} {1}", t, n);
         return MATCH;
     }
 
     //// mutate nodes
     function replace(node, var_args) {
+        if (typeof node === "string") {
+            node = Shaper.parse(node);
+        }
+
         var placeholders = [];
         //collect all $ nodes into placeholders array
         traverseTree(node, {pre: function(node, ref) {
@@ -287,13 +332,16 @@ var Shaper = (function() {
                 placeholders.push(ref);
             }
         }});
-        if (arguments.length - 1 !== placeholders.length) {
+        var args = arguments.length === 2 && Array.isArray(var_args) ?
+            var_args :
+            Array.prototype.slice.call(arguments, 1);
+        if (args.length !== placeholders.length) {
             throw new Error("replace: placeholders.length mismatch");
         }
 
         // replace placeholders with new nodes
         for (var i = 0; i < placeholders.length; i++) {
-            placeholders[i].set(arguments[i + 1]);
+            placeholders[i].set(args[i]);
         }
     }
     function renameIdentifier(node, name) {
