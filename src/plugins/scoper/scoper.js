@@ -5,28 +5,28 @@ var Shaper = Shaper || require("shaper.js") || Shaper;
 Shaper("scoper", function(root) {
     var scopes = [];
 
-    function countRead(name, noUndeclared) {
-        rw(name, "r", noUndeclared);
+    function countRead(name, noUnresolvable) {
+        rw(name, "r", noUnresolvable);
     }
-    function countWrite(name, noUndeclared) {
-        rw(name, "w", noUndeclared);
+    function countWrite(name, noUnresolvable) {
+        rw(name, "w", noUnresolvable);
     }
-    function rw(name, prop, noUndeclared) {
+    function rw(name, prop, noUnresolvable) {
         for (var i = scopes.length - 1; i >= 0; i--) {
             if (name in scopes[i]) {
                 ++scopes[i][name][prop];
                 return;
             }
         }
-        if (!noUndeclared) {
+        if (!noUnresolvable) {
             var top = scopes.top();
-            if (!top["undeclared variables"]) {
-                top["undeclared variables"] = {};
+            if (!top["unresolvable variables"]) {
+                top["unresolvable variables"] = {};
             }
-            if (!top["undeclared variables"][name]) {
-                top["undeclared variables"][name] = {r: 0, w: 0};
+            if (!top["unresolvable variables"][name]) {
+                top["unresolvable variables"][name] = {r: 0, w: 0};
             }
-            ++top["undeclared variables"][name][prop];
+            ++top["unresolvable variables"][name][prop];
         }
     }
 
@@ -105,7 +105,7 @@ Shaper("scoper", function(root) {
                 else if (rbt === tkn.TYPEOF) {
                     // handle typeof specially since typeof x should register as
                     // a read when x is resolvable, but shouldn't register as an
-                    // undeclared read when x isn't
+                    // unresolvable read when x isn't
                     // TODO support parenthesized <typeof (unresolvable)> as well
                     countRead(node.value, true);
                 }
