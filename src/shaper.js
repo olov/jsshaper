@@ -24,12 +24,12 @@ var Shaper = (function() {
 
         o[tkn.ARRAY_COMP] = [/*expr*/"expression", /*COMP_TAIL*/"tail"];
         o[tkn.CASE] = [/*expr*/"caseLabel", /*BLOCK*/"statements"];
-        o[tkn.CATCH] = [/*expr*/"guard", /*BLOCK*/"block"];
+        o[tkn.CATCH] = [/*IDENTIFIER*/"_name", /*expr*/"guard", /*BLOCK*/"block"];
         o[tkn.COMP_TAIL] = [/*[FOR_IN]*/"children", /*expr*/"guard"]; // has children but not last
         o[tkn.DEFAULT] = [/*BLOCK*/"statements"];
         o[tkn.DO] = [/*stmt*/"body", /*expr*/"condition"];
         o[tkn.FOR] = [/*expr*/"setup", /*expr*/"condition", /*expr*/"update", /*stmt*/"body"];
-        o[tkn.FOR_IN] = [/*todo "varDecl",*/ /*IDENTIFIER*/"iterator", /*expr*/"object", /*stmt*/"body"];
+        o[tkn.FOR_IN] = [/*IDENTIFIER|VAR*/"_iterator", /*expr*/"object", /*stmt*/"body"];
         o[tkn.FUNCTION] = [/*IDENTIFIER*/"_name", /*[IDENTIFIER]*/"_params", /*SCRIPT*/"body"];
         o[tkn.GENERATOR] = [/*expr*/"expression", /*COMP_TAIL*/"tail"];
         o[tkn.GETTER] = [/*SCRIPT*/"body"];
@@ -83,7 +83,7 @@ var Shaper = (function() {
             /*IDENTIFIER, expr*/
             tkn.PROPERTY_INIT,
 
-            /*[IDENTIFIER]*/
+            /*[ASSIGN|IDENTIFIER]*/
             tkn.LET, tkn.VAR, tkn.CONST,
 
             /*expr*/
