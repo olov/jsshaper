@@ -7,7 +7,9 @@ var Ref = (function() {
     // {base: obj, prop: ["children", "0"]
     function Ref(base, var_args) {
         this.base = base;
-        this.prop = Array.prototype.slice.call(arguments, 1);
+        this.prop = Array.prototype.slice.call(arguments, 1).map(function(name) {
+            return String(name);
+        });
     }
     Ref.prototype.canonical = function() {
         var i;
