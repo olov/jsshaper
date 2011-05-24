@@ -4,8 +4,8 @@ var Log = Log || require("log.js") || Log;
 var Assert = Assert || require("assert.js") || Assert;
 
 function match(template, node, conds) {
-    return Shaper.match(Shaper.parseExpression(template),
-                        Shaper.parseExpression(node),
+    return Shaper.match(Shaper.parse(template),
+                        Shaper.parse(node),
                         conds);
 }
 

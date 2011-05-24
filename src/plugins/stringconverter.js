@@ -16,7 +16,7 @@ Shaper("stringconverter", function(root) {
             return;
         }
 
-        var call = Shaper.parseExpression("String($)");
+        var call = Shaper.parse("String($)");
         Shaper.replace(call, expr);
         Shaper.cloneComments(call, node);
         return ref.set(call);

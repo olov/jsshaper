@@ -18,6 +18,13 @@ var Shaper = (function() {
         log(Fmt("{0}:{1} error: {2}", node.tokenizer.filename, node.lineno, msg));
         (typeof quit === "undefined" ? process.exit : quit)(-1);
     }
+    function deprecated(obj, params) {
+        obj[params.was] = function() {
+            throw new Error(Fmt.obj((params.now ?
+                                     "{was} is deprecated since version {since}, use {now} instead" :
+                                     "{was} is deprecated since version {since}"), params));
+        };
+    }
 
     var traverseData = (function() {
         var o = [];
@@ -227,7 +234,7 @@ var Shaper = (function() {
     match.debug = false;
     function match(t, n, conds) {
         if (typeof t === "string") {
-            t = Shaper.parseExpression(t);
+            t = Shaper.parse(t);
         }
         if (typeof n === "string") {
             throw new Error("match: expected second argument of type Node, got string");
@@ -349,26 +356,40 @@ var Shaper = (function() {
         var oldValue = node.value;
         node.value = node.srcs[0] = name;
     }
-    function insertArgument(call, arg, pos) {
-        Assert(call.type === tkn.CALL);
-        var list = call.children[1];
-        var srcs = list.srcs;
-        var args = list.children;
+    function insertChild(node, child, pos, delimiter) {
+        var srcs = node.srcs;
+        var children = node.children;
         if (pos === -1) {
-            pos = args.length;
+            pos = children.length;
         }
-        Assert(pos >= 0 && pos <= args.length);
+        Assert(pos >= 0 && pos <= children.length);
 
-        // no arguments thus srcs is in style "(/*comments, whitespace*/ )"
-        if (args.length === 0) {
+        // no children thus srcs could be in style "(/*comments, whitespace*/ )"
+        // -> srcs: ["(/*comments, whitespace*/ ", ")"]
+        if (children.length === 0) {
             var parens = srcs.pop();
-            var split = parens.lastIndexOf(")");
-            srcs.push(parens.slice(0, split), parens.slice(split));
-            args.push(arg);
+            var last = parens.length - 1;
+            srcs.push(parens.slice(0, last), parens.slice(last));
+            children.push(child);
         }
+        // has children already, insert new delimiter in srcs
         else {
-            srcs.splice(pos === args.length ? pos : pos + 1, 0, ", ");
-            args.splice(pos, 0, arg);
+            // create default delimiter if possible
+            if (delimiter === undefined) {
+                // get indentation from first node in SCRIPT, minus { character if any
+                if (node.type === tkn.SCRIPT || node.type === tkn.BLOCK) {
+                    delimiter = (srcs[0][0] === "{" ? srcs[0].slice(1) : srcs[0]);
+                }
+                else if (node.type === tkn.LIST) {
+                    delimiter = ", ";
+                }
+                else {
+                    throw new Error("insertChild: Can't create default delimiter for node "+ String(node));
+                }
+            }
+
+            srcs.splice(pos === children.length ? pos : pos + 1, 0, delimiter);
+            children.splice(pos, 0, child);
         }
     }
     function cloneComments(dst, src) {
@@ -452,21 +473,26 @@ var Shaper = (function() {
             }
         });
     };
-    function printTree(root) {
-        root.printTree();
-    }
-    function printSource(root) {
-        log(root.getSrc());
-    }
+
 
     //// parse and adjust
     function parseScript(str, filename) {
         return srcsify(adjustStartEnd(adjustComments(adjustStartEnd(Narcissus.parser.parse(str, filename || "<no filename>", 1)))));
     }
-    function parseExpression(expr) {
-        // SCRIPT -> [SEMICOLON ->] expr
-        var stmnt = parseScript(expr).children[0];
-        return stmnt.type === tkn.SEMICOLON ? stmnt.expression : stmnt;
+    function parse(str) {
+        var script = parseScript(str);
+
+        // only one statement/expression so skip SCRIPT node
+        // also skip SEMICOLON if invisible
+        if (script.children.length === 1) {
+            var c = script.children[0];
+            return (c.type === tkn.SEMICOLON && c.srcs[1] === "") ?
+                c.expression : c;
+        }
+        // SCRIPT contains multiple statements so return as-is
+        else {
+            return script;
+        }
     }
     function adjustStartEnd(root) {
         root.start = 0;
@@ -608,20 +634,33 @@ var Shaper = (function() {
         return root;
     }
 
-    shaper("tree", printTree);
-    shaper("source", printSource);
+    shaper("tree", function(root) {
+        root.printTree();
+    });
+    shaper("source", function(root) {
+        log(root.getSrc());
+    });
+    shaper("version", function(root) {
+        log(Fmt("Shaper for JavaScript version {0}", shaper.version));
+    });
 
     shaper.error = error;
     shaper.traverseTree = traverseTree;
     shaper.match = match;
     shaper.replace = replace;
     shaper.renameIdentifier = renameIdentifier;
-    shaper.insertArgument = insertArgument;
+    shaper.insertChild = insertChild;
     shaper.cloneComments = cloneComments;
     shaper.parseScript = parseScript;
-    shaper.parseExpression = parseExpression;
+    shaper.parse = parse;
     shaper.get = get;
     shaper.run = run;
+
+    deprecated(shaper, {since: "0.1", was: "parseExpression", now: "parse"});
+    deprecated(shaper, {since: "0.1", was: "insertArgument", now: "insertChild"});
+
+    shaper.version = "0.1pre";
+
     return shaper;
 })();
 

@@ -16,7 +16,7 @@ Shaper("fmtopt", function(root) {
             for (var i = 0 ; i < params.length; i++) {
                 a[i] = params[i].type === tkn.STRING ? "$" : "String($)";
             }
-            var add = Shaper.parseExpression(Fmt("({0})", a.join(" + ")));
+            var add = Shaper.parse(Fmt("({0})", a.join(" + ")));
             params.unshift(add);
             Shaper.replace.apply(null, params);
             return ref.set(add);

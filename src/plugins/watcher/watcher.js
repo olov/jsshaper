@@ -36,14 +36,14 @@ Shaper("watcher", function(root) {
             if (c.type === tkn.DOT) { // expr.id++
                 expr = c.children[0];
                 prop = c.children[1].value;
-                call = Shaper.parseExpression(Fmt('Watch.set("{0}", $, "{1}")', op, prop));
+                call = Shaper.parse(Fmt('Watch.set("{0}", $, "{1}")', op, prop));
                 Shaper.replace(call, expr);
             }
             else if (c.type === tkn.INDEX) { // expr1[expr2]++
                 expr = c.children[0];
                 prop = c.children[1];
                 strid = (prop.type === tkn.STRING) ? "$" : "String($)";
-                call = Shaper.parseExpression(Fmt('Watch.set("{0}", $, {1})', op, strid));
+                call = Shaper.parse(Fmt('Watch.set("{0}", $, {1})', op, strid));
                 Shaper.replace(call, expr, prop);
             }
             else {
@@ -58,14 +58,14 @@ Shaper("watcher", function(root) {
             if (lvalue.type === tkn.DOT) { // expr.id += v
                 expr = lvalue.children[0];
                 prop = lvalue.children[1].value;
-                call = Shaper.parseExpression(Fmt('Watch.set("{0}", $, "{1}", $)', op, prop));
+                call = Shaper.parse(Fmt('Watch.set("{0}", $, "{1}", $)', op, prop));
                 Shaper.replace(call, expr, v);
             }
             else if (lvalue.type === tkn.INDEX) { // expr1[expr2] += v
                 expr = lvalue.children[0];
                 prop = lvalue.children[1];
                 strid = (prop.type === tkn.STRING) ? "$" : "String($)";
-                call = Shaper.parseExpression(Fmt('Watch.set("{0}", $, {1}, $)', op, strid));
+                call = Shaper.parse(Fmt('Watch.set("{0}", $, {1}, $)', op, strid));
                 Shaper.replace(call, expr, prop, v);
             }
             else {

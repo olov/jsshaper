@@ -11,7 +11,7 @@ Shaper("minmax", function(root) {
         var fn = node.children[0];
         var params = node.children[1].children;
         if (fn.type === tkn.IDENTIFIER && (fn.value === "MIN" || fn.value === "MAX")) {
-            var ternary = Shaper.parseExpression(Fmt("(($) {0} ($) ? ($) : ($))", fn.value === "MIN" ? "<" : ">"));
+            var ternary = Shaper.parse(Fmt("(($) {0} ($) ? ($) : ($))", fn.value === "MIN" ? "<" : ">"));
             Shaper.replace(ternary, params[0], params[1], params[0], params[1]);
             return ref.set(ternary);
         }
