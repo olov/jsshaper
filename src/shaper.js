@@ -148,13 +148,13 @@ var Shaper = (function() {
     //// generic traverse
     // visitfns: {pre: function, post: function}
     // visit function signature: function(node, ref)
-    function traverseTree(node, visitfns, ref) {
+    function traverse(node, visitfns, ref) {
         // preconditions
         if (!node) {
             return node;
         }
         if (!(node instanceof Narcissus.parser.Node)) {
-            throw new Error(Fmt("traverseTree: expected Node, got {0}. {1}",
+            throw new Error(Fmt("traverse: expected Node, got {0}. {1}",
                                 typeof node, ref));
         }
         ref = ref || new Ref();
@@ -167,7 +167,7 @@ var Shaper = (function() {
                 return old;
             }
             else if (!(node instanceof Narcissus.parser.Node)) {
-                throw new Error("traverseTree: visitfns.post invalid return type");
+                throw new Error("traverse: visitfns.post invalid return type");
             }
         }
 
@@ -177,11 +177,11 @@ var Shaper = (function() {
             var prop = subprops[i];
             if (Array.isArray(node[prop])) {
                 for (var j = 0, k = node[prop].length; j < k; j++) {
-                    traverseTree(node[prop][j], visitfns, new Ref(node, prop, j));
+                    traverse(node[prop][j], visitfns, new Ref(node, prop, j));
                 }
             }
             else {
-                traverseTree(node[prop], visitfns, new Ref(node, prop));
+                traverse(node[prop], visitfns, new Ref(node, prop));
             }
         }
 
@@ -189,7 +189,7 @@ var Shaper = (function() {
         if (visitfns.post) {
             node = visitfns.post(node, ref) || node;
             if (!(node instanceof Narcissus.parser.Node)) {
-                throw new Error("traverseTree: visitfns.post invalid return type");
+                throw new Error("traverse: visitfns.post invalid return type");
             }
         }
 
@@ -334,7 +334,7 @@ var Shaper = (function() {
 
         var placeholders = [];
         //collect all $ nodes into placeholders array
-        traverseTree(node, {pre: function(node, ref) {
+        traverse(node, {pre: function(node, ref) {
             if (node.type === tkn.IDENTIFIER && node.value === "$") {
                 placeholders.push(ref);
             }
@@ -440,7 +440,7 @@ var Shaper = (function() {
     };
     Node.prototype.getSrc = function() {
         var srcs = [];
-        traverseTree(this, {
+        traverse(this, {
             pre: function(node, ref) {
                 var parent = ref.base;
                 if (parent) {
@@ -463,7 +463,7 @@ var Shaper = (function() {
     };
     Node.prototype.printTree = function() {
         var level = 0;
-        traverseTree(this, {
+        traverse(this, {
             pre: function(node, ref) {
                 log(Fmt("{0}{1}  < {2}", Fmt.repeat(" ", level * 2), node, ref.base ? ref.toString(ref.base.tknString()) : "root"));
                 ++level;
@@ -498,7 +498,7 @@ var Shaper = (function() {
         root.start = 0;
         root.end = root.tokenizer.source.length;
 
-        return traverseTree(root, {post: function(node, ref) {
+        return traverse(root, {post: function(node, ref) {
             var parent = ref.base;
             if (parent) {
                 if (parent.start === undefined || parent.end === undefined ||
@@ -518,7 +518,7 @@ var Shaper = (function() {
         //               -----         -----------
         var i = 0;
         try {
-            traverseTree(root, {pre: function(node, ref) {
+            traverse(root, {pre: function(node, ref) {
                 while (true) {
                     if (i === comments.length) {
                         throw true; // abort traversal
@@ -541,7 +541,7 @@ var Shaper = (function() {
         //             -                   -------
         i = 0;
         try {
-            traverseTree(root, {post: function(node, ref) {
+            traverse(root, {post: function(node, ref) {
                 while (true) {
                     while (i < comments.length && comments[i] === null) {
                         ++i;
@@ -571,7 +571,7 @@ var Shaper = (function() {
             comments: root.tokenizer.comments
         };
 
-        return traverseTree(root, {
+        return traverse(root, {
             pre: function(node, ref) {
                 var parent = ref.base;
                 node.pos = node.start;
@@ -645,7 +645,7 @@ var Shaper = (function() {
     });
 
     shaper.error = error;
-    shaper.traverseTree = traverseTree;
+    shaper.traverse = traverse;
     shaper.match = match;
     shaper.replace = replace;
     shaper.renameIdentifier = renameIdentifier;
@@ -658,6 +658,7 @@ var Shaper = (function() {
 
     deprecated(shaper, {since: "0.1", was: "parseExpression", now: "parse"});
     deprecated(shaper, {since: "0.1", was: "insertArgument", now: "insertChild"});
+    deprecated(shaper, {since: "0.1", was: "traverseTree", now: "traverse"});
 
     shaper.version = "0.1pre";
 

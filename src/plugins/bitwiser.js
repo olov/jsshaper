@@ -5,7 +5,7 @@ var Annotater = Annotater || require("plugins/annotater.js") || Annotater;
 
 Shaper("bitwiser", function(root) {
     var bitwise_stack = [];
-    return Shaper.traverseTree(root, {
+    return Shaper.traverse(root, {
         pre: function(node, ref) {
             if (node.bitwise) {
                 bitwise_stack.push(true);

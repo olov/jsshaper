@@ -4,7 +4,7 @@ var Shaper = Shaper || require("shaper.js") || Shaper;
 var Fmt = Fmt || require("fmt.js") || Fmt;
 
 Shaper("minmax", function(root) {
-    return Shaper.traverseTree(root, {pre: function(node, ref) {
+    return Shaper.traverse(root, {pre: function(node, ref) {
         if (node.type !== tkn.CALL) {
             return;
         }

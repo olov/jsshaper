@@ -4,7 +4,7 @@ var Shaper = Shaper || require("shaper.js") || Shaper;
 
 // converts ""+expr or expr+"" to String(expr)
 Shaper("stringconverter", function(root) {
-    return Shaper.traverseTree(root, {pre: function(node, ref) {
+    return Shaper.traverse(root, {pre: function(node, ref) {
         if (node.type !== tkn.PLUS) {
             return;
         }

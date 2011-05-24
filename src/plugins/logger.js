@@ -5,7 +5,7 @@ var Fmt = Fmt || require("fmt.js") || Fmt;
 
 Shaper("logger", function(root) {
     var fns = [];
-    return Shaper.traverseTree(root, {
+    return Shaper.traverse(root, {
         pre: function(node, ref) {
             if (node.type === tkn.FUNCTION) {
                 fns.push(node);

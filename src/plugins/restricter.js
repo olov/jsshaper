@@ -175,7 +175,7 @@ Shaper("restricter", function(root) {
         ref.set(replaceNode);
         return replaceNode;
     }
-    return Shaper.traverseTree(root, {pre: checkerPre, post: checkerPost});
+    return Shaper.traverse(root, {pre: checkerPre, post: checkerPost});
 });
 
 Annotater(/\/\*+\s*@loose\s*\*+\//, function(node, match) {

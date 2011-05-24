@@ -7,7 +7,7 @@ Shaper("asserter", function(root) {
     var fns = [];
     var callTempl = Shaper.parse("Assert($$)");
     var dotTempl = Shaper.parse("Assert.$($$)");
-    return Shaper.traverseTree(root, {
+    return Shaper.traverse(root, {
         pre: function(node, ref) {
             if (node.type === tkn.FUNCTION) {
                 fns.push(node);

@@ -4,7 +4,7 @@ var Shaper = Shaper || require("shaper.js") || Shaper;
 var Comments = Comments || require("comments.js") || Comments;
 
 Shaper("annotater", function(root) {
-    Shaper.traverseTree(root, {pre: function(node, ref) {
+    Shaper.traverse(root, {pre: function(node, ref) {
         // collect leading comments (whitespace excluded)
         var comments = [];
         var split = Comments.split(node.leadingComment);

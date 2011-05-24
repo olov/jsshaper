@@ -21,7 +21,7 @@ Shaper("watcher", function(root) {
     opStr[tkn.RSH] = ">>=";
     opStr[tkn.URSH] = ">>>=";
 
-    Shaper.traverseTree(root, {pre: function(node, ref) {
+    Shaper.traverse(root, {pre: function(node, ref) {
         var op;
         var expr;
         var prop;

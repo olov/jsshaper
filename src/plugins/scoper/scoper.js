@@ -30,7 +30,7 @@ Shaper("scoper", function(root) {
         }
     }
 
-    return Shaper.traverseTree(root, {
+    return Shaper.traverse(root, {
         pre: function(node, ref) {
             var scope = {};
             var i, v;

@@ -6,7 +6,7 @@ var Fmt = Fmt || require("fmt.js") || Fmt;
 var Annotater = Annotater || require("plugins/annotater.js") || Annotater;
 
 Shaper("jsdocer", function(root) {
-    return Shaper.traverseTree(root, {pre: function(node, ref) {
+    return Shaper.traverse(root, {pre: function(node, ref) {
         if (node.type === tkn.FUNCTION) {
             Log("function {0} with params {1}", node.name, node.params);
             node.body.varDecls.forEach(function(identifier) {
