@@ -20,7 +20,7 @@ Shaper("asserter", function(root) {
                               fns[fns.length - 1].name || "<anonymous>",
                               node.tokenizer.filename,
                               node.lineno);
-                Shaper.insertChild(args, Shaper.parse(str), -1);
+                Shaper.insertBefore(new Ref(args, "children", args.children.length), Shaper.parse(str));
             }
         },
         post: function(node, ref) {

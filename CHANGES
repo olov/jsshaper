@@ -13,7 +13,8 @@ First versioned release
  * node.leadingComment and node.trailingComment properties
  * Shaper.cloneComments convenience function
  * Node methods tknString, toString, verboseString and printTree (to be renamed)
- * Shaper.insertChild replaces deprecated Shaper.insertArgument
+ * Shaper.insertBefore and Shaper.insertAfter replaces deprecated
+   Shaper.insertArgument
  * Shaper.parse replaces deprecated Shaper.parseExpression
  * Shaper.traverse replaces deprecated Shaper.traverseTree
  * Ref.prop is renamed to Ref.properties

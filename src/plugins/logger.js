@@ -20,9 +20,10 @@ Shaper("logger", function(root) {
 
                 var fnname = fns.length === 0 ? "<script>" :
                     fns[fns.length - 1].name || "<anonymous>";
-                Shaper.insertChild(args, Shaper.parse('"'+ node.tokenizer.filename +'"'), 0);
-                Shaper.insertChild(args, Shaper.parse(node.lineno), 1);
-                Shaper.insertChild(args, Shaper.parse('"'+ fnname +'"'), 2);
+                var refFirstArg = new Ref(args, "children", 0);
+                Shaper.insertBefore(refFirstArg, Shaper.parse('"'+ fnname +'"'));
+                Shaper.insertBefore(refFirstArg, Shaper.parse(node.lineno));
+                Shaper.insertBefore(refFirstArg, Shaper.parse('"'+ node.tokenizer.filename +'"'));
             }
         },
         post: function(node, ref) {

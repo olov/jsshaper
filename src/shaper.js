@@ -358,9 +358,17 @@ var Shaper = (function() {
         var oldValue = node.value;
         node.value = node.srcs[0] = name;
     }
-    function insertChild(node, child, pos, delimiter) {
+    function insertBefore(ref, node, delimiter) {
+        Assert(ref.properties.length === 2);
+        _insert(ref.base, node, ref.properties[0], Number(ref.properties[1]), delimiter);
+    }
+    function insertAfter(ref, node, delimiter) {
+        Assert(ref.properties.length === 2);
+        _insert(ref.base, node, ref.properties[0], Number(ref.properties[1]) + 1, delimiter);
+    }
+    function _insert(node, child, prop, pos, delimiter) {
         var srcs = node.srcs;
-        var children = node.children;
+        var children = node[prop];
         if (pos === -1) {
             pos = children.length;
         }
@@ -386,11 +394,20 @@ var Shaper = (function() {
                     delimiter = ", ";
                 }
                 else {
-                    throw new Error("insertChild: Can't create default delimiter for node "+ String(node));
+                    throw new Error("_insert: Can't create default delimiter for node "+ String(node));
                 }
             }
 
-            srcs.splice(pos === children.length ? pos : pos + 1, 0, delimiter);
+            // temporary hardcoded workaround for semicolon issues
+            // `{ var x; }` BLOCK has no SEMICOLON, block.srcs is { @; }
+            var splicePos = (pos === children.length ? pos : pos + 1);
+            if (splicePos === children.length && (node.type === tkn.SCRIPT || node.type === tkn.BLOCK)) {
+                if (srcs[children.length][0] === ";") {
+                    srcs[children.length] = srcs[children.length].slice(1);
+                    delimiter = ";"+ delimiter;
+                }
+            }
+            srcs.splice(splicePos, 0, delimiter);
             children.splice(pos, 0, child);
         }
     }
@@ -651,7 +668,8 @@ var Shaper = (function() {
     shaper.match = match;
     shaper.replace = replace;
     shaper.renameIdentifier = renameIdentifier;
-    shaper.insertChild = insertChild;
+    shaper.insertBefore = insertBefore;
+    shaper.insertAfter = insertAfter;
     shaper.cloneComments = cloneComments;
     shaper.parseScript = parseScript;
     shaper.parse = parse;
@@ -659,7 +677,7 @@ var Shaper = (function() {
     shaper.run = run;
 
     deprecated(shaper, {since: "0.1", was: "parseExpression", now: "parse"});
-    deprecated(shaper, {since: "0.1", was: "insertArgument", now: "insertChild"});
+    deprecated(shaper, {since: "0.1", was: "insertArgument", now: "insertBefore or insertAfter"});
     deprecated(shaper, {since: "0.1", was: "traverseTree", now: "traverse"});
 
     shaper.version = "0.1-pre";
