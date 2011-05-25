@@ -176,7 +176,7 @@ var Shaper = (function() {
         for (var i = 0; i < subprops.length; i++) {
             var prop = subprops[i];
             if (Array.isArray(node[prop])) {
-                for (var j = 0, k = node[prop].length; j < k; j++) {
+                for (var j = 0; j < node[prop].length; j++) {
                     traverse(node[prop][j], visitfns, new Ref(node, prop, j));
                 }
             }
@@ -350,6 +350,8 @@ var Shaper = (function() {
         for (var i = 0; i < placeholders.length; i++) {
             placeholders[i].set(args[i]);
         }
+
+        return node;
     }
     function renameIdentifier(node, name) {
         Assert(node.type === tkn.IDENTIFIER);
@@ -660,7 +662,7 @@ var Shaper = (function() {
     deprecated(shaper, {since: "0.1", was: "insertArgument", now: "insertChild"});
     deprecated(shaper, {since: "0.1", was: "traverseTree", now: "traverse"});
 
-    shaper.version = "0.1pre";
+    shaper.version = "0.1-pre";
 
     return shaper;
 })();
