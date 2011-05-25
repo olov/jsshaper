@@ -7,6 +7,7 @@ First versioned release
    - jsdocer stub
    - logger
    - scoper
+   - var-splitter
    - watcher
  * Runs on node, d8 (v8), js (SpiderMonkey) and rhino
  * Declarative Shaper.match
