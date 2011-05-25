@@ -1,0 +1,46 @@
+TBD: version 0.1
+----------------
+First versioned release
+
+ * New plugins
+   - asserter
+   - jsdocer stub
+   - logger
+   - scoper
+   - watcher
+ * Runs on node, d8 (v8), js (SpiderMonkey) and rhino
+ * Declarative Shaper.match
+ * node.leadingComment and node.trailingComment properties
+ * Shaper.cloneComments convenience function
+ * Node methods tknString, toString, verboseString and printTree (to be renamed)
+ * Shaper.insertChild replaces deprecated Shaper.insertArgument
+ * Shaper.parse replaces deprecated Shaper.parseExpression
+ * Shaper.traverse replaces deprecated Shaper.traverseTree
+ * Ref.prop is renamed to Ref.properties
+ * Narcissus changes for improved AST
+   - FUNCTION _name and _params are traversable IDENTIFIERs
+   - VAR initializers are simply ASSIGN expressions
+   - CATCH _name is traversable IDENTIFIER
+   - FOR_IN _iterator is traversable VAR or IDENTIFIER
+ * Webpage: <http://jsshaper.org>
+ * Mailing list: <http://groups.google.com/group/jsshaper>
+ * Restrict mode webpage: <http://restrictmode.org>
+
+
+2011-03-26:
+-----------
+First github push
+
+ * Available plugins:
+   - annotater
+   - annotation-printer
+   - bitwiser
+   - restricter
+   - stringconverter
+ * Announced:
+   <http://blog.lassus.se/2011/03/announcing-restrict-mode-for-javascript.html>
+
+
+2010-12-21:
+-----------
+First commit
