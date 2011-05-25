@@ -15,6 +15,7 @@ First versioned release
  * Node methods tknString, toString, verboseString and printTree (to be renamed)
  * Shaper.insertBefore and Shaper.insertAfter replaces deprecated
    Shaper.insertArgument
+ * Shaper.remove
  * Shaper.parse replaces deprecated Shaper.parseExpression
  * Shaper.traverse replaces deprecated Shaper.traverseTree
  * Ref.prop is renamed to Ref.properties

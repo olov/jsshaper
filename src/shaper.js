@@ -358,6 +358,22 @@ var Shaper = (function() {
         var oldValue = node.value;
         node.value = node.srcs[0] = name;
     }
+    function remove(ref) {
+        Assert(ref.properties.length === 2);
+        var node = ref.base;
+        var prop = ref.properties[0];
+        var index = Number(ref.properties[1]);
+        var len = node[prop].length;
+        Assert(index >= 0 && index < len);
+
+        if (len === 1) {
+            node.srcs[0] += node.srcs.pop();
+        }
+        else {
+            node.srcs.splice(index === len - 1 ? index : index + 1, 1);
+        }
+        node[prop].splice(index, 1);
+    }
     function insertBefore(ref, node, delimiter) {
         Assert(ref.properties.length === 2);
         _insert(ref.base, node, ref.properties[0], Number(ref.properties[1]), delimiter);
@@ -668,6 +684,7 @@ var Shaper = (function() {
     shaper.match = match;
     shaper.replace = replace;
     shaper.renameIdentifier = renameIdentifier;
+    shaper.remove = remove;
     shaper.insertBefore = insertBefore;
     shaper.insertAfter = insertAfter;
     shaper.cloneComments = cloneComments;
