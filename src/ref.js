@@ -3,39 +3,43 @@
 var Fmt = Fmt || require("fmt.js") || Fmt;
 var Ref = (function() {
     // examples:
-    // {base: obj, prop: ["property"]}
-    // {base: obj, prop: ["children", "0"]
+    // {base: obj, properties: ["property"]}
+    // {base: obj, properties: ["children", "0"]
     function Ref(base, var_args) {
         this.base = base;
-        this.prop = Array.prototype.slice.call(arguments, 1).map(function(name) {
-            return String(name);
-        });
+        this.properties = Array.isArray(var_args) ? var_args :
+            Array.prototype.slice.call(arguments, 1).map(function(name) {
+                return String(name);
+            });
     }
     Ref.prototype.canonical = function() {
+        if (this.properties.length === 1) {
+            return this;
+        }
         var i;
         var base = this.base;
-        for (i = 0; i < this.prop.length - 1; i++) {
-            base = base[this.prop[i]];
+        for (i = 0; i < this.properties.length - 1; i++) {
+            base = base[this.properties[i]];
         }
-        var prop = this.prop[i];
-        return new Ref(base, prop);
+        var properties = this.properties[i];
+        return new Ref(base, properties);
     };
     Ref.prototype.set = function(value) {
         var ref = this.canonical();
-        return ref.base[ref.prop[0]] = value;
+        return ref.base[ref.properties[0]] = value;
     };
     Ref.prototype.get = function() {
         var ref = this.canonical();
-        return ref.base[ref.prop[0]];
+        return ref.base[ref.properties[0]];
     };
     Ref.prototype.toString = function(baseName) {
-        var prop = this.prop.map(function(p) {
+        var properties = this.properties.map(function(p) {
             p = String(p);
             return /^[0-9]+$/.test(p) ? Fmt("[{0}]", p) :
                 /^[_$a-zA-Z][_$a-zA-Z0-9]*$/.test(p) ? Fmt(".{0}", p) :
                 Fmt('["{0}"]', p);
         });
-        return (baseName !== undefined ? baseName : "base") + prop.join("");
+        return (baseName !== undefined ? baseName : "base") + properties.join("");
     };
     return Ref;
 })();

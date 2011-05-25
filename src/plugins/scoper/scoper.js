@@ -78,10 +78,10 @@ Shaper("scoper", function(root) {
                 if (rbt === tkn.INCREMENT || rbt === tkn.DECREMENT) {
                     countRead(node.value); countWrite(node.value);
                 }
-                else if (rbt === tkn.DOT && ref.prop[1] === "1") { // expr.IDENTIFIER (ref.prop[0] === "children")
+                else if (rbt === tkn.DOT && ref.properties[1] === "1") { // expr.IDENTIFIER (ref.properties[0] === "children")
                     // noop
                 }
-                else if (rbt === tkn.PROPERTY_INIT && ref.prop[1] === "0") { // IDENTIFIER: expr (ref.prop[0] === "children")
+                else if (rbt === tkn.PROPERTY_INIT && ref.properties[1] === "0") { // IDENTIFIER: expr (ref.properties[0] === "children")
                     // noop
                 }
                 else if (rbt === tkn.CATCH) {
@@ -93,13 +93,13 @@ Shaper("scoper", function(root) {
                 else if (rbt === tkn.VAR || rbt === tkn.LET || rbt === tkn.CONST) { // var IDENTIFIER (no initializer)
                     countWrite(node.value); // count var x; as a write since it gets a default value
                 }
-                else if (rbt === tkn.ASSIGN && ref.prop[1] === 0) { // IDENTIFIER = expr (ref.prop[0] === "children")
+                else if (rbt === tkn.ASSIGN && ref.properties[1] === 0) { // IDENTIFIER = expr (ref.properties[0] === "children")
                     if (ref.base.assignOp) {
                         countRead(node.value); // += and the like counts as a read then write
                     }
                     countWrite(node.value);
                 }
-                else if (rbt === tkn.FOR_IN && ref.prop[0] === "_iterator") {
+                else if (rbt === tkn.FOR_IN && ref.properties[0] === "_iterator") {
                     countWrite(node.value); // registers for-in _iterator
                 }
                 else if (rbt === tkn.TYPEOF) {
