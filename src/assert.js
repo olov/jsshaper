@@ -8,12 +8,10 @@ var Assert = (function() {
     assert.pass = function(args) {
     };
     assert.fail = function(args) {
-        var quitfn = typeof quit === "undefined" ? process.exit : quit;
         var str = args.length === 1 ? String(args[0]) :
             Array.prototype.slice.call(args, 1).join(", ");
 
-        printfn("Assertion failed: "+ str);
-        quitfn(-1);
+        throw new Error("Assertion failed: "+ str);
     };
     assert.throwsException = function(fn, var_args) {
         var res = false;
