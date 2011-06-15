@@ -3,9 +3,9 @@
 var Fmt = Fmt || require("fmt.js") || Fmt;
 
 var Log = (function() {
-    var printfn = (typeof console !== "undefined") && console.log || print;
+    var _console = (typeof console !== "undefined") && console || {log: print};
     function log(var_args) {
-        printfn(format(arguments));
+        _console.log(format(arguments));
     }
     function format(args) {
         return args.length === 0 ? "" :
@@ -14,7 +14,7 @@ var Log = (function() {
     }
     function verb(filename, lineno, fnname, var_args) {
         var args = Array.prototype.slice.call(arguments, 3);
-        printfn(Fmt("{0} line {1} <{2}>: {3}", filename, lineno, fnname, format(args)));
+        _console.log(Fmt("{0} line {1} <{2}>: {3}", filename, lineno, fnname, format(args)));
     }
 
     log.verb = verb;
