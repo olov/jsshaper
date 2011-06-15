@@ -41,11 +41,26 @@ var Fmt = (function() {
         return (new Array(n + 1)).join(str);
     }
 
+    // inspect object properties
+    function inspect(obj, name) {
+        name = name || "object";
+        if (obj === null || obj === undefined) {
+            return Fmt("{0} ({1})", name, obj);
+        }
+
+        var props = "";
+        for (var prop in obj) {
+            props += Fmt("\n    {0}: {1}", prop, obj[prop]);
+        }
+        return Fmt("{0} {{1}\n}", name, props);
+    }
+
     fmt.fmt = fmt;
     fmt.obj = obj;
     fmt.cat = cat;
     fmt.abbrev = abbrev;
     fmt.repeat = repeat;
+    fmt.inspect = inspect;
     return fmt;
 })();
 
