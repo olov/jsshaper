@@ -9,7 +9,7 @@ if (args.length > 0 && args[0] === "--") {
     args.shift();
 }
 if (args.length !== 1) {
-    log("run-restrict-checker: filename");
+    log("run-restricter: filename");
     (typeof quit === "undefined" ? process.exit : quit)(0);
 }
 var filename = args.shift();
