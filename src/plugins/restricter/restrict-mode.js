@@ -66,25 +66,13 @@ function __eq(x, y) {
     if (__pedantic) {
         throw new Error("restrict pedantic mode disallows the == operator, use === or /*@loose*/ annotate instead");
     }
-    var eq_strict = (x === y);
-    var eq_loose = /*@loose*/(x == y);
-    if (!(eq_strict === eq_loose ||
-          (x === undefined && y === null || x === null && y === undefined))) {
-        __throw_typeerror("==", x, y);
-    }
-    return eq_loose;
+    return /*@loose*/(x == y);
 }
 function __ne(x, y) {
     if (__pedantic) {
         throw new Error("restrict pedantic mode disallows the != operator, use !== or /*@loose*/ annotate instead");
     }
-    var ne_strict = (x !== y);
-    var ne_loose = /*@loose*/(x != y);
-    if (!(ne_strict === ne_loose ||
-          (x === undefined && y === null || x === null && y === undefined))) {
-        __throw_typeerror("!=", x, y);
-    }
-    return ne_loose;
+    return /*@loose*/(x != y);
 }
 function __lt(x, y) {
     var xtype = typeof x;
@@ -128,7 +116,11 @@ function __neg(v) {
 function __add(x, y) {
     var xtype = typeof x;
     var ytype = typeof y;
-    if (!(xtype === ytype && (xtype === "string" || xtype === "number"))) {
+    // number + number -> addition
+    // string + string -> concatenation
+    // string + number or number + string -> concatenation
+    if (!((xtype === "string" || xtype === "number") &&
+          (ytype === "string" || ytype === "number"))) {
         __throw_typeerror("+", x, y);
     }
     return /*@loose*/(x + y); // number addition or string concatenation
