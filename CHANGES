@@ -25,6 +25,8 @@ First versioned release
    - VAR initializers are simply ASSIGN expressions
    - CATCH _name is traversable IDENTIFIER
    - FOR_IN _iterator is traversable VAR or IDENTIFIER
+   - LABEL _label is traversable IDENTIFIER
+   - SEMICOLON nodes always (and only) match ; tokens
  * Webpage: <http://jsshaper.org>
  * Mailing list: <http://groups.google.com/group/jsshaper>
  * Restrict mode webpage: <http://restrictmode.org>

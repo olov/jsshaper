@@ -241,13 +241,6 @@ var Shaper = (function() {
         }
         conds = conds || {$: {}, $$: {rest: true}};
 
-        if (t && t.type === tkn.SEMICOLON && t.srcs[1] === "" &&
-            n.type !== tkn.SEMICOLON) {
-            // t is invisible (auto-inserted) semicolon while
-            //   n is of some other type so
-            //   try matching t's expression with n instead of MISMATCH
-            return match(t.expression, n, conds);
-        }
         if (t && t.type === tkn.IDENTIFIER) {
             var cond = conds[t.value];
             // todo should conds match null/undefined?
@@ -518,16 +511,12 @@ var Shaper = (function() {
         var script = parseScript(str);
 
         // only one statement/expression so skip SCRIPT node
-        // also skip SEMICOLON if invisible
         if (script.children.length === 1) {
-            var c = script.children[0];
-            return (c.type === tkn.SEMICOLON && c.srcs[1] === "") ?
-                c.expression : c;
+            return script.children[0];
         }
-        // SCRIPT contains multiple statements so return as-is
-        else {
-            return script;
-        }
+
+        // SCRIPT contains multiple statements/expressions so return as-is
+        return script;
     }
     function adjustStartEnd(root) {
         root.start = 0;
