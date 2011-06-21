@@ -403,7 +403,7 @@ var Shaper = (function() {
                     delimiter = ", ";
                 }
                 else {
-                    throw new Error("_insert: Can't create default delimiter for node "+ String(node));
+                    throw new Error("_insert: Can't create default delimiter for node "+ node.toString(false));
                 }
             }
 
@@ -433,17 +433,23 @@ var Shaper = (function() {
     //// printers
     var Node = Narcissus.parser.Node;
     Node.prototype.verboseString = (function(oldToString) {
-        return function(recursiveVerbose) {
+        return function(recurse) {
+            if (recurse === undefined) {
+                recurse = true;
+            }
             var res;
-            if (recursiveVerbose === true) {
-                var newToString = Node.prototype.toString;
+            var newToString = Node.prototype.toString;
+            if (recurse === true) {
                 Node.prototype.toString = oldToString;
                 res = this.toString();
-                Node.prototype.toString = newToString;
             }
             else {
+                Node.prototype.toString = function() {
+                    return newToString.call(this, false);
+                };
                 res = oldToString.call(this);
             }
+            Node.prototype.toString = newToString;
             return res;
         };
     })(Node.prototype.toString);
@@ -453,19 +459,53 @@ var Shaper = (function() {
         var t = defs.tokens[tt];
         return /^\W/.test(t) ? defs.opTypeNames[t] : t.toUpperCase();
     };
-    Node.prototype.toString = function() {
+    Node.prototype.toString = function(recurse) {
+        if (recurse === undefined) {
+            recurse = true;
+        }
+        return recurse ? treeString(this) : nodeString(this);
+    };
+    function nodeString(node) {
         function strPos(pos) {
             return pos === undefined ? "?" : String(pos);
         }
-        var src = this.tokenizer.source;
-        return this.tknString() +": "+
-            ("srcs" in this ? this.srcs.join("@") :
-             "start" in this && "end" in this ?
-             Fmt(" '{0}'", JSON.stringify(Fmt.abbrev(src.slice(this.start, this.end), 30))) :
-             (this.value !== undefined ? Fmt(" ({0})", this.value) : "")) +
-            ("start" in this || "end" in this ?
-             Fmt(" ({0}..{1})", strPos(this.start), strPos(this.end)) : "");
+        var src = node.tokenizer.source;
+
+        return node.tknString() +": "+
+            ("srcs" in node ? Fmt.abbrev(JSON.stringify(node.srcs.join("@")).slice(1,-1), 60) :
+             "start" in node && "end" in node ?
+             Fmt(" '{0}'", JSON.stringify(Fmt.abbrev(src.slice(node.start, node.end), 30))) :
+             (node.value !== undefined ? Fmt(" ({0})", node.value) : "")) +
+            ("start" in node || "end" in node ?
+             Fmt(" ({0}..{1})", strPos(node.start), strPos(node.end)) : "");
     };
+    function treeString(node) {
+        var level = 0;
+        var lines = [];
+        traverse(node, {
+            pre: function(node, ref) {
+                var comments = [];
+                if (node.leadingComment) {
+                    comments.push("leadingComment: "+ (Fmt.abbrev(node.leadingComment, 20) || ""));
+                }
+                if (node.trailingComment) {
+                    comments.push("trailingComment: "+ (Fmt.abbrev(node.trailingComment, 20) || ""));
+                }
+                comments = comments.join(", ");
+
+                lines.push(Fmt("{0}{1}  < {2}{3}",
+                               Fmt.repeat(" ", level * 2),
+                               nodeString(node),
+                               ref.base ? ref.toString(ref.base.tknString()) : "root",
+                               comments ? "  "+ JSON.stringify(comments).slice(1, -1) : ""));
+                ++level;
+            },
+            post: function(node, ref) {
+                --level;
+            }
+        });
+        return lines.join("\n");
+    }
     Node.prototype.getSrc = function() {
         var srcs = [];
         traverse(this, {
@@ -488,18 +528,6 @@ var Shaper = (function() {
             }
         });
         return srcs.join("");
-    };
-    Node.prototype.printTree = function() {
-        var level = 0;
-        traverse(this, {
-            pre: function(node, ref) {
-                log(Fmt("{0}{1}  < {2}", Fmt.repeat(" ", level * 2), node, ref.base ? ref.toString(ref.base.tknString()) : "root"));
-                ++level;
-            },
-            post: function(node, ref) {
-                --level;
-            }
-        });
     };
 
 
@@ -606,7 +634,7 @@ var Shaper = (function() {
                     if (parent.pos > node.start ||
                        node.start === undefined || node.end === undefined) {
                         throw new Error(Fmt("srcsify: src already covered. parent: {0} {1}:{2}",
-                                            parent, ref, node));
+                                            parent, ref, node.toString(false)));
                     }
                     src = parent.tokenizer.source;
                     var frag = src.slice(parent.pos, node.start);
@@ -659,7 +687,7 @@ var Shaper = (function() {
     }
 
     shaper("tree", function(root) {
-        root.printTree();
+        log(root.toString());
     });
     shaper("source", function(root) {
         log(root.getSrc());
@@ -685,6 +713,7 @@ var Shaper = (function() {
     deprecated(shaper, {since: "0.1", was: "parseExpression", now: "parse"});
     deprecated(shaper, {since: "0.1", was: "insertArgument", now: "insertBefore or insertAfter"});
     deprecated(shaper, {since: "0.1", was: "traverseTree", now: "traverse"});
+    deprecated(Node.prototype, {since: "0.1", was: "printTree", now: "toString"});
 
     shaper.version = "0.1-pre";
 
