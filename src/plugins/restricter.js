@@ -98,6 +98,11 @@ Shaper("restricter", function(root) {
             var __op = node.type === tkn.INCREMENT ? "__inc" : "__dec";
             var __postprefop = (node.postfix ? "__post" : "__pref") + (node.type === tkn.INCREMENT ? "inc" : "dec");
 
+            // extract c from ((c)) if needed
+            while (c.type === tkn.GROUP) {
+                c = c.children[0];
+            }
+
             if (c.type === tkn.IDENTIFIER) { // id++
                 if (node.postfix) {
                     replaceNode = Shaper.parse(Fmt("__arg0($, $ = {0}($))", __op));
@@ -134,6 +139,11 @@ Shaper("restricter", function(root) {
             var v = node.children[1];
             var __opcall = restrictfns[node.assignOp];
             var __op = __opcall.slice(0, __opcall.indexOf("("));
+
+            // extract lvalue from ((lvalue)) if needed
+            while (lvalue.type === tkn.GROUP) {
+                lvalue = lvalue.children[0];
+            }
 
             if (lvalue.type === tkn.IDENTIFIER) { // id += v
                 replaceNode = Shaper.parse(Fmt("$ = {0}($, $)", __op));
