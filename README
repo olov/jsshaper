@@ -30,7 +30,7 @@ JSShaper comes with the following plugins:
     converting operators into function calls in a compatible way. it
     comes with a small run-time library. <http://restrictmode.org>
 
-It also comes with a few small and simple examples.
+It also comes with a few small and simple examples (src/examples).
 
 Get the source code from <https://github.com/olov/jsshaper>:
 git clone git://github.com/olov/jsshaper.git
