@@ -348,7 +348,6 @@ var Shaper = (function() {
     }
     function renameIdentifier(node, name) {
         Assert(node.type === tkn.IDENTIFIER);
-        var oldValue = node.value;
         node.value = node.srcs[0] = name;
     }
     function remove(ref) {
