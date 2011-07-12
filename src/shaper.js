@@ -41,7 +41,7 @@ var Shaper = (function() {
         o[tkn.GENERATOR] = [/*expr*/"expression", /*COMP_TAIL*/"tail"];
         o[tkn.GETTER] = [/*SCRIPT*/"body"];
         o[tkn.IF] = [/*expr*/"condition", /*stmt*/"thenPart", /*stmt*/"elsePart"];
-        o[tkn.LABEL] = [/*stmt*/"statement"];
+        o[tkn.LABEL] = [/*stmt*/"statement"]; // TODO should /*IDENTIFIER*/"_label" be captured?
         o[tkn.LET_BLOCK] = [/*LET*/"variables", /*expr*/"expression", /*BLOCK*/"block"];
         o[tkn.RETURN] = [/*expr*/"value"];
         o[tkn.SEMICOLON] = [/*expr*/"expression"];
@@ -54,21 +54,18 @@ var Shaper = (function() {
         o[tkn.YIELD] = [/*expr*/"value"];
 
 /*
-        // TODO these properties aren't nodes but still relevant
+        // TODO these properties aren't nodes but may still be relevant
         x[tkn.ASSIGN] = ["assignOp"]; // number ("value" has string representation)
         x[tkn.INCREMENT] = ["postfix"]; // boolean ("value" is just "++")
         x[tkn.DECREMENT] = ["postfix"]; // boolean
-        x[tkn.FUNCTION] = ["functionForm", "name", "params"]; // number, string, array of strings
+        x[tkn.FUNCTION] = ["functionForm"]; // number
         x[tkn.FOR_IN] = ["isEach"]; // boolean
         x[tkn.SWITCH] = ["defaultIndex"]; // number
-        x[tkn.CATCH] = ["varName"]; // string
         x[tkn.LABEL] = ["label"]; // string
         x[tkn.IDENTIFIER] = ["value"]; // string, same as "name" when part of VAR 
         x[tkn.NUMBER] = ["value"]; // number (can differ from srcs)
         x[tkn.REGEXP] = ["value"]; // string
         x[tkn.STRING] = ["value"]; // string (can differ from srcs)
-        x[tkn.GETTER] = ["functionForm", "name", "params"]; // same as FUNCTION
-        x[tkn.SETTER] = ["functionForm", "name", "params"]; // same as FUNCTION
 */
 
         var c = [
