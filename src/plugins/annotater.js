@@ -1,7 +1,7 @@
 "use strict"; "use restrict";
 
-var Shaper = Shaper || require("shaper.js") || Shaper;
-var Comments = Comments || require("comments.js") || Comments;
+var Shaper = Shaper || require("../shaper.js") || Shaper;
+var Comments = Comments || require("../comments.js") || Comments;
 
 Shaper("annotater", function(root) {
     Shaper.traverse(root, {pre: function(node, ref) {

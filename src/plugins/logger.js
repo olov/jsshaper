@@ -1,7 +1,7 @@
 "use strict"; "use restrict";
 
-var Shaper = Shaper || require("shaper.js") || Shaper;
-var Fmt = Fmt || require("fmt.js") || Fmt;
+var Shaper = Shaper || require("../shaper.js") || Shaper;
+var Fmt = Fmt || require("../fmt.js") || Fmt;
 
 Shaper("logger", function(root) {
     var fns = [];
