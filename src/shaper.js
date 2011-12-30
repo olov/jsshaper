@@ -162,7 +162,7 @@ var Shaper = (function() {
                 return old;
             }
             else if (!(node instanceof Narcissus.parser.Node)) {
-                throw new Error("traverse: visitfns.post invalid return type");
+                throw new Error("traverse: visitfns.pre invalid return type");
             }
         }
 
