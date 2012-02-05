@@ -2,7 +2,8 @@
 // run with d8
 var filename = "../build/all-restricter.js";
 
-var read = read || require("fs").readFileSync;
+// read: js/d8/v8 || rhino || node
+var read = read || typeof readFile !== "undefined" && readFile || require("fs").readFileSync;
 var src = read(filename);
 var root = Shaper.parseScript(src, filename);
 Shaper.run(root, ["annotater", "restricter", "source"]);
