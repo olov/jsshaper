@@ -711,7 +711,25 @@ var Shaper = (function() {
         log(root.toString());
     });
     shaper("source", function(root) {
-        log(root.getSrc());
+        var write = function(str) {
+            // log is going to add a trailing newline, so suppress the last one
+            // from str (if that's actually what it ends with)
+            if (str[str.length-1]=='\n') {
+                str = str.substring(0, str.length-1);
+            }
+            log(str);
+        };
+        // if we have a "print without trailing newline" function available,
+        // use it instead.
+        if (typeof process !== 'undefined') {
+            // node uses process.stdout.write
+            if (process.stdout && typeof process.stdout.write === 'function') {
+                write = process.stdout.write.bind(process.stdout);
+            }
+        }
+
+        var str = root.getSrc();
+        write(str);
     });
     shaper("version", function(root) {
         log(Fmt("Shaper for JavaScript version {0}", shaper.version));
