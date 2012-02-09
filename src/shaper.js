@@ -701,7 +701,11 @@ var Shaper = (function() {
         log(root.toString());
     });
     shaper("source", function(root) {
-        log(root.getSrc());
+        var str = root.getSrc();
+        // log is going to add a trailing newline, so suppress the last one
+        // from str (if that's actually what it ends with)
+        if (str[str.length-1]=='\n') { str = str.substring(0, str.length-1); }
+        log(str);
     });
     shaper("version", function(root) {
         log(Fmt("Shaper for JavaScript version {0}", shaper.version));
