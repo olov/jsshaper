@@ -1,6 +1,9 @@
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
+
+define(['../../shaper', '../../tkn'], function(Shaper, tkn) {
 "use strict"; "use restrict";
 
-var Shaper = Shaper || require("shaper.js") || Shaper;
+var log = (typeof console !== "undefined") && console.log || print;
 
 Shaper("scoper", function(root) {
     var scopes = [];
@@ -119,7 +122,10 @@ Shaper("scoper", function(root) {
             // pop scope and print info
             if (node.type === tkn.SCRIPT || node.type === tkn.CATCH) {
                 var scope = scopes.pop();
-                print("scope variables: "+ JSON.stringify(scope));
+                log("scope variables: "+ JSON.stringify(scope));
             }
         }});
+});
+
+return Shaper.get("scoper");
 });

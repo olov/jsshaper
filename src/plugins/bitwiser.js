@@ -1,7 +1,7 @@
-"use strict"; "use restrict";
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-var Shaper = Shaper || require("shaper.js") || Shaper;
-var Annotater = Annotater || require("plugins/annotater.js") || Annotater;
+define(['../shaper','./annotater','../tkn'], function(Shaper, Annotater, tkn) {
+"use strict"; "use restrict";
 
 Shaper("bitwiser", function(root) {
     var bitwise_stack = [];
@@ -29,4 +29,7 @@ Shaper("bitwiser", function(root) {
 
 Annotater(/\/\*+\s*@bitwise\s*\*+\//, function(node, match) {
     node.bitwise = true;
+});
+
+return Shaper.get("bitwiser");
 });

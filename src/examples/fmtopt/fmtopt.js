@@ -1,7 +1,7 @@
-"use strict"; "use restrict";
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-var Shaper = Shaper || require("shaper.js") || Shaper;
-var Fmt = Fmt || require("fmt.js") || Fmt;
+define(['../../shaper', '../../fmt', '../../tkn'], function(Shaper, Fmt, tkn) {
+"use strict"; "use restrict";
 
 Shaper("fmtopt", function(root) {
     var templ = Shaper.parse("Fmt.cat($$)");
@@ -18,4 +18,7 @@ Shaper("fmtopt", function(root) {
             return ref.set(add);
         }
     }});
+});
+
+return Shaper.get("fmtopt");
 });

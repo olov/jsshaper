@@ -1,8 +1,7 @@
-"use strict"; "use restrict";
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-var Fmt = Fmt || require("fmt.js") || Fmt;
-var Shaper = Shaper || require("shaper.js") || Shaper;
-var Annotater = Annotater || require("plugins/annotater.js") || Annotater;
+define(['../shaper', '../fmt', '../tkn', './annotater'], function(Shaper, Fmt, tkn, Annotater) {
+"use strict"; "use restrict";
 
 Shaper("restricter", function(root) {
     var restrictfns = [];
@@ -190,4 +189,7 @@ Shaper("restricter", function(root) {
 
 Annotater(/\/\*+\s*@loose\s*\*+\//, function(node, match) {
     node.loose = true;
+});
+
+    return Shaper.get("restricter");
 });

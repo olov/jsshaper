@@ -1,6 +1,8 @@
-"use strict"; "use restrict";
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-var Assert = (function() {
+define([], function() {
+    "use strict"; "use restrict";
+
     var printfn = (typeof console !== "undefined") && console.log || print;
     function assert(condition, var_args) {
         condition ? assert.pass(arguments) : assert.fail(arguments);
@@ -29,8 +31,4 @@ var Assert = (function() {
     };
 
     return assert;
-})();
-
-if (typeof exports !== "undefined") {
-    module.exports = Assert;
-}
+});

@@ -1,7 +1,8 @@
-"use strict"; "use restrict";
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-var Fmt = Fmt || require("fmt.js") || Fmt;
-var Ref = (function() {
+define(['./fmt'], function(Fmt) {
+    "use strict"; "use restrict";
+
     // examples:
     // {base: obj, properties: ["property"]}
     // {base: obj, properties: ["children", "0"]
@@ -42,8 +43,4 @@ var Ref = (function() {
         return (baseName !== undefined ? baseName : "base") + properties.join("");
     };
     return Ref;
-})();
-
-if (typeof exports !== "undefined") {
-    module.exports = Ref;
-}
+});

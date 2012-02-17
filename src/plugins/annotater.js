@@ -1,7 +1,7 @@
-"use strict"; "use restrict";
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-var Shaper = Shaper || require("shaper.js") || Shaper;
-var Comments = Comments || require("comments.js") || Comments;
+define(['../shaper', '../comments'], function(Shaper, Comments) {
+"use strict"; "use restrict";
 
 Shaper("annotater", function(root) {
     Shaper.traverse(root, {pre: function(node, ref) {
@@ -41,6 +41,5 @@ function Annotater(re, applyfn) {
 }
 Annotater.matchers = [];
 
-if (typeof exports !== "undefined") {
-    module.exports = Annotater;
-}
+return Annotater;
+});

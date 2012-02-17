@@ -1,7 +1,7 @@
-"use strict"; "use restrict";
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-var Shaper = Shaper || require("shaper.js") || Shaper;
-var Fmt = Fmt || require("fmt.js") || Fmt;
+define(['../../shaper', '../../fmt'], function(Shaper, Fmt) {
+"use strict"; "use restrict";
 
 Shaper("minmax", function(root) {
     var minTempl = Shaper.parse("MIN($, $)");
@@ -21,4 +21,7 @@ Shaper("minmax", function(root) {
         Shaper.replace(ternary, params[0], params[1], params[0], params[1]);
         return ref.set(ternary);
     }});
+});
+
+return Shaper.get("minmax");
 });

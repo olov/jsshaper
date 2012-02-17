@@ -1,6 +1,8 @@
-"use strict"; "use restrict";
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-var Comments = (function() {
+define([], function() {
+    "use strict"; "use restrict";
+
     // Comments.split is only used by annotater and can be vastly simplified
     function split(str) {
         if (str === undefined) {
@@ -179,8 +181,4 @@ var Comments = (function() {
         isComment: isComment,
         indexArray: indexArray
     };
-})();
-
-if (typeof exports !== "undefined") {
-    module.exports = Comments;
-}
+});

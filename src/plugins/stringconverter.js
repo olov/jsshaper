@@ -1,6 +1,7 @@
-"use strict"; "use restrict";
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-var Shaper = Shaper || require("shaper.js") || Shaper;
+define(['../shaper', '../tkn'], function(Shaper, tkn) {
+"use strict"; "use restrict";
 
 // converts ""+expr or expr+"" to String(expr)
 Shaper("stringconverter", function(root) {
@@ -21,4 +22,7 @@ Shaper("stringconverter", function(root) {
         Shaper.cloneComments(call, node);
         return ref.set(call);
     }});
+});
+
+return Shaper.get("stringconverter");
 });

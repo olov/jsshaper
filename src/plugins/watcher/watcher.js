@@ -1,7 +1,7 @@
-"use strict"; "use restrict";
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-var Shaper = Shaper || require("shaper.js") || Shaper;
-var Fmt = Fmt || require("fmt.js") || Fmt;
+define(['../../shaper', '../../fmt', '../../tkn'], function(Shaper, Fmt, tkn) {
+"use strict"; "use restrict";
 
 // Shapes object property assignments into Watch.set calls
 // handles expr.id, expr1[expr2]
@@ -78,4 +78,7 @@ Shaper("watcher", function(root) {
         ref.set(call);
         return call;
     }});
+});
+
+return Shaper.get("watcher");
 });

@@ -1,8 +1,8 @@
 "use strict"; "use restrict";
 
 var require = require || function(f) { load(f); };
-var Watch = Watch || require("plugins/watcher/watch.js") || Watch;
-var Log = Log || require("log.js") || Log;
+var Watch = Watch || require("../watch.js") || Watch;
+var Log = Log || require("../../../log.js") || Log;
 
 // watch o for invalid age [1]
 var o = {name: "marvin", age: 100000};

@@ -1,7 +1,7 @@
-"use strict"; "use restrict";
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-var Shaper = Shaper || require("shaper.js") || Shaper;
-var Fmt = Fmt || require("fmt.js") || Fmt;
+define(['../shaper', '../fmt', '../ref', '../tkn'], function(Shaper, Fmt, Ref, tkn) {
+"use strict"; "use restrict";
 
 Shaper("asserter", function(root) {
     var fns = [];
@@ -28,4 +28,7 @@ Shaper("asserter", function(root) {
                 fns.pop();
             }
         }});
+});
+
+    return Shaper.get("asserter");
 });

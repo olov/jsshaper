@@ -1,6 +1,7 @@
-"use strict"; "use restrict";
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-var Shaper = Shaper || require("shaper.js") || Shaper;
+define(['../../shaper'], function(Shaper) {
+"use strict"; "use restrict";
 
 Shaper("add-op-to-call", function(root) {
     var template = Shaper.parse("$ + $");
@@ -12,4 +13,7 @@ Shaper("add-op-to-call", function(root) {
             return ref.set(call);
         }
     }});
+});
+
+return Shaper.get("add-op-to-call");
 });
