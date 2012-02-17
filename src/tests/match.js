@@ -24,6 +24,7 @@ Assert (Shaper.match("$NUM", Shaper.parse("1"), {$NUM: function(n) { return n.ty
 Assert (Shaper.match("$NUM", Shaper.parse("1"), {$NUM: {type: tkn.NUMBER}}));
 Assert (Shaper.match("$NUM", Shaper.parse("1"), {$NUM: {type: function(t) { return t === tkn.NUMBER; }}}));
 Assert (!Shaper.match("$ += $", Shaper.parse("x -= 1")));
+Assert (!Shaper.match("$++", Shaper.parse("++x")));
 
 Assert (Shaper.match("[ONE_STR, REST_NUMBERS]", Shaper.parse("['one', 2, 3]"), {
     ONE_STR: {type: tkn.STRING},
