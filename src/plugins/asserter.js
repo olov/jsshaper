@@ -14,13 +14,13 @@ Shaper("asserter", function(root) {
             }
             if (Shaper.match(callTempl, node) || Shaper.match(dotTempl, node)) {
                 var args = node.children[1];
-                var str = Fmt('"{0}, function {1}, file {2}, line {3}"',
-                              args.children[0].getSrc().replace(/"/g, '\\"'),
+                var str = Fmt('{0}, function {1}, file {2}, line {3}',
+                              args.children[0].getSrc(),
                               fns.length === 0 ? "<script>" :
                               fns[fns.length - 1].name || "<anonymous>",
                               node.tokenizer.filename,
                               node.lineno);
-                Shaper.insertBefore(new Ref(args, "children", args.children.length), Shaper.parse(str));
+                Shaper.insertBefore(new Ref(args, "children", args.children.length), Shaper.parse(JSON.stringify(str)));
             }
         },
         post: function(node, ref) {
