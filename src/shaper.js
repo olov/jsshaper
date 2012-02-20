@@ -53,20 +53,6 @@ var Shaper = (function() {
         o[tkn.WITH] = [/*expr*/"object", /*stmt*/"body"];
         o[tkn.YIELD] = [/*expr*/"value"];
 
-/*
-        // TODO these properties aren't nodes but may still be relevant
-        x[tkn.ASSIGN] = ["assignOp"]; // number ("value" has string representation)
-        x[tkn.INCREMENT] = ["postfix"]; // boolean ("value" is just "++")
-        x[tkn.DECREMENT] = ["postfix"]; // boolean
-        x[tkn.FUNCTION] = ["functionForm"]; // number
-        x[tkn.FOR_IN] = ["isEach"]; // boolean
-        x[tkn.SWITCH] = ["defaultIndex"]; // number
-        x[tkn.IDENTIFIER] = ["value"]; // string, same as "name" when part of VAR 
-        x[tkn.NUMBER] = ["value"]; // number (can differ from srcs)
-        x[tkn.REGEXP] = ["value"]; // string
-        x[tkn.STRING] = ["value"]; // string (can differ from srcs)
-*/
-
         var c = [
             /*[stmt]*/
             tkn.SCRIPT, tkn.BLOCK,
@@ -139,6 +125,22 @@ var Shaper = (function() {
         }
 
         return o;
+    })();
+
+    var extraTraverseData = (function() {
+        var x = {};
+        // These properties aren't nodes but may still be relevant
+        x[tkn.ASSIGN] = ["assignOp"]; // number ("value" has string representation)
+        x[tkn.INCREMENT] = ["postfix"]; // boolean ("value" is just "++")
+        x[tkn.DECREMENT] = ["postfix"]; // boolean
+        x[tkn.FUNCTION] = ["functionForm"]; // number
+        x[tkn.FOR_IN] = ["isEach"]; // boolean
+        x[tkn.SWITCH] = ["defaultIndex"]; // number
+        x[tkn.IDENTIFIER] = ["value"]; // string, same as "name" when part of VAR
+        x[tkn.NUMBER] = ["value"]; // number (can differ from srcs)
+        x[tkn.REGEXP] = ["value"]; // string
+        x[tkn.STRING] = ["value"]; // string (can differ from srcs)
+        return x;
     })();
 
     //// generic traverse
@@ -229,6 +231,7 @@ var Shaper = (function() {
 
     match.debug = false;
     function match(t, n, conds) {
+        var i;
         if (typeof t === "string") {
             t = Shaper.parse(t);
         }
@@ -271,11 +274,24 @@ var Shaper = (function() {
                 return MISMATCH;
             }
         }
+        var extraprops = extraTraverseData[t.type] || [];
+        for (i = 0; i < extraprops.length; i++) {
+            var extra = extraprops[i];
+            if (extra === 'value') {
+                // handled above.
+                continue;
+            }
+            if (t[extra] !== n[extra]) {
+                match.debug && Log("mismatch {0} {1} {2}",
+                                   extra, t[extra], n[extra]);
+                return MISMATCH;
+            }
+        }
 
         // traverse descendants
         var subprops = traverseData[t.type] || [];
         var res;
-        for (var i = 0; i < subprops.length; i++) {
+        for (i = 0; i < subprops.length; i++) {
             var prop = subprops[i];
             // t[prop] is an array, such as BLOCK.children
             if (Array.isArray(t[prop])) {
