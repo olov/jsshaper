@@ -399,7 +399,7 @@ var Shaper = (function() {
         if (children.length === 0) {
             var parens = srcs.pop();
             var last = parens.length - 1;
-            srcs.push(parens.slice(0, last), parens.slice(last));
+            srcs.push(parens.slice(0, last), (delimiter||'')+parens.slice(last));
             children.push(child);
         }
         // has children already, insert new delimiter in srcs
@@ -701,7 +701,11 @@ var Shaper = (function() {
         log(root.toString());
     });
     shaper("source", function(root) {
-        log(root.getSrc());
+        var str = root.getSrc();
+        // log is going to add a trailing newline, so suppress the last one
+        // from str (if that's actually what it ends with)
+        if (str[str.length-1]=='\n') { str = str.substring(0, str.length-1); }
+        log(str);
     });
     shaper("version", function(root) {
         log(Fmt("Shaper for JavaScript version {0}", shaper.version));
