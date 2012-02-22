@@ -378,15 +378,21 @@ var Shaper = (function() {
         }
         node[prop].splice(index, 1);
     }
-    function insertBefore(ref, node, delimiter) {
+    // When the delimiter is (e.g.) a comma, like when adding elements to a
+    // list, we don't want to add the delimiter if the new element would be
+    // the last child (or if the parent initially had no children).  But if
+    // the delimiter is whitespace or newlines, we want to always add the
+    // delimiter.  Use the optional 'alwaysDelimit' parameter to distinguish
+    // these two cases.
+    function insertBefore(ref, node, delimiter, alwaysDelimit) {
         Assert(ref.properties.length === 2);
-        _insert(ref.base, node, ref.properties[0], Number(ref.properties[1]), delimiter);
+        _insert(ref.base, node, ref.properties[0], Number(ref.properties[1]), delimiter, alwaysDelimit);
     }
-    function insertAfter(ref, node, delimiter) {
+    function insertAfter(ref, node, delimiter, alwaysDelimit) {
         Assert(ref.properties.length === 2);
-        _insert(ref.base, node, ref.properties[0], Number(ref.properties[1]) + 1, delimiter);
+        _insert(ref.base, node, ref.properties[0], Number(ref.properties[1]) + 1, delimiter, alwaysDelimit);
     }
-    function _insert(node, child, prop, pos, delimiter) {
+    function _insert(node, child, prop, pos, delimiter, alwaysDelimit) {
         var srcs = node.srcs;
         var children = node[prop];
         if (pos === -1) {
@@ -399,7 +405,8 @@ var Shaper = (function() {
         if (children.length === 0) {
             var parens = srcs.pop();
             var last = parens.length - 1;
-            srcs.push(parens.slice(0, last), parens.slice(last));
+            var d = (alwaysDelimit && delimiter) ? delimiter : '';
+            srcs.push(parens.slice(0, last), d + parens.slice(last));
             children.push(child);
         }
         // has children already, insert new delimiter in srcs
@@ -416,6 +423,9 @@ var Shaper = (function() {
                 else {
                     throw new Error("_insert: Can't create default delimiter for node "+ node.toString(false));
                 }
+            }
+            if (pos === children.length && !alwaysDelimit) {
+                delimiter = '';
             }
 
             // temporary hardcoded workaround for semicolon issues
