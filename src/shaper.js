@@ -399,7 +399,7 @@ var Shaper = (function() {
         if (children.length === 0) {
             var parens = srcs.pop();
             var last = parens.length - 1;
-            srcs.push(parens.slice(0, last), parens.slice(last));
+            srcs.push(parens.slice(0, last), (delimiter||'')+parens.slice(last));
             children.push(child);
         }
         // has children already, insert new delimiter in srcs
