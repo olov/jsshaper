@@ -13,13 +13,15 @@ define(['../shaper', '../tkn', '../narcissus'], function(Shaper, tkn, Narcissus)
         var tmpl = Shaper.parse('eval(definitions.consts)');
         return Shaper.traverse(root, {
             pre: function(node, ref) {
+                if (Shaper.match(tmpl, node)) {
+                    var repl = Shaper.parse(Narcissus.definitions.consts);
+                    return ref.set(repl.expression);
+                }
+            },
+            post: function(node, ref) {
                 if (node.type === tkn.CONST) {
                     node.type = tkn.VAR;
                     node.srcs[0] = node.srcs[0].replace(/^const/, 'var');
-                }
-                if (Shaper.match(tmpl, node)) {
-                    var repl = Shaper.parse(Narcissus.definitions.consts);
-                    ref.set(repl.expression);
                 }
             }
         });
