@@ -1,23 +1,23 @@
 var Shaper = requirejs('shaper');
+var Assert = requirejs('assert');
 
-jQuery(document).ready(function() {
-    var source;
-    var checked;
+jQuery(document).ready(function($) {
+    var source = "";
+    var checked = "";
     function showSourceview() {
-        jQuery("#sourceedit").hide();
-        source = jQuery("#sourceedit").val();
-        jQuery("#sourceview").html(source).chili().show();
+        $("#sourceedit").hide();
+        source = $("#sourceedit").val();
+        $("#sourceview").html(source).chili().show();
     }
 
-    // run restricter
-    jQuery("form").submit(function() {
-        clear();
-        showSourceview();
+    function shape() {
+        source = $("#sourceedit").val();
         try {
-            var root = Shaper.parseScript(source, "<filename>");
-            root = Shaper.run(root, ["annotater", "restricter"]);
+            var root = Shaper.parseScript(source, "try.js");
+            root = Shaper.run(root, ["annotater", "asserter", "restricter"]);
             checked = root.getSrc();
-            jQuery("#checkedview").html(checked).chili().show();
+            $("#checkedview").html(checked).chili();
+            clear();
         }
         catch (e) {
             var reason = String(e);
@@ -26,11 +26,9 @@ jQuery(document).ready(function() {
             }
             print(reason);
         }
+    }
 
-        return false;
-    });
     function exec(src) {
-        clear();
         try {
             var fn = new Function(src);
             fn();
@@ -43,21 +41,30 @@ jQuery(document).ready(function() {
             print(reason);
         }
     }
-    jQuery("#execleft").click(function() {
-        exec(source);
+    $("#execleft").click(function() {
+        $("#output").text("Running original (left) program:\n");
+        setTimeout(function() {
+            exec(source);
+        }, 0);
     });
-    jQuery("#execright").click(function() {
-        exec(checked);
+    $("#execright").click(function() {
+        $("#output").text("Running checked (right) program:\n");
+        setTimeout(function() {
+            exec(checked);
+        }, 0);
     });
 
 
     // act on keystrokes in editor
-    jQuery("#sourceedit").keydown(function(e) {
+    $("#sourceedit").keydown(function(e) {
+        setTimeout(shape, 50);
+
         // code borrowed from John Resig
         if (this.setSelectionRange) {
             var start = this.selectionStart;
             var val = this.value;
 
+            // enter
             if (e.keyCode === 13) {
                 var match = val.substring(0, start).match(/(^|\n)([ \t]*)([^\n]*)$/);
                 if (match) {
@@ -69,19 +76,22 @@ jQuery(document).ready(function() {
                     return false;
                 }
             }
+            // backspace
             else if (e.keyCode === 8 && val.substring(start - 2, start) === "  ") {
                 this.value = val.substring(0, start - 2) + val.substr(this.selectionEnd);
                 this.setSelectionRange(start - 2, start - 2);
                 this.focus();
                 return false;
             }
+            // tab
             else if (e.keyCode === 9) {
                 this.value = val.substring(0, start) +"  "+ val.substr(this.selectionEnd);
                 this.setSelectionRange(start + 2, start + 2);
                 this.focus();
                 return false;
             }
-            else if (e.keyCode === 27) { // ESC
+            // escape
+            else if (e.keyCode === 27) {
                 showSourceview();
                 return false;
             }
@@ -89,15 +99,14 @@ jQuery(document).ready(function() {
     });
 
     // hide highlighter, show editor
-    jQuery("#sourceview").dblclick(function(){
-        jQuery("#sourceview").hide();
-        jQuery("#sourceedit").show();
-        jQuery("#sourceedit").focus();
+    $("#sourceview").dblclick(function(){
+        $("#sourceview").hide();
+        $("#sourceedit").show().focus();
     });
 
     var sourceedit = [
         '// double-click to edit, ESC to leave',
-        '"use restrict";',
+        '"use strict"; "use restrict";',
         '',
         'function average(x, y) {',
         '  return (x + y) / 2;',
@@ -111,19 +120,15 @@ jQuery(document).ready(function() {
         'print(average(1, "2"));'
     ].join("\n");
 
-    var checkedview = [
-        '// press run restricter for',
-        '// restricter output here'
-    ].join("\n");
-
-    jQuery("#sourceedit").html(sourceedit);
+    $("#sourceedit").html(sourceedit);
     showSourceview();
-    jQuery("#checkedview").html(checkedview).chili().show();
+    shape();
 });
 
 function print(str) {
-    $("#output").append(str + "\n");
+    var old = $("#output").text();
+    $("#output").text(old + str + "\n");
 }
 function clear() {
-    $("#output").html("").show();
+    $("#output").text("");
 }
