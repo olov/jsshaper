@@ -49,12 +49,14 @@ Shaper("restricter", function(root) {
             var inRestrict = useRestrictStack.top();
             for (var i = 0; i < node.children.length; i++) {
                 var c = node.children[i];
-                if (!(c.type === tkn.SEMICOLON &&
-                      c.expression.type === tkn.STRING)) {
+                if (c.type === tkn.SEMICOLON) {
+                    c = c.expression;
+                }
+                if (c.type !== tkn.STRING) {
                     break;
                 }
-                if (c.expression.value.search("^use restrict") === 0) {
-                    inRestrict = c.expression.value;
+                if (c.value.search("^use restrict") === 0) {
+                    inRestrict = c.value;
                     break;
                 }
             }
