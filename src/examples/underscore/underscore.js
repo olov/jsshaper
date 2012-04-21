@@ -1,6 +1,7 @@
-"use strict"; "use restrict";
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-var Shaper = Shaper || require("shaper.js") || Shaper;
+define(['../../shaper', '../../tkn'], function(Shaper, tkn) {
+"use strict"; "use restrict";
 
 Shaper("underscore", function(root) {
     return Shaper.traverse(root, {pre: function(node, ref) {
@@ -8,4 +9,7 @@ Shaper("underscore", function(root) {
             Shaper.renameIdentifier(node, "_"+ node.value);
         }
     }});
+});
+
+return Shaper.get("underscore");
 });

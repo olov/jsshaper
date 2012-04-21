@@ -1,7 +1,7 @@
-"use strict"; "use restrict";
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-var Shaper = Shaper || require("shaper.js") || Shaper;
-var Fmt = Fmt || require("fmt.js") || Fmt;
+define(['../shaper', '../ref', '../tkn'], function(Shaper, Ref, tkn) {
+"use strict"; "use restrict";
 
 Shaper("logger", function(root) {
     var fns = [];
@@ -31,4 +31,7 @@ Shaper("logger", function(root) {
                 fns.pop();
             }
         }});
+});
+
+    return Shaper.get("logger");
 });

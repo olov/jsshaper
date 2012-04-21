@@ -1,9 +1,7 @@
-"use strict"; "use restrict";
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-var Shaper = Shaper || require("shaper.js") || Shaper;
-var Log = Log || require("log.js") || Log;
-var Fmt = Fmt || require("fmt.js") || Fmt;
-var Annotater = Annotater || require("plugins/annotater.js") || Annotater;
+define(['../../shaper', '../../log', '../../fmt', '../annotater', '../../tkn'], function(Shaper, Log, Fmt, Annotater, tkn) {
+"use strict"; "use restrict";
 
 Shaper("jsdocer", function(root) {
     return Shaper.traverse(root, {pre: function(node, ref) {
@@ -44,4 +42,7 @@ Annotater(/\/\*\*[\s\S]*\*\//, function(node, match) {
     else {
         Log("Annotation for {0}\n{1}\n", node.tknString(), match);
     }
+});
+
+    return Shaper.get("jsdocer");
 });

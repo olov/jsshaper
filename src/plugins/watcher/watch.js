@@ -1,6 +1,8 @@
-"use strict"; "use restrict";
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-var Watch = (function() {
+define([], function(){
+    "use strict"; "use restrict";
+
     var objs = [];
     var names = [];
     var fns = [];
@@ -46,8 +48,4 @@ var Watch = (function() {
     watch.clear = clear;
     watch.set = set;
     return watch;
-})();
-
-if (typeof exports !== "undefined") {
-    module.exports = Watch;
-}
+});

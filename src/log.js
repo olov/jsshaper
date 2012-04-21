@@ -1,8 +1,8 @@
-"use strict"; "use restrict";
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-var Fmt = Fmt || require("fmt.js") || Fmt;
+define(['./fmt'], function(Fmt) {
+    "use strict"; "use restrict";
 
-var Log = (function() {
     var _console = (typeof console !== "undefined") && console || {log: print};
     function log(var_args) {
         _console.log(format(arguments));
@@ -19,8 +19,4 @@ var Log = (function() {
 
     log.verb = verb;
     return log;
-})();
-
-if (typeof exports !== "undefined") {
-    module.exports = Log;
-}
+});

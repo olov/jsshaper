@@ -1,9 +1,7 @@
-"use strict"; "use restrict";
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-var Shaper = Shaper || require("shaper.js") || Shaper;
-var Ref = Ref || require("ref.js") || Ref;
-var Assert = Assert || require("assert.js") || Assert;
-var Fmt = Fmt || require("fmt.js") || Fmt;
+define(['../../shaper', '../../ref', '../../assert', '../../fmt', '../../tkn'], function(Shaper, Ref, Assert, Fmt, tkn) {
+"use strict"; "use restrict";
 
 Shaper("var-splitter", function(root) {
     var varTempl = Shaper.parse("var $, $$");
@@ -59,4 +57,7 @@ Shaper("var-splitter", function(root) {
             alter(node, ref);
         }
     }});
+});
+
+return Shaper.get("var-splitter");
 });

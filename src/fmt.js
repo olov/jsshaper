@@ -1,6 +1,8 @@
-"use strict"; "use restrict";
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-var Fmt = (function() {
+define([], function() {
+    "use strict"; "use restrict";
+
     // String formatting
     // Call Fmt directly instead of Fmt.fmt
     // example: Fmt("Name: {0}, Age: {1}", "shaper", 0)
@@ -62,8 +64,4 @@ var Fmt = (function() {
     fmt.repeat = repeat;
     fmt.inspect = inspect;
     return fmt;
-})();
-
-if (typeof exports !== "undefined") {
-    module.exports = Fmt;
-}
+});
