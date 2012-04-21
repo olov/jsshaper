@@ -25,16 +25,16 @@ it must be linked from the head of a page like:
 .html .mlcom  { color: rgb(204,140,60); }
 .html .entity { color: rgb(255,221,51); }
 
-.javascript { color: rgb(243,243,255); }
-.javascript .mlcom    { color: rgb(95,97,126); }
-.javascript .com      { color: rgb(95,97,126); }
-.javascript .regexp   { color: rgb(153,0,102); }
-.javascript .string   { color: rgb(204,140,60); }
-.javascript .global   { color: rgb(204,140,60); }
-.javascript .keywords { color: rgb(150,166,200); }
-.javascript .numbers  { color: rgb(133,142,244); }
-.javascript .method   { color: rgb(115,200,54); }
-.javascript .selector   { color: rgb(204,140,60); }
+.javascript { color: #444; }
+.javascript .mlcom    { color: #777; font-style: italic; }
+.javascript .com      { color: #777; font-style: italic; }
+.javascript .regexp   { color: #4e9a06; }
+.javascript .string   { color: #4e9a06; }
+.javascript .global   { }
+.javascript .keywords { color: #204a87; }
+.javascript .numbers  { color: #c4a000; }
+.javascript .method   { }
+.javascript .selector   { }
 
 .mysql .function  { color: #e17100; }
 .mysql .keyword   { color: navy; font-weight: bold; }

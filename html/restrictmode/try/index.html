@@ -12,14 +12,14 @@ area
   output
 -->
   <style type="text/css">
-    body { background: #222; color: #DDD; font-family: Helvetica, Arial; font-size: 16px; }
+    body { font-family: Helvetica, Arial; font-size: 16px; }
 
     #container { width: 48%; position: absolute; top: 30px; }
-    textarea { width: 100%; font-size: 20px; height: 425px; font-family: Monaco, Courier New; background: #000; color: #EEE; overflow: auto; margin: 0; border: 0; padding: 0 0 0 5px; }
+    textarea { width: 100%; font-size: 20px; height: 425px; color: #333; font-family: Monaco, Courier New; overflow: auto; margin: 0; border: 1px solid black; padding: 0 0 0 5px; }
 
-    #sourceview { position: absolute; top: 30px; width: 48%; font-size: 20px; height: 425px; font-family: Monaco, Courier New; background: #000; color: #DDD; overflow: auto; margin: 0; border: 0; padding: 0 0 0 5px; }
-    #checkedview { position: absolute; top: 30px; left: 50%; width: 48%; font-size: 20px; height: 425px; font-family: Monaco, Courier New; background: #000; color: #DDD; overflow: auto; margin: 0; border: 0; padding: 0 0 0 5px; }
-    #output { position: absolute; top: 470px; width: 98%; font-size: 12px; height: 100px; font-family: Monaco, Courier New; background: #000; color: #DDD; overflow: auto; margin: 0; border: 0; padding: 0 0 0 5px; }
+    #sourceview { position: absolute; top: 30px; width: 48%; font-size: 20px; height: 425px; font-family: Monaco, Courier New; overflow: auto; margin: 0; border: 1px solid black; padding: 0 0 0 5px; }
+    #checkedview { position: absolute; top: 30px; left: 50%; width: 48%; font-size: 20px; height: 425px; font-family: Monaco, Courier New; overflow: auto; margin: 0; border: 1px solid black; padding: 0 0 0 5px; }
+    #output { position: absolute; top: 470px; width: 98%; font-size: 11px; height: 100px; font-family: Monaco, Courier New; overflow: auto; margin: 0; border: 1px solid black; padding: 0 0 0 5px; }
 
     textarea { z-index: 1; }
     #sourceview { z-index: 2; }
@@ -28,16 +28,15 @@ area
     h3 { font-size: 24px; }
     h3.large { position: absolute; top: 45%; left: 0; width: 100%; font-size: 48px; text-align: center; }
     div.buttons { position: absolute; top: 0px; right: 5px; }
-    a { color: #EEE; text-decoration: none; border-bottom: 1px solid #EEE; }
+    a { text-decoration: none; border-bottom: 1px solid #EEE; }
   </style>
   <link rel="stylesheet" href="jquery-chili/recipes.css">
   <script type="text/javascript" src="jquery-chili/jquery.js"></script>
   <script type="text/javascript" src="jquery-chili/jquery.chili.js"></script>
   <script type="text/javascript" src="jquery-chili/recipes.js"></script>
-  <script type="text/javascript" src="try-restrictmode.js"></script>
-  <script type="text/javascript" src="../restricter/all-narcissus.js"></script>
   <script type="text/javascript" src="../restricter/all-restricter.js"></script>
   <script type="text/javascript" src="../restricter/restrict-mode.js"></script>
+  <script type="text/javascript" src="try-restrictmode.js"></script>
   <script type="text/javascript">
     var _gaq = _gaq || [];
     _gaq.push(['_setAccount', 'UA-22381771-1']);
@@ -71,7 +70,7 @@ area
     <pre id="checkedview" class="javascript"></pre>
 
     <!-- output -->
-    <pre id="output" class="javascript">Exception output here after pressing one of the execute buttons</pre>
+    <pre id="output" class="javascript"></pre>
   </div>
 </body>
 </html>

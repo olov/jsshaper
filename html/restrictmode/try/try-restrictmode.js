@@ -1,13 +1,17 @@
+var Shaper = requirejs('shaper');
+
 jQuery(document).ready(function() {
     var source;
     var checked;
     function showSourceview() {
+        jQuery("#sourceedit").hide();
         source = jQuery("#sourceedit").val();
         jQuery("#sourceview").html(source).chili().show();
     }
 
     // run restricter
     jQuery("form").submit(function() {
+        clear();
         showSourceview();
         try {
             var root = Shaper.parseScript(source, "<filename>");
@@ -20,23 +24,23 @@ jQuery(document).ready(function() {
             if (e.stack) {
                 reason += "\n\n"+ e.stack;
             }
-            jQuery("#output").html(reason).show();
+            print(reason);
         }
 
         return false;
     });
     function exec(src) {
+        clear();
         try {
             var fn = new Function(src);
             fn();
-            jQuery("#output").html("No exception thrown").show();
         }
         catch (e) {
             var reason = String(e);
             if (e.stack) {
                 reason += "\n\n"+ e.stack;
             }
-            jQuery("#output").html(reason).show();
+            print(reason);
         }
     }
     jQuery("#execleft").click(function() {
@@ -87,6 +91,7 @@ jQuery(document).ready(function() {
     // hide highlighter, show editor
     jQuery("#sourceview").dblclick(function(){
         jQuery("#sourceview").hide();
+        jQuery("#sourceedit").show();
         jQuery("#sourceedit").focus();
     });
 
@@ -98,12 +103,12 @@ jQuery(document).ready(function() {
         '  return (x + y) / 2;',
         '}',
         '// 1.5, as expected',
-        'alert(average(1, 2));',
+        'print(average(1, 2));',
         '',
         '// 6 (since 1+"2" === "12" and "12"/2 === 6)',
         '// in restrict mode this throws an exception',
         '// which helps you spot the defect',
-        'alert(average(1, "2"));'
+        'print(average(1, "2"));'
     ].join("\n");
 
     var checkedview = [
@@ -115,3 +120,10 @@ jQuery(document).ready(function() {
     showSourceview();
     jQuery("#checkedview").html(checkedview).chili().show();
 });
+
+function print(str) {
+    $("#output").append(str + "\n");
+}
+function clear() {
+    $("#output").html("").show();
+}
