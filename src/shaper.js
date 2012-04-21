@@ -1,13 +1,12 @@
 "use strict"; "use restrict";
 
 var require = require || function(f) { load(f); };
-require.paths && typeof __dirname !== "undefined" && require.paths.unshift(__dirname);
-/* global Narcissus, tkn */ (typeof Narcissus === "undefined") && require("narcissus.js");
-var Fmt = Fmt || require("fmt.js") || Fmt;
-var Ref = Ref || require("ref.js") || Ref;
-var Log = Log || require("log.js") || Log;
-var Assert = Assert || require("assert.js") || Assert;
-var Comments = Comments || require("comments.js") || Comments;
+/* global Narcissus, tkn */ (typeof Narcissus === "undefined") && require("./narcissus.js");
+var Fmt = Fmt || require("./fmt.js") || Fmt;
+var Ref = Ref || require("./ref.js") || Ref;
+var Log = Log || require("./log.js") || Log;
+var Assert = Assert || require("./assert.js") || Assert;
+var Comments = Comments || require("./comments.js") || Comments;
 var log = (typeof console !== "undefined") && console.log || print;
 
 var Shaper = (function() {
@@ -165,7 +164,7 @@ var Shaper = (function() {
                 return old;
             }
             else if (!(node instanceof Narcissus.parser.Node)) {
-                throw new Error("traverse: visitfns.post invalid return type");
+                throw new Error("traverse: visitfns.pre invalid return type");
             }
         }
 
