@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>JSShaper</title>
+  <script type="text/javascript" charset="utf-8"
+          src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+  <style type="text/css">
+    div { max-width: 900px; margin: 5px; }
+    body { margin-left: auto; margin-right: auto; max-width: 900px; font-family: Georgia, "Times New Roman", Times, serif; font-size: 100%; }
+    h1 { font-size: 300%; color: #080; }
+    h2 { margin-top: 0px; margin-bottom: 0px; font-size: 150%; color: #080; }
+    code { font-family: Monospace, "Courier New"; font-size: 100%; color: #808080; }
+    .name { font-family: Monospace, "Courier New"; font-size: 125%; color: #080; }
+    a:link { color: #080; /*#cc6600*/ }
+    a:visited { color: #cc6600; /*#5588aa*/ }
+    a:hover { color: #000000; }
+
+    #plugins { width: 900px; }
+    #plugins p { float: left; width: 450px; }
+    .clear { clear: both; height: 0; }
+  </style>
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-22381771-3']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+</head>
+<body>
+<h1>JavaScript Shaper</h1>
+<p>Shaper is an extensible framework for JavaScript syntax tree
+  shaping, created by <a href="http://lassus.se">Olov Lassus</a>.
+  <a href="http://twitter.com/olov">Follow me</a> on
+  Twitter.
+</p>
+<p>Shaper manipulates the syntax tree representation of your JS
+source code, and then turns it back into source code again. It
+goes very far to keep all your source code formatting, indentation,
+whitespace and comments intact.
+</p>
+<p><a href="http://groups.google.com/group/jsshaper">Discuss</a> in
+  the JSShaper Google group. Source code available
+  (<a href="https://github.com/olov/jsshaper/blob/master/LICENSE">MIT
+  license</a>) at
+  <a href="https://github.com/olov/jsshaper">GitHub</a>. Check out the
+  <a href="https://github.com/olov/jsshaper/blob/master/README">README</a>
+  for more info. Clone it and use it or hack it and create your own
+  plugins! All of Shaper is written in JavaScript so you'll start
+  adding to it in no time. Shaper
+  is <a href="http://people.mozilla.org/~jorendorff/es5.html#sec-C">ES5
+  strict mode</a> and
+  <a href="http://restrictmode.org">restrict mode</a> clean, and will
+  stay that way.
+</p>
+<p><code>node run-shaper.js filename [plugin1 .. pluginN]</code>
+  <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where the plugins (or builtins) forms a syntax tree shaping pipeline 
+</p>
+<p>Example: <code>node run-shaper.js myfile.js plugins/annotater.js
+    plugins/restricter.js --source</code>
+</p>
+<br>
+
+<h2>PLUGINS</h2>
+<p>It's really easy to create new Shaper plugins. Here are the existing ones (click to view
+  JavaScript source)
+</p>
+<div id="plugins">
+  <p><a class="name" href="https://github.com/olov/jsshaper/blob/master/src/plugins/restricter.js">restricter</a><br>
+    Adds <a href="http://restrictmode.org">restrict mode</a> checking
+    to your program by rewriting operators into function-calls
+  </p>
+
+  <p><a class="name" href="https://github.com/olov/jsshaper/blob/master/src/plugins/asserter.js">asserter</a><br>
+    C-style assertions with great error output<br>
+    <code>Assert(f(x) === 3)</code>
+  </p>
+
+  <div class="clear"></div>
+
+  <p><a class="name"
+  href="https://github.com/olov/jsshaper/blob/master/src/plugins/logger.js">logger</a><br>
+    Formatted logging with great detail (file, function, line)<br>
+    <code>Log("Formatting via {0}", "Fmt")</code> or just <code>Log()</code>
+  </p>
+
+  <p><a class="name"
+  href="https://github.com/olov/jsshaper/blob/master/src/plugins/watcher/watcher.js">watcher</a><br>
+    Trap (watch) object modifications for debugging purposes <br>
+    <code>Watch(o, "age", function() { <br>
+      &nbsp;&nbsp;if (o.age < 0) { <br>
+      &nbsp;&nbsp;&nbsp;&nbsp;throw new Error("age out of range"); <br>
+      &nbsp;&nbsp;} <br>
+    }); </code>
+  </p>
+
+  <div class="clear"></div>
+
+  <p><a class="name" href="https://github.com/olov/jsshaper/blob/master/src/plugins/bitwiser.js">bitwiser</a><br>
+    Requires annotation for bitwise operators <code>|</code>
+    and <code>&</code> to avoid mistakenly using them instead of <code>||</code>
+    and <code>&&</code>
+    <br><code>var y = (/*@bitwise*/ x | 3);</code>
+  </p>
+
+  <p><a class="name" href="https://github.com/olov/jsshaper/blob/master/src/plugins/stringconverter.js">stringconverter</a><br>
+    Converts <code>"" + expr</code> and <code>expr + ""</code> into <code>String(expr)</code>
+  </p>
+
+  <div class="clear"></div>
+
+  <p><a class="name" href="https://github.com/olov/jsshaper/blob/master/src/plugins/annotater.js">annotater</a><br>
+    Internal plugin used by other plugins. Lets you match annotations
+    and execute code with no effort
+    <code>Annotater(/\/\*+\s*@loose\s*\*+\//, <br>
+      &nbsp;&nbsp;function(node, match) {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;node.loose = true;<br>
+      &nbsp;&nbsp;}<br>
+      );
+    </code>
+  </p>
+
+  <p><a class="name" href="https://github.com/olov/jsshaper/blob/master/src/plugins/annotation-printer.js">annotation-printer</a><br>
+    Dumps all your <code>/* @annotations */</code>
+  </p>
+
+  <div class="clear"></div>
+</div>
+<br>
+
+<h2>BUILTINS</h2>
+<div id="plugins">
+  <p><span class="name">--tree</span><br>
+    Dumps the syntax tree in an easy to read format, used
+    when developing plugins
+  </p>
+
+  <p><span class="name">--source</span><br>
+    Prints the shaped source code. This is often the final plugin/builtin used
+    in a pipeline
+  </p>
+
+  <div class="clear"></div>
+</div>
+<br>
+
+</body>
+</html>
