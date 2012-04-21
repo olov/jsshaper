@@ -12,7 +12,7 @@ representation of your textual source code, and then turning it back
 into source code again. JSShaper goes very far to keep all your source
 code formatting, intendation, whitespace and comments.
 
-JSShaper comes with the following plugins:
+JSShaper comes with a number of plugins, some of which are listed below:
   annotation-printer:
     prints /* @annotations */
   asserter:
@@ -29,6 +29,10 @@ JSShaper comes with the following plugins:
     adds run-time checking for restrict mode programs by
     converting operators into function calls in a compatible way. it
     comes with a small run-time library. <http://restrictmode.org>
+  logger:
+    formatted logging with great detail (file, function, line)
+  watcher:
+    trap (watch) object modifications for debugging purposes
 
 It also comes with a few small and simple examples (src/examples).
 
@@ -42,23 +46,17 @@ JSShaper is young, not very documented, and may crash with horrible
 error messages. Thanks for being an early adopter and reporting bugs or
 annoyances. Contributors are welcome!
 
-JSShaper is designed to run from the command line. It should be
-possible to use with the following JS shells:
-  js: recent versions of Mozilla SpiderMonkey
-  d8: Google V8 debug shell
-  node: Embedded V8 with lots more
+JSShaper is designed to run with node.js or in the browser. It uses AMD.
 
-It doesn't work with the JavaScriptCore jsc shell since it has no
-native read function.
+Run it like this:
+node run-shaper.js filename [shape1 .. shapeN]
+  where shape is a plugin (see plugins/) or builtin (--tree or --source)
+example: node run-shaper.js myfile.js plugins/annotater.js plugins/bitwiser.js --source
+example: node run-shaper.js myfile.js plugins/annotater.js plugins/restricter.js --source
 
-Run it like this (replace d8 with your preferred shell):
-d8 run-shaper.js -- filename [shape1 .. shapeN]
-  where shape is a plugin (see plugins/) or --builtin (--tree or --source)
-example: d8 run-shaper.js -- myfile.js plugins/annotater.js plugins/bitwiser.js --source
-example: d8 run-shaper.js -- myfile.js plugins/annotater.js plugins/restricter.js --source
-
-For restricter, you can also run the more convenient run-restricter:
-example: d8 run-restricter.js -- myfile.js
+For restricter (the restrict mode checker), you can also run the more
+convenient run-restricter:
+example: node run-restricter.js myfile.js
 
 JSShaper and its plugins are Open Source and licensed under the MIT
 license, see LICENSE file for terms and conditions.
