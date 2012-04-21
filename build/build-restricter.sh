@@ -1,31 +1,42 @@
 #!/bin/sh
 # should be run from jsshaper/src
 
-# pick d8 or node
-if test -z "$JS" ; then
-  JS=d8
-fi
-if ! which $JS > /dev/null ; then
-  JS=node
-fi
-if ! which $JS > /dev/null ; then
-  echo "Can't find d8 or node on the path.  Please set JS to your JavaScript shell."
+if ! which node > /dev/null ; then
+  echo "build-restricter.sh: can't detect node"
   exit 1
 fi
-# concatenate parts of narcissus into all-narcissus.js
+
+# all-restricter-eval.js is restricter with dependencies (including
+# Shaper and Narcissus) assembled by the requirejs optimizer
 node node_modules/r.js -o name=../build/almond.js include=plugins/restricter out=../build/all-restricter-eval.js baseUrl=. optimize=none
-# de-eval-ify so it runs right in strict mode.
-${JS} run-shaper.js ../build/all-restricter-eval.js plugins/deeval.js --source > ../build/all-restricter.js
-# let restricter create a checked version of itself (all-restricter-checked.js)
-${JS} run-restricter.js -- ../build/all-restricter.js > ../build/all-restricter-checked.js
-# let restricter create a checked version of all-restricter-checked.js
-#  (should be identical)
-${JS} run-restricter.js -- ../build/all-restricter-checked.js > ../build/all-restricter-checked-repeated.js
-diff -u ../build/all-restricter-checked.js ../build/all-restricter-checked-repeated.js
 
-# let all-restricter-checked create a checked version of all-restricter
-#  (should be identical apart from extra trailing newline due to print)
+# all-restricter.js is a de-eval-ified version of
+# all-restricter-eval.js so it runs right in strict mode.
+node run-shaper.js ../build/all-restricter-eval.js plugins/deeval.js --source > ../build/all-restricter.js
+
+# all-restricter-checked.js is a checked version of all-restricter.js
+# (i.e. restricter checking itself)
+node run-restricter.js -- ../build/all-restricter.js > ../build/all-restricter-checked.js
+
+# all-restricter-checked-repeated.js is a checked version of
+# all-restricter-checked.js (should be identical)
+node run-restricter.js -- ../build/all-restricter-checked.js > ../build/all-restricter-checked-repeated.js
+if ! diff -u ../build/all-restricter-checked.js ../build/all-restricter-checked-repeated.js ; then
+  echo "build-restricter.sh: error building all-restricter-checked-repeated.js"
+  echo "build-restricter.sh: (should be identical to all-restricter-checked.js)"
+  exit 1
+fi
+
+
+# finally, we want to verify that all-restricter-checked works correctly.
+# all-restricter-checked-bootstrapped.js is a checked version of
+# all-restricter.js, created using all-restricter-checked.js and some ceremony
+# (should be identical)
 cat plugins/restricter/restrict-mode.js ../build/all-restricter-checked.js ../build/build-restricter-ceremony.js > ../build/all-build-restricter-ceremony.js
-${JS} ../build/all-build-restricter-ceremony.js > ../build/all-restricter-checked-bootstrapped.js
+node ../build/all-build-restricter-ceremony.js > ../build/all-restricter-checked-bootstrapped.js
 
-diff -u ../build/all-restricter-checked.js ../build/all-restricter-checked-bootstrapped.js
+if ! diff -u ../build/all-restricter-checked.js ../build/all-restricter-checked-bootstrapped.js ; then
+  echo "build-restricter.sh: error building all-restricter-checked-bootstrapped.js"
+  echo "build-restricter.sh: (should be identical to all-restricter-checked.js)"
+  exit 1
+fi
