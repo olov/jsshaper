@@ -419,9 +419,6 @@ var Shaper = (function() {
                     throw new Error("_insert: Can't create default delimiter for node "+ node.toString(false));
                 }
             }
-            if (pos === children.length && !alwaysDelimit) {
-                delimiter = '';
-            }
 
             // temporary hardcoded workaround for semicolon issues
             // `{ var x; }` BLOCK has no SEMICOLON, block.srcs is { @; }
