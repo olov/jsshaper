@@ -5,7 +5,7 @@ var pipeline = ["annotater", "asserter", "restricter"];
 
 jQuery(document).ready(function($) {
     var source = "";
-    var checked = "";
+    var checked = null;
     function showSourceview() {
         $("#sourceedit").hide();
         source = $("#sourceedit").val();
@@ -28,6 +28,7 @@ jQuery(document).ready(function($) {
     function shape() {
         source = $("#sourceedit").val();
         try {
+            checked = null;
             clear();
             var root = Shaper.parseScript(source, "try.js");
             root = Shaper.run(root, pipeline);
@@ -55,6 +56,10 @@ jQuery(document).ready(function($) {
         }, 0);
     });
     $("#execright").click(function() {
+        shape();
+        if (checked === null) {
+            return;
+        }
         $("#output").text("Running checked (right) program:\n");
         setTimeout(function() {
             exec(checked);
