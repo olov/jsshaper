@@ -10,8 +10,14 @@ var Shaper = (function() {
         return Object.prototype.toString.call(o) === "[object Array]";
     };
     function error(node, msg) {
-        log(Fmt("{0}:{1} error: {2}", node.tokenizer.filename, node.lineno, msg));
-        (typeof quit === "undefined" ? process.exit : quit)(-1);
+        var str = Fmt("{0}:{1} error: {2}", node.tokenizer.filename, node.lineno, msg);
+        if (typeof process !== "undefined") {
+            log(str);
+            process.exit(-1);
+        }
+        else {
+            throw new Error(str);
+        }
     }
     function deprecated(obj, params) {
         obj[params.was] = function() {
