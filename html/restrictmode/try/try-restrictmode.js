@@ -1,5 +1,7 @@
+// global on purpose so they can be retrieved easily from the JS console
 var Shaper = requirejs('shaper');
 var Assert = requirejs('assert');
+var pipeline = ["annotater", "asserter", "restricter"];
 
 jQuery(document).ready(function($) {
     var source = "";
@@ -10,21 +12,30 @@ jQuery(document).ready(function($) {
         $("#sourceview").html(source).chili().show();
     }
 
+    function formatException(e) {
+        var reason = String(e);
+        if (e.stack === undefined) { // no stack-trace
+            return reason;
+        }
+        if (e.stack.indexOf(reason) === 0) { // stack-trace is good as-is
+            return e.stack;
+        }
+        else { // concatenate reason and stack-trace
+            return reason + "\n" + e.stack;
+        }
+    }
+
     function shape() {
         source = $("#sourceedit").val();
         try {
+            clear();
             var root = Shaper.parseScript(source, "try.js");
-            root = Shaper.run(root, ["annotater", "asserter", "restricter"]);
+            root = Shaper.run(root, pipeline);
             checked = root.getSrc();
             $("#checkedview").html(checked).chili();
-            clear();
         }
         catch (e) {
-            var reason = String(e);
-            if (e.stack) {
-                reason += "\n\n"+ e.stack;
-            }
-            print(reason);
+            print(e);
         }
     }
 
@@ -34,11 +45,7 @@ jQuery(document).ready(function($) {
             fn();
         }
         catch (e) {
-            var reason = String(e);
-            if (e.stack) {
-                reason += "\n\n"+ e.stack;
-            }
-            print(reason);
+            print(formatException(e));
         }
     }
     $("#execleft").click(function() {
