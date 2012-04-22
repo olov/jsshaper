@@ -8,7 +8,7 @@ fi
 
 # all-restricter-eval.js is restricter with dependencies (including
 # Shaper and Narcissus) assembled by the requirejs optimizer
-node node_modules/r.js -o name=../build/almond.js include=plugins/restricter,plugins/asserter out=../build/all-restricter-eval.js baseUrl=. optimize=none
+node node_modules/r.js -o name=../build/almond.js include=plugins/annotater,plugins/bitwiser,plugins/asserter,plugins/restricter out=../build/all-restricter-eval.js baseUrl=. optimize=none
 
 # all-restricter.js is a de-eval-ified version of
 # all-restricter-eval.js so it runs right in strict mode.
