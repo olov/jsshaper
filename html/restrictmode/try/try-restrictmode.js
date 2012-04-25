@@ -34,9 +34,13 @@ jQuery(document).ready(function($) {
             root = Shaper.run(root, pipeline);
             checked = root.getSrc();
             $("#checkedview").html(checked).chili();
+            $("#checkedview").css("background", "white");
+            $("#output").css("border-color", "grey");
         }
         catch (e) {
             print(e);
+            $("#checkedview").css("background", "#eee");
+            $("#output").css("border-color", "red");
         }
     }
 
@@ -111,13 +115,13 @@ jQuery(document).ready(function($) {
     });
 
     // hide highlighter, show editor
-    $("#sourceview").dblclick(function(){
+    $("#sourceview").click(function(){
         $("#sourceview").hide();
         $("#sourceedit").show().focus();
     });
 
     var sourceedit = [
-        '// double-click to edit, ESC to leave',
+        '// click to edit, ESC to leave',
         '"use strict"; "use restrict";',
         '',
         'function average(x, y) {',
