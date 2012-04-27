@@ -122,6 +122,7 @@ jQuery(document).ready(function($) {
 
     var sourceedit = [
         '// click to edit, ESC to leave',
+        '// try removing "use" directives',
         '"use strict"; "use restrict";',
         '',
         'function average(x, y) {',
