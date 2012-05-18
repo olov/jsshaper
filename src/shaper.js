@@ -689,7 +689,7 @@ var Shaper = (function() {
     // register shapes and run pipeline
     var shapes = {};
     function shaper(name, fn) {
-        shapes[name] = fn;
+        return shapes[name] = fn;
     }
     function get(name) {
         return shapes[name];
