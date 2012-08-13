@@ -25,7 +25,13 @@
 "use strict"; "use restrict";
 
 var __pedantic = false;
-var __errorfn = null;
+// replace __errorfn with a custom one if you like
+// returns exception to be thrown, or null/undefined for continue
+// __errorfn = null will talso hrow the exception
+var __errorfn = function(e) {
+  console.log(e.stack);
+  return e;
+};
 
 function __verbosetypeof(v) {
     var t = typeof v;
@@ -42,10 +48,10 @@ function __throw_typeerror(opname, var_args) {
     var args = Array.prototype.slice.call(arguments, 1, arguments.length);
     var typeofs = args.map(__verbosetypeof).join(" and ");
     var e = new Error("restrict mode ".concat(opname, " called with ", typeofs));
-    if (!__errorfn) {
+
+    if (!__errorfn || __errorfn(e)) {
         throw e;
     }
-    __errorfn(e);
 }
 function __assert_number(opname, v) {
     var vtype = typeof v;
