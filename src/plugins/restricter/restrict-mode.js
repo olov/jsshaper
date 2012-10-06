@@ -205,3 +205,17 @@ function __postdec(base, name) {
     base[name] = __dec(tmp);
     return tmp;
 }
+
+// Node.js
+// put the helper functions in the global scope, once and for all
+//   so that we avoid putting a require-tax on every file
+//   that "use restrict"
+if (typeof GLOBAL === "object") {
+    var fns = [__eq, __ne, __lt, __gt, __le, __ge, __uplus, __neg, __add,
+        __sub, __mul, __div, __mod, __bitand, __bitor, __bitxor, __bitasl,
+        __bitasr, __bitlsr, __bitnot, __inc, __dec, __arg0, __op_set,
+        __prefinc, __postinc, __prefdec, __postdec];
+    fns.forEach(function(fn) {
+        GLOBAL[fn.name] = fn;
+    });
+}
