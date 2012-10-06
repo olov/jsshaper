@@ -89,7 +89,8 @@
             }
             // load the plugin
             var pluginPaths = {
-                yielder: './plugins/yielder/yielder'
+                yielder: './plugins/yielder/yielder',
+                restricter: './plugins/restricter',
             };
             var ppath = prefix;
             if (prefix in pluginPaths) {
@@ -130,6 +131,7 @@
                         };
                         root = Shaper.run(root, [plugin, hackdeps]);
                         text = root.getSrc();
+//                        console.log("shaper produced "+ name +": "+ text);
                     } catch (e) {// throw e;
                         var msg = "Could not compile: "+path;
                         msg += " ("+e.toString();

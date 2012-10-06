@@ -58,6 +58,14 @@ For restricter (the restrict mode checker), you can also run the more
 convenient run-restricter:
 example: node run-restricter.js myfile.js
 
+JSShaper can also execute on the fly, in your browser. Check out
+example-restrict-mode-on-the-fly.html for an example of how to use that to
+get restrict mode checking without a precomplilation step.
+
+If you want to restrict mode check your node.js code,
+plugins/restricter/restrict-mode.js can be loaded with require once and its
+helper functions (such as __add) will be accessible to all other modules.
+
 JSShaper and its plugins are Open Source and licensed under the MIT
 license, see LICENSE file for terms and conditions.
 
